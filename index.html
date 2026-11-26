@@ -135,7 +135,9 @@ nav.bottom-nav button.active{color:var(--blue);font-weight:800}
    ========================================================= */
 const DB_NAME = 'YadhiyaPosDB_v1';
 const DB_VER = 1;
+const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbylRtrTBXbtKpLgUoRWfJBnaA5SiDrIeuBcIdJVHsgfNkb1VimKNhiiaYIs4MnZeI69/exec';
 let db = null;
+let isSyncing = false;
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -188,7 +190,7 @@ let state = {
   currentUser: null,
   page: 'Kasir',
   online: navigator.onLine,
-  gasUrl: 'https://script.google.com/macros/s/AKfycbylRtrTBXbtKpLgUoRWfJBnaA5SiDrIeuBcIdJVHsgfNkb1VimKNhiiaYIs4MnZeI69/exec',
+  gasUrl: DEFAULT_GAS_URL,
   lastSync: 'Belum pernah',
   syncQueue: [],
   users: DEFAULT_USERS,
@@ -208,7 +210,7 @@ async function loadAppState() {
   await openDB();
   const saved = await dbGet('yadhiya_state_v1');
   if (saved) {
-    state = { ...state, ...saved, gasUrl: saved.gasUrl || 'https://script.google.com/macros/s/AKfycbylRtrTBXbtKpLgUoRWfJBnaA5SiDrIeuBcIdJVHsgfNkb1VimKNhiiaYIs4MnZeI69/exec', online: navigator.onLine };
+    state = { ...state, ...saved, gasUrl: saved.gasUrl || DEFAULT_GAS_URL, online: navigator.onLine };
   } else {
     await saveAppState();
   }
@@ -263,7 +265,7 @@ function renderLogin() {
         <b>Akun Bawaan Offline:</b><br>
         • Owner: <code>admin</code> / Password: <code>123</code><br>
         • Kasir: <code>kasir</code> / Password: <code>123</code><br>
-        <span class="muted">Sesuai pengaturan, peran Owner dan Kasir memiliki akses penuh yang sama untuk operasional toko.</span>
+        <span class="muted">Transaksi di HP dan Laptop otomatis disinkronkan dua arah saat online.</span>
       </div>
     </div>
   </div>`;
@@ -281,7 +283,7 @@ async function handleLogin(e) {
   state.currentUser = found;
   await saveAppState();
   render();
-  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+  if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
 async function handleLogout() {
@@ -458,7 +460,7 @@ function stopScannerAndClose() {
 }
 
 /* =========================================================
-   6. CHECKOUT & SILENT ACCOUNTING ENGINE
+   6. CHECKOUT & SILENT ACCOUNTING ENGINE (DELTA STOCK)
    ========================================================= */
 async function processCheckout() {
   if (!state.cart.length) return;
@@ -473,17 +475,17 @@ async function processCheckout() {
     return;
   }
 
-  const invoice = 'INV-' + Date.now().toString().slice(-6);
+  const invoice = 'INV-' + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89);
   const date = nowStr();
   const isoDate = todayKey();
 
-  // 1. Kurangi stok produk fisik
+  // 1. Kurangi stok produk fisik & kirim DELTA stok (agar transaksi HP & Laptop terakumulasi akurat)
   state.cart.forEach(item => {
     const prod = state.products.find(p => p.code === item.code);
     if (prod && !prod.isService) {
       prod.stock = Math.max(0, prod.stock - item.qty);
       prod.updatedAt = new Date().toISOString();
-      queueSync('PRODUCT', prod);
+      queueSync('STOCK_DELTA', { code: prod.code, delta: -item.qty });
     }
   });
 
@@ -519,7 +521,7 @@ async function processCheckout() {
   await saveAppState();
   render();
   showReceiptModal(sale);
-  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+  if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
 async function voidSale(invoice) {
@@ -532,14 +534,14 @@ async function voidSale(invoice) {
   sale.voidReason = reason;
   queueSync('SALE', sale);
 
-  // Kembalikan stok
+  // Kembalikan stok via Delta Stok (+qty)
   let totalHpp = 0;
   sale.items.forEach(item => {
     totalHpp += item.buyPrice * item.qty;
     const prod = state.products.find(p => p.code === item.code);
     if (prod && !prod.isService) {
       prod.stock += item.qty;
-      queueSync('PRODUCT', prod);
+      queueSync('STOCK_DELTA', { code: prod.code, delta: +item.qty });
     }
   });
 
@@ -557,7 +559,7 @@ async function voidSale(invoice) {
 
   await saveAppState();
   render();
-  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+  if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
 /* =========================================================
@@ -613,9 +615,9 @@ async function handlePurchaseSubmit(e) {
   prod.buyPrice = totalQty > 0 ? Math.round((oldVal + newVal) / totalQty) : newBuy;
   prod.stock = totalQty;
   prod.updatedAt = new Date().toISOString();
-  queueSync('PRODUCT', prod);
+  queueSync('STOCK_DELTA', { code: prod.code, delta: +qty, newBuyPrice: prod.buyPrice });
 
-  const invoice = 'PO-' + Date.now().toString().slice(-6);
+  const invoice = 'PO-' + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89);
   const date = nowStr();
   const isoDate = todayKey();
   const total = qty * newBuy;
@@ -633,7 +635,7 @@ async function handlePurchaseSubmit(e) {
   await saveAppState();
   alert('Barang masuk tersimpan! HPP Rata-rata baru ' + prod.name + ': ' + rp(prod.buyPrice));
   render();
-  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+  if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
 function openShiftClosingModal() {
@@ -690,56 +692,154 @@ async function submitShiftClosing(systemCash) {
   closeModal();
   alert('Tutup kasir tercatat! Selisih kas: ' + rp(diff));
   render();
-  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+  if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
 /* =========================================================
-   9. GOOGLE SHEETS SYNC ENGINE (OFFLINE -> ONLINE)
+   9. TWO-WAY SYNC ENGINE (HP <-> GOOGLE SHEETS <-> LAPTOP)
    ========================================================= */
-async function syncToGoogleSheets(silent = false) {
+async function syncTwoWay(silent = false) {
+  if (isSyncing) return;
   if (!state.online) {
-    if (!silent) alert('Perangkat sedang OFFLINE. Data aman tersimpan di memori HP/Laptop dan akan otomatis disinkronkan saat online.');
+    if (!silent) alert('Perangkat sedang OFFLINE. Data tersimpan di memori perangkat dan akan otomatis disinkronkan saat online.');
     return;
   }
   if (!state.gasUrl) {
     if (!silent) {
       state.page = 'Master';
       render();
-      alert('Masukkan URL Web App Google Apps Script terlebih dahulu di menu Master & Pengaturan.');
+      alert('Masukkan URL Web App Google Apps Script terlebih dahulu di menu Pengaturan.');
     }
     return;
   }
-  if (state.syncQueue.length === 0) {
-    if (!silent) alert('Semua data sudah sinkron dengan Google Sheets!');
-    return;
-  }
 
+  isSyncing = true;
+  render();
+
+  const queueSnapshot = [...state.syncQueue];
   const batch = {
-    products: state.syncQueue.filter(q => q.type === 'PRODUCT').map(q => q.item),
-    sales: state.syncQueue.filter(q => q.type === 'SALE').map(q => q.item),
-    purchases: state.syncQueue.filter(q => q.type === 'PURCHASE').map(q => q.item),
-    journals: state.syncQueue.filter(q => q.type === 'JOURNAL').map(q => q.item),
-    shifts: state.syncQueue.filter(q => q.type === 'SHIFT').map(q => q.item)
+    products: queueSnapshot.filter(q => q.type === 'PRODUCT').map(q => q.item),
+    stockDeltas: queueSnapshot.filter(q => q.type === 'STOCK_DELTA').map(q => q.item),
+    sales: queueSnapshot.filter(q => q.type === 'SALE').map(q => q.item),
+    purchases: queueSnapshot.filter(q => q.type === 'PURCHASE').map(q => q.item),
+    journals: queueSnapshot.filter(q => q.type === 'JOURNAL').map(q => q.item),
+    shifts: queueSnapshot.filter(q => q.type === 'SHIFT').map(q => q.item)
   };
 
   try {
     const res = await fetch(state.gasUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'SYNC_BATCH', data: batch })
+      body: JSON.stringify({ action: 'SYNC_TWO_WAY', data: batch })
     });
     const json = await res.json();
-    if (json.status === 'ok') {
-      state.syncQueue = [];
+    if (json.status === 'ok' && json.data) {
+      // Hapus antrean yang sudah berhasil terkirim
+      const sentTs = new Set(queueSnapshot.map(q => q.ts));
+      state.syncQueue = state.syncQueue.filter(q => !sentTs.has(q.ts));
+
+      // Gabungkan & perbarui state lokal dari Google Sheets (Master kebenaran bersama)
+      const cloud = json.data;
+
+      if (cloud.users && cloud.users.length) {
+        state.users = cloud.users.filter(u => String(u.Aktif || 'Ya').toLowerCase() !== 'tidak').map(u => ({
+          username: String(u.Username),
+          password: String(u.Password),
+          name: String(u.Nama),
+          role: String(u.Peran || 'Kasir')
+        }));
+      }
+
+      if (cloud.products && cloud.products.length) {
+        state.products = cloud.products.map(p => {
+          const code = String(p.Kode);
+          const cat = String(p.Kategori || 'Umum');
+          const isService = cat.toLowerCase().includes('jasa') || cat.toLowerCase().includes('fotokopi') || Number(p.Stok) >= 9000;
+          return {
+            code,
+            name: String(p.Nama),
+            category: cat,
+            unit: String(p.Satuan || 'Pcs'),
+            buyPrice: Number(p.HargaBeli || 0),
+            sellPrice: Number(p.HargaJual || 0),
+            stock: Number(p.Stok || 0),
+            minStock: Number(p.MinStok || 5),
+            isService,
+            updatedAt: String(p.UpdatedAt || '')
+          };
+        });
+      }
+
+      if (cloud.sales) {
+        state.sales = cloud.sales.map(s => {
+          let items = [];
+          try { items = typeof s.ItemsJSON === 'string' ? JSON.parse(s.ItemsJSON) : (s.ItemsJSON || []); } catch (e) {}
+          return {
+            invoice: String(s.NoFaktur),
+            date: String(s.Tanggal),
+            cashier: String(s.Kasir),
+            paymentMethod: String(s.MetodeBayar),
+            subtotal: Number(s.Subtotal || 0),
+            total: Number(s.Total || 0),
+            paid: Number(s.Bayar || 0),
+            change: Number(s.Kembali || 0),
+            status: String(s.Status || 'Selesai'),
+            voidReason: String(s.AlasanVoid || ''),
+            items
+          };
+        }).reverse();
+      }
+
+      if (cloud.purchases) {
+        state.purchases = cloud.purchases.map(pur => {
+          let items = [];
+          try { items = typeof pur.ItemsJSON === 'string' ? JSON.parse(pur.ItemsJSON) : (pur.ItemsJSON || []); } catch (e) {}
+          return {
+            invoice: String(pur.NoFaktur),
+            date: String(pur.Tanggal),
+            supplier: String(pur.Supplier),
+            total: Number(pur.Total || 0),
+            cashier: String(pur.Kasir),
+            items
+          };
+        }).reverse();
+      }
+
+      if (cloud.journals) {
+        state.journals = cloud.journals.map(j => ({
+          id: String(j.ID),
+          date: String(j.Tanggal),
+          ref: String(j.NoRef),
+          desc: String(j.Keterangan),
+          account: String(j.Akun),
+          debit: Number(j.Debit || 0),
+          credit: Number(j.Kredit || 0)
+        })).reverse();
+      }
+
+      if (cloud.shifts) {
+        state.shifts = cloud.shifts.map(st => ({
+          id: String(st.ID),
+          date: String(st.Tanggal),
+          cashier: String(st.Kasir),
+          systemCash: Number(st.SaldoSistem || 0),
+          actualCash: Number(st.UangFisik || 0),
+          diff: Number(st.Selisih || 0),
+          note: String(st.Catatan || '')
+        })).reverse();
+      }
+
       state.lastSync = nowStr();
       await saveAppState();
-      render();
-      if (!silent) alert('Berhasil sinkronisasi ke Google Sheets!');
+      if (!silent) alert('Sinkronisasi 2 arah berhasil! Data HP & Laptop sudah sama.');
     } else {
-      if (!silent) alert('Gagal sinkron: ' + json.message);
+      if (!silent) alert('Gagal sinkron: ' + (json.message || 'Respons tidak valid'));
     }
   } catch (err) {
-    if (!silent) alert('Koneksi ke Google Sheets terganggu. Data tetap aman di antrean lokal.');
+    if (!silent) alert('Koneksi ke Google Sheets terganggu. Data tetap aman di perangkat.');
+  } finally {
+    isSyncing = false;
+    render();
   }
 }
 
@@ -768,11 +868,11 @@ function viewDashboard() {
       <button onclick="go('Kasir')"><span>🛒</span>Kasir</button>
       <button onclick="openPhotocopyModal()"><span>🖨️</span>Fotokopi</button>
       <button onclick="go('Pembelian')"><span>🧺</span>Kulakan</button>
-      <button onclick="syncToGoogleSheets(false)"><span>☁️</span>Sync (${state.syncQueue.length})</button>
+      <button onclick="syncTwoWay(false)"><span>🔄</span>Sync 2 Arah</button>
     </div>
-    <h2>Riwayat Transaksi Terakhir</h2>
+    <h2>Riwayat Transaksi Terakhir (Semua Perangkat)</h2>
     <div class="panel">
-      ${state.sales.length ? state.sales.slice(0, 15).map(s => `
+      ${state.sales.length ? state.sales.slice(0, 25).map(s => `
         <div class="row">
           <div class="ico">${s.status === 'Void' ? '🚫' : '🧾'}</div>
           <div class="grow">
@@ -923,7 +1023,10 @@ function viewPersediaan() {
   return `
     <div class="section-head">
       <h1>Manajemen Persediaan</h1>
-      <button class="btn sm" onclick="openAddProductModal()">＋ Produk Baru</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn secondary sm" onclick="syncTwoWay(false)">🔄 Segarkan Stok</button>
+        <button class="btn sm" onclick="openAddProductModal()">＋ Produk Baru</button>
+      </div>
     </div>
     <div class="panel">
       ${state.products.map(p => `
@@ -968,7 +1071,7 @@ function viewKeuangan() {
           </tr>
         </thead>
         <tbody>
-          ${state.journals.length ? state.journals.slice(0, 40).map(j => `
+          ${state.journals.length ? state.journals.slice(0, 50).map(j => `
             <tr style="border-bottom:1px solid var(--line)">
               <td style="padding:8px">${j.date}<br><small class="muted">${j.ref}</small></td>
               <td style="padding:8px;padding-left:${j.credit > 0 ? '22px' : '8px'}">${j.account}<br><small class="muted">${j.desc}</small></td>
@@ -983,18 +1086,18 @@ function viewKeuangan() {
 
 function viewMaster() {
   return `
-    <h1>Master Data & Sinkronisasi Cloud</h1>
+    <h1>Master Data & Sinkronisasi Multi-Device</h1>
 
     <div class="panel">
-      <h3>☁️ Koneksi Google Sheets (Online Sync)</h3>
-      <p class="muted">Saat offline, semua data disimpan di perangkat ini. Saat online, data disinkronkan ke Google Sheets kamu.</p>
+      <h3>🔄 Sinkronisasi 2 Arah (HP ↔ Google Sheets ↔ Laptop)</h3>
+      <p class="muted">Data transaksi & stok otomatis disinkronkan setiap 15 detik saat online. Kamu juga bisa menekan tombol di bawah untuk menarik data produk baru dari Google Sheets.</p>
       <label>URL Web App Google Apps Script</label>
       <input id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec" value="${state.gasUrl}">
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" onclick="saveGasUrl()">Simpan URL</button>
-        <button class="btn success" onclick="syncToGoogleSheets(false)">🔄 Sinkronkan Sekarang (${state.syncQueue.length} antrean)</button>
+        <button class="btn success" onclick="syncTwoWay(false)">🔄 Sinkron & Tarik Data Sekarang</button>
       </div>
-      <p class="muted" style="margin-top:8px">Sinkronisasi terakhir: <b>${state.lastSync}</b></p>
+      <p class="muted" style="margin-top:8px">Sinkronisasi terakhir: <b>${state.lastSync}</b> · Antrean belum terkirim: <b>${state.syncQueue.length}</b></p>
     </div>
 
     <div class="panel">
@@ -1066,6 +1169,7 @@ async function saveNewProduct() {
   await saveAppState();
   closeModal();
   render();
+  if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
 function openEditProductModal(code) {
@@ -1096,12 +1200,14 @@ async function saveEditProduct(code) {
   await saveAppState();
   closeModal();
   render();
+  if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
 async function saveGasUrl() {
   state.gasUrl = $('#gasUrlInput').value.trim();
   await saveAppState();
   alert('URL Google Apps Script tersimpan!');
+  syncTwoWay(false);
 }
 
 async function addUserPrompt() {
@@ -1196,8 +1302,8 @@ function render() {
             <button class="pill ${state.online ? 'online' : 'offline'}" onclick="state.online=!state.online;render()">
               ${state.online ? '🟢 Online' : '🔴 Offline'}
             </button>
-            <button class="pill sync" onclick="syncToGoogleSheets(false)">
-              ☁️ Sync (${state.syncQueue.length})
+            <button class="pill sync" onclick="syncTwoWay(false)">
+              ${isSyncing ? '⏳ Syncing...' : '🔄 Sync (' + state.syncQueue.length + ')'}
             </button>
             <button class="pill user" onclick="handleLogout()">👤 ${state.currentUser.username}</button>
           </div>
@@ -1219,9 +1325,14 @@ function render() {
 window.addEventListener('online', () => {
   state.online = true;
   render();
-  if (state.gasUrl && state.syncQueue.length > 0) syncToGoogleSheets(true);
+  if (state.gasUrl) syncTwoWay(true);
 });
 window.addEventListener('offline', () => { state.online = false; render(); });
+window.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.currentUser && state.online && state.gasUrl) {
+    syncTwoWay(true);
+  }
+});
 window.addEventListener('keydown', (e) => {
   if (e.key === 'F2' && state.page === 'Kasir') {
     e.preventDefault();
@@ -1230,11 +1341,23 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+// Auto-sync 2 arah setiap 15 detik saat aplikasi dibuka & online
+setInterval(() => {
+  if (state.currentUser && state.online && state.gasUrl && !isSyncing) {
+    syncTwoWay(true);
+  }
+}, 15000);
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-loadAppState().then(render);
+loadAppState().then(() => {
+  render();
+  if (state.currentUser && state.online && state.gasUrl) {
+    syncTwoWay(true);
+  }
+});
 </script>
 </body>
 </html>
