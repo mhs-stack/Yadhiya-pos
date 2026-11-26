@@ -48,8 +48,11 @@ h2{font-size:16px;margin:16px 0 10px}
 .panel{padding:14px;margin-bottom:12px}
 .panel.soft{background:var(--soft)}
 .metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
-.metric{padding:13px;background:#fff}
+.metric{padding:13px;background:#fff;text-align:left;font-family:inherit;cursor:pointer;transition:.15s;position:relative}
+.metric:hover{border-color:var(--blue);transform:translateY(-1px);box-shadow:0 6px 16px rgba(23,43,77,.07)}
+.metric:active{transform:scale(.99)}
 .metric .value{font-size:20px;font-weight:800;margin-top:4px}
+.metric .hint{font-size:11px;color:var(--blue);font-weight:700;margin-top:4px}
 .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
 .quick button{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 4px;font-weight:700;font-size:12px;cursor:pointer;color:#1e293b}
 .quick button span{display:block;font-size:20px;margin-bottom:4px}
@@ -57,6 +60,7 @@ h2{font-size:16px;margin:16px 0 10px}
 /* FORMS & BUTTONS */
 input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d5dce6;border-radius:10px;background:#fff;font:inherit;margin:4px 0 10px}
 input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(40,90,157,.12)}
+input[readonly]{background:#f1f5f9;color:#475569;font-weight:700}
 label{font-size:12px;font-weight:700;color:#475569;display:block}
 .btn{border:0;background:var(--blue);color:#fff;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn.secondary{background:#edf2f8;color:#1e3a5f}
@@ -69,6 +73,18 @@ label{font-size:12px;font-weight:700;color:#475569;display:block}
 .row .grow{flex:1;min-width:0}
 .ico{width:34px;height:34px;border-radius:10px;background:#f0f4fa;display:grid;place-items:center;font-size:17px;flex-shrink:0}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+
+/* MODE SWITCHER (KULAKAN) */
+.mode-pills{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.mode-pill{border:1.5px solid #cbd5e1;background:#fff;border-radius:11px;padding:10px 12px;font-weight:700;font-size:12px;color:#334155;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left}
+.mode-pill.active{border-color:var(--green);background:#ecfdf5;color:#14532d}
+.mode-dot{width:14px;height:14px;border-radius:50%;border:2px solid #94a3b8;display:inline-grid;place-items:center;flex-shrink:0}
+.mode-pill.active .mode-dot{border-color:var(--green)}
+.mode-pill.active .mode-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--green)}
+.pur-entry-grid{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:640px){
+  .pur-entry-grid{grid-template-columns:1.6fr 1fr 0.75fr 1fr auto;align-items:end}
+}
 
 /* POS SPLIT LAYOUT */
 .pos-layout{display:grid;grid-template-columns:1fr;gap:14px}
@@ -189,6 +205,7 @@ const DEFAULT_PRODUCTS = [
 let state = {
   currentUser: null,
   page: 'Kasir',
+  stockFilterLow: false,
   online: navigator.onLine,
   gasUrl: DEFAULT_GAS_URL,
   lastSync: 'Belum pernah',
@@ -203,7 +220,20 @@ let state = {
   searchQuery: '',
   catFilter: 'Semua',
   paymentMethod: 'Tunai (Kas Laci)',
-  cashPaid: ''
+  cashPaid: '',
+  // Purchase Draft (Multi-item + Subtotal/Unit mode + Extras)
+  purMode: 'subtotal', // 'subtotal' | 'unit'
+  purSelectedCode: '',
+  purQtyInput: 1,
+  purTotalInput: '',
+  purUnitInput: '',
+  purItems: [],
+  purShowExtras: false,
+  purDiscount: 0,
+  purAdminFee: 0,
+  purShipping: 0,
+  purSupplier: '',
+  purPaySrc: '101 - Kas Laci Toko'
 };
 
 async function loadAppState() {
@@ -479,7 +509,6 @@ async function processCheckout() {
   const date = nowStr();
   const isoDate = todayKey();
 
-  // 1. Kurangi stok produk fisik & kirim DELTA stok (agar transaksi HP & Laptop terakumulasi akurat)
   state.cart.forEach(item => {
     const prod = state.products.find(p => p.code === item.code);
     if (prod && !prod.isService) {
@@ -489,7 +518,6 @@ async function processCheckout() {
     }
   });
 
-  // 2. Simpan transaksi penjualan
   const sale = {
     invoice,
     date,
@@ -506,7 +534,6 @@ async function processCheckout() {
   state.sales.unshift(sale);
   queueSync('SALE', sale);
 
-  // 3. Silent Accounting: Jurnal Penjualan & HPP otomatis
   const cashAcc = state.paymentMethod === 'Tunai (Kas Laci)' ? '101 - Kas Laci Toko' : '102 - Bank / QRIS';
   const jEntries = [
     { id: invoice + '-1', date, isoDate, ref: invoice, desc: 'Penjualan ' + invoice, account: cashAcc, debit: total, credit: 0 },
@@ -534,7 +561,6 @@ async function voidSale(invoice) {
   sale.voidReason = reason;
   queueSync('SALE', sale);
 
-  // Kembalikan stok via Delta Stok (+qty)
   let totalHpp = 0;
   sale.items.forEach(item => {
     totalHpp += item.buyPrice * item.qty;
@@ -545,7 +571,6 @@ async function voidSale(invoice) {
     }
   });
 
-  // Jurnal Pembalik
   const date = nowStr();
   const isoDate = todayKey();
   const cashAcc = sale.paymentMethod === 'Tunai (Kas Laci)' ? '101 - Kas Laci Toko' : '102 - Bank / QRIS';
@@ -595,45 +620,182 @@ function showReceiptModal(sale) {
 }
 
 /* =========================================================
-   8. PEMBELIAN (AVERAGE COST) & TUTUP KASIR
+   8. PEMBELIAN / KULAKAN (MULTI-ITEM + SUBTOTAL/UNIT + DISKON/ADMIN/ONGKIR)
    ========================================================= */
-async function handlePurchaseSubmit(e) {
-  e.preventDefault();
-  const code = $('#purProd').value;
-  const qty = Math.max(1, parseInt($('#purQty').value || 1, 10));
-  const newBuy = Math.max(0, Number($('#purPrice').value || 0));
-  const supplier = $('#purSup').value.trim() || 'Supplier Umum';
-  const paySrc = $('#purPay').value;
+function recalcPurchaseEntry() {
+  const qty = Math.max(1, Number(state.purQtyInput || 1));
+  if (state.purMode === 'subtotal') {
+    const tot = Number(state.purTotalInput || 0);
+    state.purUnitInput = tot > 0 ? Math.round(tot / qty) : '';
+  } else {
+    const unit = Number(state.purUnitInput || 0);
+    state.purTotalInput = unit > 0 ? Math.round(unit * qty) : '';
+  }
+}
 
-  const prod = state.products.find(p => p.code === code);
+function setPurchaseMode(mode) {
+  state.purMode = mode;
+  recalcPurchaseEntry();
+  render();
+}
+
+function onPurQtyChange(val) {
+  state.purQtyInput = Math.max(1, parseInt(val || 1, 10));
+  recalcPurchaseEntry();
+  const unitEl = $('#purUnitField');
+  const totEl = $('#purTotalField');
+  if (unitEl) unitEl.value = state.purUnitInput;
+  if (totEl) totEl.value = state.purTotalInput;
+}
+
+function onPurTotalChange(val) {
+  state.purTotalInput = val;
+  const qty = Math.max(1, Number(state.purQtyInput || 1));
+  const tot = Number(val || 0);
+  state.purUnitInput = tot > 0 ? Math.round(tot / qty) : '';
+  const unitEl = $('#purUnitField');
+  if (unitEl) unitEl.value = state.purUnitInput;
+}
+
+function onPurUnitChange(val) {
+  state.purUnitInput = val;
+  const qty = Math.max(1, Number(state.purQtyInput || 1));
+  const unit = Number(val || 0);
+  state.purTotalInput = unit > 0 ? Math.round(unit * qty) : '';
+  const totEl = $('#purTotalField');
+  if (totEl) totEl.value = state.purTotalInput;
+}
+
+function addPurchaseItem() {
+  const physicalProducts = state.products.filter(p => !p.isService);
+  if (!physicalProducts.length) return;
+  const code = state.purSelectedCode || physicalProducts[0].code;
+  const prod = physicalProducts.find(p => p.code === code);
   if (!prod) return;
 
-  // Rumus Average Cost (Harga Rata-Rata Tertimbang)
-  const oldVal = prod.stock * prod.buyPrice;
-  const newVal = qty * newBuy;
-  const totalQty = prod.stock + qty;
-  prod.buyPrice = totalQty > 0 ? Math.round((oldVal + newVal) / totalQty) : newBuy;
-  prod.stock = totalQty;
-  prod.updatedAt = new Date().toISOString();
-  queueSync('STOCK_DELTA', { code: prod.code, delta: +qty, newBuyPrice: prod.buyPrice });
+  const qty = Math.max(1, parseInt(state.purQtyInput || 1, 10));
+  let lineTotal = 0;
+  let unitPrice = 0;
+
+  if (state.purMode === 'subtotal') {
+    lineTotal = Math.max(0, Number(state.purTotalInput || 0));
+    unitPrice = qty > 0 ? lineTotal / qty : 0;
+  } else {
+    unitPrice = Math.max(0, Number(state.purUnitInput || 0));
+    lineTotal = unitPrice * qty;
+  }
+
+  if (lineTotal <= 0) {
+    alert('Masukkan Total Harga Beli atau Harga Satuan terlebih dahulu!');
+    return;
+  }
+
+  const existing = state.purItems.find(x => x.code === prod.code);
+  if (existing) {
+    existing.qty += qty;
+    existing.lineTotal += lineTotal;
+    existing.buyPrice = Math.round(existing.lineTotal / existing.qty);
+  } else {
+    state.purItems.push({
+      code: prod.code,
+      name: prod.name,
+      unit: prod.unit,
+      qty,
+      buyPrice: Math.round(unitPrice),
+      lineTotal: Math.round(lineTotal)
+    });
+  }
+
+  state.purQtyInput = 1;
+  state.purTotalInput = '';
+  state.purUnitInput = '';
+  render();
+}
+
+function removePurchaseItem(idx) {
+  state.purItems.splice(idx, 1);
+  render();
+}
+
+async function submitPurchaseOrder() {
+  if (!state.purItems.length) {
+    alert('Tambahkan minimal 1 barang ke daftar kulakan terlebih dahulu!');
+    return;
+  }
+
+  const subtotal = state.purItems.reduce((s, x) => s + Number(x.lineTotal || 0), 0);
+  const discount = Math.max(0, Number(state.purDiscount || 0));
+  const adminFee = Math.max(0, Number(state.purAdminFee || 0));
+  const shipping = Math.max(0, Number(state.purShipping || 0));
+  const netExtra = adminFee + shipping - discount;
+  const grandTotal = Math.max(0, subtotal + netExtra);
 
   const invoice = 'PO-' + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89);
   const date = nowStr();
   const isoDate = todayKey();
-  const total = qty * newBuy;
+  const supplier = (state.purSupplier || '').trim() || 'Supplier Umum';
+  const paySrc = state.purPaySrc || '101 - Kas Laci Toko';
 
-  const pur = { invoice, date, supplier, total, cashier: state.currentUser.name, items: [{ code: prod.code, name: prod.name, qty, buyPrice: newBuy }] };
+  // Proporsionalkan biaya tambahan / diskon nota ke biaya perolehan persediaan (Average Cost)
+  const finalizedItems = state.purItems.map(item => {
+    const weight = subtotal > 0 ? (item.lineTotal / subtotal) : (1 / state.purItems.length);
+    const allocatedCost = Math.max(0, item.lineTotal + netExtra * weight);
+    const effectiveUnitCost = item.qty > 0 ? Math.round(allocatedCost / item.qty) : item.buyPrice;
+
+    const prod = state.products.find(p => p.code === item.code);
+    if (prod) {
+      const oldVal = prod.stock * prod.buyPrice;
+      const totalQty = prod.stock + item.qty;
+      prod.buyPrice = totalQty > 0 ? Math.round((oldVal + allocatedCost) / totalQty) : effectiveUnitCost;
+      prod.stock = totalQty;
+      prod.updatedAt = new Date().toISOString();
+      queueSync('STOCK_DELTA', { code: prod.code, delta: +item.qty, newBuyPrice: prod.buyPrice });
+    }
+
+    return {
+      code: item.code,
+      name: item.name,
+      unit: item.unit,
+      qty: item.qty,
+      buyPrice: effectiveUnitCost,
+      lineTotal: item.lineTotal
+    };
+  });
+
+  const pur = {
+    invoice,
+    date,
+    supplier,
+    subtotal,
+    discount,
+    adminFee,
+    shipping,
+    total: grandTotal,
+    cashier: state.currentUser.name,
+    items: finalizedItems
+  };
   state.purchases.unshift(pur);
   queueSync('PURCHASE', pur);
 
-  const j1 = { id: invoice + '-1', date, isoDate, ref: invoice, desc: 'Pembelian ' + prod.name, account: '104 - Persediaan Barang', debit: total, credit: 0 };
-  const j2 = { id: invoice + '-2', date, isoDate, ref: invoice, desc: 'Pembelian ' + prod.name, account: paySrc, debit: 0, credit: total };
-  state.journals.unshift(j2, j1);
-  queueSync('JOURNAL', j1);
-  queueSync('JOURNAL', j2);
+  // Jurnal Akuntansi: Persediaan bertambah sebesar nilai perolehan bersih (Subtotal - Diskon + Admin + Ongkir)
+  const jEntries = [
+    { id: invoice + '-1', date, isoDate, ref: invoice, desc: 'Kulakan ' + supplier + ' (' + finalizedItems.length + ' item)', account: '104 - Persediaan Barang', debit: grandTotal, credit: 0 },
+    { id: invoice + '-2', date, isoDate, ref: invoice, desc: 'Pembayaran Kulakan ' + supplier, account: paySrc, debit: 0, credit: grandTotal }
+  ];
+  jEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
+
+  // Reset form kulakan
+  state.purItems = [];
+  state.purDiscount = 0;
+  state.purAdminFee = 0;
+  state.purShipping = 0;
+  state.purSupplier = '';
+  state.purQtyInput = 1;
+  state.purTotalInput = '';
+  state.purUnitInput = '';
 
   await saveAppState();
-  alert('Barang masuk tersimpan! HPP Rata-rata baru ' + prod.name + ': ' + rp(prod.buyPrice));
+  alert('Nota kulakan ' + invoice + ' tersimpan! Total transaksi: ' + rp(grandTotal));
   render();
   if (state.online && state.gasUrl) syncTwoWay(true);
 }
@@ -718,6 +880,7 @@ async function syncTwoWay(silent = false) {
 
   const queueSnapshot = [...state.syncQueue];
   const batch = {
+    users: queueSnapshot.filter(q => q.type === 'USER').map(q => q.item),
     products: queueSnapshot.filter(q => q.type === 'PRODUCT').map(q => q.item),
     stockDeltas: queueSnapshot.filter(q => q.type === 'STOCK_DELTA').map(q => q.item),
     sales: queueSnapshot.filter(q => q.type === 'SALE').map(q => q.item),
@@ -734,11 +897,9 @@ async function syncTwoWay(silent = false) {
     });
     const json = await res.json();
     if (json.status === 'ok' && json.data) {
-      // Hapus antrean yang sudah berhasil terkirim
       const sentTs = new Set(queueSnapshot.map(q => q.ts));
       state.syncQueue = state.syncQueue.filter(q => !sentTs.has(q.ts));
 
-      // Gabungkan & perbarui state lokal dari Google Sheets (Master kebenaran bersama)
       const cloud = json.data;
 
       if (cloud.users && cloud.users.length) {
@@ -798,6 +959,10 @@ async function syncTwoWay(silent = false) {
             invoice: String(pur.NoFaktur),
             date: String(pur.Tanggal),
             supplier: String(pur.Supplier),
+            subtotal: Number(pur.Subtotal !== undefined ? pur.Subtotal : (pur.Total || 0)),
+            discount: Number(pur.Diskon || 0),
+            adminFee: Number(pur.BiayaAdmin || 0),
+            shipping: Number(pur.Ongkir || 0),
             total: Number(pur.Total || 0),
             cashier: String(pur.Kasir),
             items
@@ -844,8 +1009,32 @@ async function syncTwoWay(silent = false) {
 }
 
 /* =========================================================
-   10. PAGE VIEWS
+   10. RESPONSIVE DASHBOARD SHORTCUTS & PAGE VIEWS
    ========================================================= */
+function goToTransactionsList() {
+  state.page = 'Dashboard';
+  render();
+  setTimeout(() => {
+    const el = $('#dashboardTransactionsSection');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 40);
+}
+
+function goToLowStockList() {
+  state.stockFilterLow = true;
+  state.page = 'Persediaan';
+  render();
+}
+
+function goToJournalList() {
+  state.page = 'Keuangan';
+  render();
+  setTimeout(() => {
+    const el = $('#journalSection');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 40);
+}
+
 function viewDashboard() {
   const validSales = state.sales.filter(s => s.status === 'Selesai');
   const omzet = validSales.reduce((s, x) => s + x.total, 0);
@@ -859,10 +1048,26 @@ function viewDashboard() {
       <button class="btn secondary sm" onclick="openShiftClosingModal()">🔒 Tutup Kasir</button>
     </div>
     <div class="metrics">
-      <div class="metric"><div class="muted">Total Omzet</div><div class="value green">${rp(omzet)}</div></div>
-      <div class="metric"><div class="muted">Transaksi Sukses</div><div class="value">${validSales.length}</div></div>
-      <div class="metric"><div class="muted">Laba Kotor</div><div class="value">${rp(labaKotor)}</div></div>
-      <div class="metric"><div class="muted">Stok Menipis</div><div class="value red">${lowStock} item</div></div>
+      <button type="button" class="metric" onclick="goToTransactionsList()">
+        <div class="muted">Total Omzet</div>
+        <div class="value green">${rp(omzet)}</div>
+        <div class="hint">Lihat daftar transaksi →</div>
+      </button>
+      <button type="button" class="metric" onclick="goToTransactionsList()">
+        <div class="muted">Transaksi Sukses</div>
+        <div class="value">${validSales.length}</div>
+        <div class="hint">Buka riwayat transaksi →</div>
+      </button>
+      <button type="button" class="metric" onclick="goToJournalList()">
+        <div class="muted">Laba Kotor</div>
+        <div class="value">${rp(labaKotor)}</div>
+        <div class="hint">Buka jurnal keuangan →</div>
+      </button>
+      <button type="button" class="metric" onclick="goToLowStockList()">
+        <div class="muted">Stok Menipis</div>
+        <div class="value red">${lowStock} item</div>
+        <div class="hint">${lowStock > 0 ? 'Cek barang menipis →' : 'Lihat semua stok →'}</div>
+      </button>
     </div>
     <div class="quick">
       <button onclick="go('Kasir')"><span>🛒</span>Kasir</button>
@@ -870,22 +1075,24 @@ function viewDashboard() {
       <button onclick="go('Pembelian')"><span>🧺</span>Kulakan</button>
       <button onclick="syncTwoWay(false)"><span>🔄</span>Sync 2 Arah</button>
     </div>
-    <h2>Riwayat Transaksi Terakhir (Semua Perangkat)</h2>
-    <div class="panel">
-      ${state.sales.length ? state.sales.slice(0, 25).map(s => `
-        <div class="row">
-          <div class="ico">${s.status === 'Void' ? '🚫' : '🧾'}</div>
-          <div class="grow">
-            <strong>${s.invoice} · ${s.paymentMethod.split(' ')[0]} ${s.status === 'Void' ? '<span class="badge low">VOID</span>' : ''}</strong>
-            <small>${s.date} · Kasir: ${s.cashier}</small>
+    <div id="dashboardTransactionsSection">
+      <h2>Riwayat Transaksi Terakhir (Semua Perangkat)</h2>
+      <div class="panel">
+        ${state.sales.length ? state.sales.slice(0, 25).map(s => `
+          <div class="row">
+            <div class="ico">${s.status === 'Void' ? '🚫' : '🧾'}</div>
+            <div class="grow">
+              <strong>${s.invoice} · ${s.paymentMethod.split(' ')[0]} ${s.status === 'Void' ? '<span class="badge low">VOID</span>' : ''}</strong>
+              <small>${s.date} · Kasir: ${s.cashier}</small>
+            </div>
+            <div style="text-align:right">
+              <b class="${s.status === 'Void' ? 'red' : 'green'}">${rp(s.total)}</b><br>
+              <button class="btn secondary sm" onclick='showReceiptModal(${JSON.stringify(s)})'>Struk</button>
+              ${s.status === 'Selesai' ? `<button class="btn danger sm" onclick="voidSale('${s.invoice}')">Void</button>` : ''}
+            </div>
           </div>
-          <div style="text-align:right">
-            <b class="${s.status === 'Void' ? 'red' : 'green'}">${rp(s.total)}</b><br>
-            <button class="btn secondary sm" onclick='showReceiptModal(${JSON.stringify(s)})'>Struk</button>
-            ${s.status === 'Selesai' ? `<button class="btn danger sm" onclick="voidSale('${s.invoice}')">Void</button>` : ''}
-          </div>
-        </div>
-      `).join('') : '<p class="muted">Belum ada transaksi penjualan.</p>'}
+        `).join('') : '<p class="muted">Belum ada transaksi penjualan.</p>'}
+      </div>
     </div>`;
 }
 
@@ -983,36 +1190,152 @@ function viewKasir() {
 
 function viewPembelian() {
   const physicalProducts = state.products.filter(p => !p.isService);
+  if (!state.purSelectedCode && physicalProducts.length) {
+    state.purSelectedCode = physicalProducts[0].code;
+  }
+
+  const isSubMode = state.purMode === 'subtotal';
+  const subtotal = state.purItems.reduce((s, x) => s + Number(x.lineTotal || 0), 0);
+  const discount = Math.max(0, Number(state.purDiscount || 0));
+  const adminFee = Math.max(0, Number(state.purAdminFee || 0));
+  const shipping = Math.max(0, Number(state.purShipping || 0));
+  const grandTotal = Math.max(0, subtotal - discount + adminFee + shipping);
+
   return `
     <h1>Pencatatan Barang Masuk (Kulakan)</h1>
-    <p class="muted">HPP produk otomatis dihitung ulang menggunakan metode Average Cost.</p>
+    <p class="muted">Bisa input banyak produk dalam 1 nota pembelian. HPP otomatis dihitung ulang menggunakan metode Average Cost.</p>
+
     <div class="panel">
-      <form onsubmit="handlePurchaseSubmit(event)">
-        <label>Pilih Produk</label>
-        <select id="purProd">
-          ${physicalProducts.map(p => `<option value="${p.code}">${p.name} (Stok: ${p.stock} ${p.unit} · HPP saat ini: ${rp(p.buyPrice)})</option>`).join('')}
-        </select>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div><label>Jumlah Masuk</label><input id="purQty" type="number" min="1" value="10" required></div>
-          <div><label>Harga Beli Satuan (Rp)</label><input id="purPrice" type="number" min="0" required placeholder="Contoh: 2100"></div>
+      <div class="mode-pills">
+        <button type="button" class="mode-pill ${!isSubMode ? 'active' : ''}" onclick="setPurchaseMode('unit')">
+          <span class="mode-dot"></span>
+          <span>Input Berdasarkan Harga Satuan</span>
+        </button>
+        <button type="button" class="mode-pill ${isSubMode ? 'active' : ''}" onclick="setPurchaseMode('subtotal')">
+          <span class="mode-dot"></span>
+          <span>Input Berdasarkan Harga Subtotal</span>
+        </button>
+      </div>
+
+      <div style="font-weight:700;margin-bottom:8px;font-size:13px">Masukkan Item Produk Yang Dibeli</div>
+      <div class="pur-entry-grid">
+        <div>
+          <label>Nama Produk</label>
+          <select id="purProd" onchange="state.purSelectedCode=this.value" style="margin-bottom:4px">
+            ${physicalProducts.map(p => `<option value="${p.code}" ${state.purSelectedCode === p.code ? 'selected' : ''}>${p.name} (Stok: ${p.stock} ${p.unit})</option>`).join('')}
+          </select>
         </div>
-        <label>Nama Supplier</label>
-        <input id="purSup" placeholder="Contoh: Agen Sembako & ATK Blitar">
-        <label>Sumber Dana Pembayaran</label>
-        <select id="purPay">
-          <option value="101 - Kas Laci Toko">101 - Kas Laci Toko (Tunai)</option>
-          <option value="102 - Bank / QRIS">102 - Bank / QRIS (Transfer)</option>
-          <option value="201 - Utang Usaha">201 - Utang Usaha (Tempo)</option>
-        </select>
-        <button class="btn" type="submit" style="width:100%">💾 Simpan Pembelian & Update Stok</button>
-      </form>
+        <div>
+          <label>Total Harga Beli</label>
+          <input id="purTotalField" type="number" min="0" placeholder="25000" value="${state.purTotalInput}"
+            ${isSubMode ? 'oninput="onPurTotalChange(this.value)"' : 'readonly'} style="margin-bottom:4px">
+        </div>
+        <div>
+          <label>Quantity</label>
+          <input id="purQtyField" type="number" min="1" value="${state.purQtyInput}" oninput="onPurQtyChange(this.value)" style="margin-bottom:4px">
+        </div>
+        <div>
+          <label>Harga Satuan</label>
+          <input id="purUnitField" type="number" min="0" placeholder="5000" value="${state.purUnitInput}"
+            ${!isSubMode ? 'oninput="onPurUnitChange(this.value)"' : 'readonly'} style="margin-bottom:4px">
+        </div>
+        <div style="padding-bottom:4px">
+          <button type="button" class="btn success" onclick="addPurchaseItem()" title="Tambah ke daftar nota" style="width:100%;height:40px">＋ Tambah</button>
+        </div>
+      </div>
+
+      ${state.purItems.length ? `
+        <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">
+          <div class="section-head" style="margin-bottom:4px">
+            <b style="font-size:13px">Daftar Barang di Nota (${state.purItems.length} item)</b>
+            <button type="button" class="btn danger sm" onclick="state.purItems=[];render()">Hapus Semua</button>
+          </div>
+          ${state.purItems.map((it, idx) => `
+            <div class="row">
+              <div class="ico">📦</div>
+              <div class="grow">
+                <strong>${it.name}</strong>
+                <small>${it.qty} ${it.unit} × ${rp(it.buyPrice)}</small>
+              </div>
+              <div style="text-align:right">
+                <b>${rp(it.lineTotal)}</b><br>
+                <button type="button" class="btn danger sm" onclick="removePurchaseItem(${idx})">Hapus</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<div class="panel soft" style="margin-top:12px;margin-bottom:0;text-align:center;color:var(--muted);font-size:12px">Belum ada item ditambahkan ke nota pembelian ini.</div>`}
     </div>
+
+    <div class="panel">
+      <div class="section-head" style="margin-bottom:${state.purShowExtras ? '10px' : '0'}">
+        <div>
+          <b style="font-size:13px">Diskon, Biaya Admin & Ongkos Kirim (Opsional)</b>
+          <div class="muted">Potongan nota, biaya layanan marketplace, atau ongkir supplier</div>
+        </div>
+        <button type="button" class="btn secondary sm" onclick="state.purShowExtras=!state.purShowExtras;render()">
+          ${state.purShowExtras ? 'SEMBUNYIKAN' : 'TAMPILKAN'}
+        </button>
+      </div>
+
+      ${state.purShowExtras ? `
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:6px;border-top:1px solid var(--line)">
+          <div>
+            <label>Diskon Nota (Rp)</label>
+            <input type="number" min="0" value="${state.purDiscount || ''}" placeholder="0" oninput="state.purDiscount=this.value;render()">
+          </div>
+          <div>
+            <label>Biaya Admin (Rp)</label>
+            <input type="number" min="0" value="${state.purAdminFee || ''}" placeholder="0" oninput="state.purAdminFee=this.value;render()">
+          </div>
+          <div>
+            <label>Ongkos Kirim (Rp)</label>
+            <input type="number" min="0" value="${state.purShipping || ''}" placeholder="0" oninput="state.purShipping=this.value;render()">
+          </div>
+        </div>
+      ` : ''}
+    </div>
+
+    <div class="panel">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label>Nama Supplier / Toko</label>
+          <input placeholder="Contoh: Agen Sembako & ATK Blitar" value="${state.purSupplier}" oninput="state.purSupplier=this.value">
+        </div>
+        <div>
+          <label>Sumber Dana Pembayaran</label>
+          <select onchange="state.purPaySrc=this.value">
+            <option value="101 - Kas Laci Toko" ${state.purPaySrc === '101 - Kas Laci Toko' ? 'selected' : ''}>101 - Kas Laci Toko (Tunai)</option>
+            <option value="102 - Bank / QRIS" ${state.purPaySrc === '102 - Bank / QRIS' ? 'selected' : ''}>102 - Bank / QRIS (Transfer)</option>
+            <option value="201 - Utang Usaha" ${state.purPaySrc === '201 - Utang Usaha' ? 'selected' : ''}>201 - Utang Usaha (Tempo)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel soft" style="padding:12px;margin-top:4px">
+        <div class="r-row"><span class="muted">Subtotal Barang:</span><b>${rp(subtotal)}</b></div>
+        ${discount > 0 ? `<div class="r-row"><span class="muted">Diskon:</span><b class="green">- ${rp(discount)}</b></div>` : ''}
+        ${adminFee > 0 ? `<div class="r-row"><span class="muted">Biaya Admin:</span><b>+ ${rp(adminFee)}</b></div>` : ''}
+        ${shipping > 0 ? `<div class="r-row"><span class="muted">Ongkos Kirim:</span><b>+ ${rp(shipping)}</b></div>` : ''}
+        <hr style="border:0;border-top:1px solid var(--line);margin:8px 0">
+        <div class="r-row" style="font-size:16px"><b>Total Transaksi</b><b class="green">${rp(grandTotal)}</b></div>
+      </div>
+
+      <button type="button" class="btn" onclick="submitPurchaseOrder()" style="width:100%;padding:12px;font-size:14px">
+        💾 Simpan Nota Kulakan & Update Stok
+      </button>
+    </div>
+
     <h2>Riwayat Pembelian</h2>
     <div class="panel">
       ${state.purchases.length ? state.purchases.map(p => `
         <div class="row">
           <div class="ico">🧺</div>
-          <div class="grow"><strong>${p.invoice} · ${p.supplier}</strong><small>${p.date} · ${p.items.map(i => i.name + ' (' + i.qty + ')').join(', ')}</small></div>
+          <div class="grow">
+            <strong>${p.invoice} · ${p.supplier}</strong>
+            <small>${p.date} · ${p.items.map(i => i.name + ' (' + i.qty + ')').join(', ')}</small>
+            ${(p.discount || p.adminFee || p.shipping) ? `<small style="display:block;color:var(--blue)">Subtotal: ${rp(p.subtotal || p.total)}${p.discount ? ' · Diskon: -' + rp(p.discount) : ''}${p.adminFee ? ' · Admin: +' + rp(p.adminFee) : ''}${p.shipping ? ' · Ongkir: +' + rp(p.shipping) : ''}</small>` : ''}
+          </div>
           <b>${rp(p.total)}</b>
         </div>
       `).join('') : '<p class="muted">Belum ada catatan pembelian.</p>'}
@@ -1020,28 +1343,41 @@ function viewPembelian() {
 }
 
 function viewPersediaan() {
+  const lowCount = state.products.filter(p => !p.isService && p.stock <= (p.minStock || 5)).length;
+  const list = state.stockFilterLow
+    ? state.products.filter(p => !p.isService && p.stock <= (p.minStock || 5))
+    : state.products;
+
   return `
     <div class="section-head">
-      <h1>Manajemen Persediaan</h1>
-      <div style="display:flex;gap:6px">
+      <div>
+        <h1>Manajemen Persediaan</h1>
+        <p class="muted" style="margin:2px 0 0">${state.stockFilterLow ? 'Menampilkan khusus barang stok menipis (' + list.length + ' item)' : 'Menampilkan seluruh produk & jasa (' + list.length + ' item)'}</p>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn sm ${state.stockFilterLow ? 'danger' : 'secondary'}" onclick="state.stockFilterLow=!state.stockFilterLow;render()">
+          ${state.stockFilterLow ? '⚠️ Filter Menipis (' + lowCount + ') · Tampil Semua' : '⚠️ Stok Menipis (' + lowCount + ')'}
+        </button>
         <button class="btn secondary sm" onclick="syncTwoWay(false)">🔄 Segarkan Stok</button>
         <button class="btn sm" onclick="openAddProductModal()">＋ Produk Baru</button>
       </div>
     </div>
     <div class="panel">
-      ${state.products.map(p => `
+      ${list.length ? list.map(p => {
+        const isLow = !p.isService && p.stock <= (p.minStock || 5);
+        return `
         <div class="row">
-          <div class="ico">${p.isService ? '🖨️' : '📦'}</div>
+          <div class="ico">${p.isService ? '🖨️' : (isLow ? '⚠️' : '📦')}</div>
           <div class="grow">
-            <strong>${p.name} <span class="badge">${p.category}</span></strong>
+            <strong>${p.name} <span class="badge ${isLow ? 'low' : ''}">${isLow ? 'Stok Menipis (Min ' + (p.minStock || 5) + ')' : p.category}</span></strong>
             <small>Kode: ${p.code} · HPP: ${rp(p.buyPrice)} · Jual: ${rp(p.sellPrice)}</small>
           </div>
           <div style="text-align:right">
-            <b>${p.isService ? 'Jasa' : p.stock + ' ' + p.unit}</b><br>
+            <b class="${isLow ? 'red' : ''}">${p.isService ? 'Jasa' : p.stock + ' ' + p.unit}</b><br>
             <button class="btn secondary sm" onclick="openEditProductModal('${p.code}')">Edit</button>
           </div>
-        </div>
-      `).join('')}
+        </div>`;
+      }).join('') : '<p class="muted">Tidak ada barang dengan stok menipis saat ini.</p>'}
     </div>`;
 }
 
@@ -1054,33 +1390,35 @@ function viewKeuangan() {
   return `
     <h1>Keuangan & Jurnal Otomatis</h1>
     <div class="metrics">
-      <div class="metric"><div class="muted">Pendapatan</div><div class="value green">${rp(omzet)}</div></div>
-      <div class="metric"><div class="muted">Total HPP</div><div class="value red">${rp(hpp)}</div></div>
-      <div class="metric"><div class="muted">Laba Kotor</div><div class="value">${rp(omzet - hpp)}</div></div>
-      <div class="metric"><div class="muted">Nilai Aset Stok</div><div class="value">${rp(nilaiPersediaan)}</div></div>
+      <div class="metric" style="cursor:default"><div class="muted">Pendapatan</div><div class="value green">${rp(omzet)}</div></div>
+      <div class="metric" style="cursor:default"><div class="muted">Total HPP</div><div class="value red">${rp(hpp)}</div></div>
+      <div class="metric" style="cursor:default"><div class="muted">Laba Kotor</div><div class="value">${rp(omzet - hpp)}</div></div>
+      <div class="metric" style="cursor:default"><div class="muted">Nilai Aset Stok</div><div class="value">${rp(nilaiPersediaan)}</div></div>
     </div>
-    <h2>Jurnal Umum (Otomatis dari Transaksi)</h2>
-    <div class="panel" style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead>
-          <tr style="background:#f1f5f9;text-align:left">
-            <th style="padding:8px">Tanggal / Ref</th>
-            <th style="padding:8px">Akun</th>
-            <th style="padding:8px;text-align:right">Debit</th>
-            <th style="padding:8px;text-align:right">Kredit</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${state.journals.length ? state.journals.slice(0, 50).map(j => `
-            <tr style="border-bottom:1px solid var(--line)">
-              <td style="padding:8px">${j.date}<br><small class="muted">${j.ref}</small></td>
-              <td style="padding:8px;padding-left:${j.credit > 0 ? '22px' : '8px'}">${j.account}<br><small class="muted">${j.desc}</small></td>
-              <td style="padding:8px;text-align:right">${j.debit ? rp(j.debit) : '-'}</td>
-              <td style="padding:8px;text-align:right">${j.credit ? rp(j.credit) : '-'}</td>
+    <div id="journalSection">
+      <h2>Jurnal Umum (Otomatis dari Transaksi)</h2>
+      <div class="panel" style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:#f1f5f9;text-align:left">
+              <th style="padding:8px">Tanggal / Ref</th>
+              <th style="padding:8px">Akun</th>
+              <th style="padding:8px;text-align:right">Debit</th>
+              <th style="padding:8px;text-align:right">Kredit</th>
             </tr>
-          `).join('') : '<tr><td colspan="4" style="padding:14px" class="muted">Belum ada jurnal tercatat.</td></tr>'}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            ${state.journals.length ? state.journals.slice(0, 50).map(j => `
+              <tr style="border-bottom:1px solid var(--line)">
+                <td style="padding:8px">${j.date}<br><small class="muted">${j.ref}</small></td>
+                <td style="padding:8px;padding-left:${j.credit > 0 ? '22px' : '8px'}">${j.account}<br><small class="muted">${j.desc}</small></td>
+                <td style="padding:8px;text-align:right">${j.debit ? rp(j.debit) : '-'}</td>
+                <td style="padding:8px;text-align:right">${j.credit ? rp(j.credit) : '-'}</td>
+              </tr>
+            `).join('') : '<tr><td colspan="4" style="padding:14px" class="muted">Belum ada jurnal tercatat.</td></tr>'}
+          </tbody>
+        </table>
+      </div>
     </div>`;
 }
 
@@ -1108,7 +1446,11 @@ function viewMaster() {
       ${state.users.map(u => `
         <div class="row">
           <div class="ico">👤</div>
-          <div class="grow"><strong>${u.name} (${u.username})</strong><small>Peran: ${u.role} · Akses Penuh</small></div>
+          <div class="grow">
+            <strong>${u.name} (${u.username})</strong>
+            <small>Peran: ${u.role} · Sandi: <code>${u.password}</code></small>
+          </div>
+          <button class="btn secondary sm" onclick="changeUserPassword('${u.username}')">✏️ Ganti Sandi</button>
         </div>
       `).join('')}
     </div>
@@ -1125,8 +1467,36 @@ function viewMaster() {
 }
 
 /* =========================================================
-   11. MASTER CRUD & BACKUP HELPERS
+   11. MASTER CRUD, PASSWORD CHANGE & BACKUP HELPERS
    ========================================================= */
+async function changeUserPassword(username) {
+  const user = state.users.find(u => u.username === username);
+  if (!user) return;
+  const nextPass = prompt('Masukkan sandi baru untuk akun "' + user.name + '" (' + user.username + '):', user.password);
+  if (nextPass === null) return;
+  const trimmed = nextPass.trim();
+  if (!trimmed) {
+    alert('Sandi tidak boleh kosong!');
+    return;
+  }
+  user.password = trimmed;
+  if (state.currentUser && state.currentUser.username === username) {
+    state.currentUser.password = trimmed;
+  }
+  const userPayload = {
+    username: user.username,
+    password: user.password,
+    name: user.name,
+    role: user.role,
+    active: 'Ya'
+  };
+  queueSync('USER', userPayload);
+  await saveAppState();
+  render();
+  alert('Sandi untuk akun ' + user.username + ' berhasil diperbarui menjadi "' + trimmed + '" dan siap disinkronkan.');
+  if (state.online && state.gasUrl) syncTwoWay(true);
+}
+
 function openAddProductModal() {
   openModal(`
     <h3>＋ Tambah Produk / Jasa Baru</h3>
@@ -1217,9 +1587,12 @@ async function addUserPrompt() {
   if (!username) return;
   const password = prompt('Password:', '123') || '123';
   const role = confirm('Klik OK untuk peran Owner, Cancel untuk Kasir (keduanya memiliki hak akses penuh yang sama):') ? 'Owner' : 'Kasir';
-  state.users.push({ name, username, password, role });
+  const newUser = { name, username, password, role, active: 'Ya' };
+  state.users.push(newUser);
+  queueSync('USER', newUser);
   await saveAppState();
   render();
+  if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
 function exportBackupJSON() {
@@ -1260,7 +1633,11 @@ const NAV_ITEMS = [
   ['Master', '⚙️', 'Pengaturan']
 ];
 
-function go(p) { state.page = p; render(); }
+function go(p) {
+  if (p !== 'Persediaan') state.stockFilterLow = false;
+  state.page = p;
+  render();
+}
 function openModal(html) { $('#modalBody').innerHTML = html; $('#modalBg').classList.add('open'); }
 function closeModal() { $('#modalBg').classList.remove('open'); }
 
@@ -1341,7 +1718,6 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// Auto-sync 2 arah setiap 15 detik saat aplikasi dibuka & online
 setInterval(() => {
   if (state.currentUser && state.online && state.gasUrl && !isSyncing) {
     syncTwoWay(true);
