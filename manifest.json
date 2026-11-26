@@ -1,7 +1,7 @@
 {
   "name": "YADHIYA POS — Kasir & Akuntansi Offline",
   "short_name": "YADHIYA POS",
-  "description": "Aplikasi Kasir, Fotokopi, Persediaan, dan Akuntansi Otomatis Offline-First dengan Sinkronisasi Google Sheets",
+  "description": "Aplikasi Kasir, Fotokopi, Kulakan, Manufaktur, Utang Piutang, dan Akuntansi Otomatis Offline-First dengan Sinkronisasi Google Sheets",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "any",
