@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#172b4d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>YADHIYA POS — Kasir & Akuntansi</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --navy:#172b4d;--navy-dark:#0f1d36;--blue:#285a9d;--bg:#f4f6fa;--muted:#687386;
+  --line:#e6eaf0;--card:#fff;--green:#16834a;--red:#c43d3d;--amber:#d97706;--soft:#f7f9fc
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#172033}
+
+/* LOGIN SCREEN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#172b4d 0%,#285a9d 100%)}
+.login-box{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.login-logo{width:54px;height:54px;border-radius:14px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900;font-size:28px;margin-bottom:14px}
+
+/* APP SHELL */
+.shell{display:flex;min-height:100vh}
+.sidebar{display:none}
+.main-area{flex:1;display:flex;flex-direction:column;min-width:0}
+header{background:var(--navy);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;background:#fff;color:var(--navy);border-radius:10px;display:grid;place-items:center;font-weight:900;font-size:20px;flex-shrink:0}
+.brand small{display:block;color:#cbd8ec;font-size:11px}
+.status-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.pill{border:0;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.pill.online{background:#dcfce7;color:#166534}
+.pill.offline{background:#fee2e2;color:#991b1b}
+.pill.sync{background:#e0e7ff;color:#1e3a8a}
+.pill.user{background:rgba(255,255,255,.15);color:#fff}
+
+main{padding:16px 16px 96px;flex:1;max-width:1280px;width:100%;margin:0 auto}
+.eyebrow{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;margin:0 0 8px;text-transform:uppercase}
+h1{font-size:20px;margin:0}
+h2{font-size:16px;margin:16px 0 10px}
+.muted{color:var(--muted);font-size:12px}
+.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}
+
+/* CARDS & GRIDS */
+.card,.metric,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px}
+.panel{padding:14px;margin-bottom:12px}
+.panel.soft{background:var(--soft)}
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.metric{padding:13px;background:#fff}
+.metric .value{font-size:20px;font-weight:800;margin-top:4px}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.quick button{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 4px;font-weight:700;font-size:12px;cursor:pointer;color:#1e293b}
+.quick button span{display:block;font-size:20px;margin-bottom:4px}
+
+/* FORMS & BUTTONS */
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d5dce6;border-radius:10px;background:#fff;font:inherit;margin:4px 0 10px}
+input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(40,90,157,.12)}
+label{font-size:12px;font-weight:700;color:#475569;display:block}
+.btn{border:0;background:var(--blue);color:#fff;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.secondary{background:#edf2f8;color:#1e3a5f}
+.btn.success{background:var(--green);color:#fff}
+.btn.danger{background:#fee2e2;color:var(--red)}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row .grow{flex:1;min-width:0}
+.ico{width:34px;height:34px;border-radius:10px;background:#f0f4fa;display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+
+/* POS SPLIT LAYOUT */
+.pos-layout{display:grid;grid-template-columns:1fr;gap:14px}
+.prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.prod-card{border:1px solid var(--line);border-radius:13px;background:#fff;padding:12px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:.15s}
+.prod-card:active{transform:scale(.98)}
+.prod-card.out{opacity:.5;background:#f8fafc}
+.badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;background:#eef2f6;color:#475569}
+.badge.low{background:#fee2e2;color:#b91c1c}
+.cart-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+.qty-ctrl{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border-radius:8px;padding:2px}
+.qty-ctrl button{border:0;background:#fff;width:24px;height:24px;border-radius:6px;font-weight:800;cursor:pointer}
+
+/* NAVIGATION */
+nav.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding:6px 4px max(8px,env(safe-area-inset-bottom));z-index:25}
+nav.bottom-nav button{flex:1;background:none;border:0;color:#64748b;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0}
+nav.bottom-nav button b{font-size:19px;font-weight:400}
+nav.bottom-nav button.active{color:var(--blue);font-weight:800}
+
+/* MODAL & PRINT RECEIPT */
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:18px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;padding:20px;box-shadow:0 20px 40px rgba(0,0,0,.25)}
+.receipt-paper{font-family:'Courier New',monospace;font-size:12px;background:#fff;color:#000;padding:12px;border:1px dashed #94a3b8;line-height:1.4}
+.receipt-paper hr{border:0;border-top:1px dashed #000;margin:6px 0}
+.r-row{display:flex;justify-content:space-between}
+
+/* DESKTOP & TABLET ADAPTIVE */
+@media(min-width:768px){
+  nav.bottom-nav{display:none}
+  .sidebar{display:flex;flex-direction:column;width:235px;background:var(--navy);color:#fff;padding:18px 12px;position:sticky;top:0;height:100vh;flex-shrink:0}
+  .sidebar .brand{padding:0 8px 18px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:14px}
+  .sidebar button{background:none;border:0;color:#cbd5e1;text-align:left;padding:11px 12px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .sidebar button:hover{background:rgba(255,255,255,.08);color:#fff}
+  .sidebar button.active{background:var(--blue);color:#fff}
+  header .brand{display:none}
+  main{padding:20px 24px 40px}
+  .metrics{grid-template-columns:repeat(4,1fr)}
+  .pos-layout{grid-template-columns:1.45fr 1fr;align-items:start}
+  .prod-grid{grid-template-columns:repeat(3,1fr)}
+  .cart-box{position:sticky;top:74px}
+}
+
+/* THERMAL PRINT MODE */
+@media print{
+  body *{visibility:hidden}
+  #printArea, #printArea *{visibility:visible}
+  #printArea{position:fixed;left:0;top:0;width:58mm;padding:2mm;border:0}
+}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- MODAL UNIVERSAL -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<script>
+/* =========================================================
+   1. INDEXEDDB OFFLINE STORAGE ENGINE
+   ========================================================= */
+const DB_NAME = 'YadhiyaPosDB_v1';
+const DB_VER = 1;
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv');
+    };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    req.onerror = (e) => reject(e.target.error);
+  });
+}
+
+function dbGet(key) {
+  return new Promise((resolve) => {
+    const tx = db.transaction('kv', 'readonly');
+    const req = tx.objectStore('kv').get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+}
+
+function dbSet(key, val) {
+  return new Promise((resolve) => {
+    const tx = db.transaction('kv', 'readwrite');
+    tx.objectStore('kv').put(val, key);
+    tx.oncomplete = () => resolve(true);
+  });
+}
+
+/* =========================================================
+   2. DEFAULT STATE & SEED DATA
+   ========================================================= */
+const DEFAULT_USERS = [
+  { username: 'admin', password: '123', name: 'Owner YADHIYA', role: 'Owner' },
+  { username: 'kasir', password: '123', name: 'Kasir Toko', role: 'Kasir' }
+];
+
+const DEFAULT_PRODUCTS = [
+  { code: '8991001', name: 'Chiki Balls Keju', category: 'Makanan Ringan', unit: 'Pcs', buyPrice: 2000, sellPrice: 3000, stock: 30, minStock: 5, isService: false },
+  { code: '8991002', name: 'Pulpen Standard AE7', category: 'Alat Tulis', unit: 'Pcs', buyPrice: 1500, sellPrice: 2500, stock: 24, minStock: 5, isService: false },
+  { code: '8991003', name: 'Buku Tulis Sidu 38', category: 'Alat Tulis', unit: 'Pcs', buyPrice: 3200, sellPrice: 4500, stock: 18, minStock: 5, isService: false },
+  { code: '8991004', name: 'Kertas HVS A4 75gr', category: 'ATK', unit: 'Rim', buyPrice: 42000, sellPrice: 52000, stock: 4, minStock: 5, isService: false },
+  { code: 'FC-BW', name: 'Fotokopi Hitam Putih A4', category: 'Jasa Fotokopi', unit: 'Lembar', buyPrice: 120, sellPrice: 300, stock: 9999, minStock: 0, isService: true },
+  { code: 'PRT-CLR', name: 'Print Warna A4', category: 'Jasa Fotokopi', unit: 'Lembar', buyPrice: 500, sellPrice: 1500, stock: 9999, minStock: 0, isService: true },
+  { code: 'JILID-01', name: 'Jilid Lakban + Mika', category: 'Jasa Fotokopi', unit: 'Buku', buyPrice: 1500, sellPrice: 4000, stock: 9999, minStock: 0, isService: true }
+];
+
+let state = {
+  currentUser: null,
+  page: 'Kasir',
+  online: navigator.onLine,
+  gasUrl: 'https://script.google.com/macros/s/AKfycbylRtrTBXbtKpLgUoRWfJBnaA5SiDrIeuBcIdJVHsgfNkb1VimKNhiiaYIs4MnZeI69/exec',
+  lastSync: 'Belum pernah',
+  syncQueue: [],
+  users: DEFAULT_USERS,
+  products: DEFAULT_PRODUCTS,
+  sales: [],
+  purchases: [],
+  journals: [],
+  shifts: [],
+  cart: [],
+  searchQuery: '',
+  catFilter: 'Semua',
+  paymentMethod: 'Tunai (Kas Laci)',
+  cashPaid: ''
+};
+
+async function loadAppState() {
+  await openDB();
+  const saved = await dbGet('yadhiya_state_v1');
+  if (saved) {
+    state = { ...state, ...saved, gasUrl: saved.gasUrl || 'https://script.google.com/macros/s/AKfycbylRtrTBXbtKpLgUoRWfJBnaA5SiDrIeuBcIdJVHsgfNkb1VimKNhiiaYIs4MnZeI69/exec', online: navigator.onLine };
+  } else {
+    await saveAppState();
+  }
+}
+
+async function saveAppState() {
+  const toSave = {
+    currentUser: state.currentUser,
+    gasUrl: state.gasUrl,
+    lastSync: state.lastSync,
+    syncQueue: state.syncQueue,
+    users: state.users,
+    products: state.products,
+    sales: state.sales,
+    purchases: state.purchases,
+    journals: state.journals,
+    shifts: state.shifts
+  };
+  await dbSet('yadhiya_state_v1', toSave);
+}
+
+/* =========================================================
+   3. HELPERS & FORMATTERS
+   ========================================================= */
+const $ = (s) => document.querySelector(s);
+const rp = (n) => 'Rp' + Math.round(Number(n || 0)).toLocaleString('id-ID');
+const nowStr = () => new Date().toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+const todayKey = () => new Date().toISOString().slice(0, 10);
+
+function queueSync(type, item) {
+  state.syncQueue.push({ type, item, ts: Date.now() });
+}
+
+/* =========================================================
+   4. AUTHENTICATION (OWNER & KASIR)
+   ========================================================= */
+function renderLogin() {
+  $('#root').innerHTML = `
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-logo">Y</div>
+      <h1 style="font-size:22px">YADHIYA POS</h1>
+      <p class="muted" style="margin-top:4px">Kasir, Fotokopi & Akuntansi Offline-First</p>
+      <form onsubmit="handleLogin(event)" style="margin-top:18px">
+        <label>Username</label>
+        <input id="loginUser" placeholder="Masukkan username (admin / kasir)" required autocomplete="username">
+        <label>Password</label>
+        <input id="loginPass" type="password" placeholder="Masukkan password (default: 123)" required autocomplete="current-password">
+        <button class="btn" style="width:100%;padding:12px;margin-top:6px" type="submit">Masuk ke Aplikasi</button>
+      </form>
+      <div class="panel soft" style="margin-top:16px;margin-bottom:0;font-size:11px">
+        <b>Akun Bawaan Offline:</b><br>
+        • Owner: <code>admin</code> / Password: <code>123</code><br>
+        • Kasir: <code>kasir</code> / Password: <code>123</code><br>
+        <span class="muted">Sesuai pengaturan, peran Owner dan Kasir memiliki akses penuh yang sama untuk operasional toko.</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const u = $('#loginUser').value.trim().toLowerCase();
+  const p = $('#loginPass').value.trim();
+  const found = state.users.find(x => x.username.toLowerCase() === u && x.password === p);
+  if (!found) {
+    alert('Username atau password salah!');
+    return;
+  }
+  state.currentUser = found;
+  await saveAppState();
+  render();
+  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+}
+
+async function handleLogout() {
+  if (!confirm('Keluar dari akun ' + state.currentUser.name + '?')) return;
+  state.currentUser = null;
+  await saveAppState();
+  render();
+}
+
+/* =========================================================
+   5. POS CART, PHOTOCOPY CALCULATOR & CAMERA SCANNER
+   ========================================================= */
+function addToCart(code, customQty = 1) {
+  const prod = state.products.find(p => p.code === code);
+  if (!prod) return;
+  const existing = state.cart.find(c => c.code === code);
+  const currentQty = existing ? existing.qty : 0;
+
+  if (!prod.isService && currentQty + customQty > prod.stock) {
+    alert('Stok ' + prod.name + ' tidak mencukupi! Sisa stok: ' + prod.stock);
+    return;
+  }
+  if (existing) {
+    existing.qty += customQty;
+  } else {
+    state.cart.push({
+      code: prod.code,
+      name: prod.name,
+      unit: prod.unit,
+      buyPrice: prod.buyPrice,
+      sellPrice: prod.sellPrice,
+      isService: prod.isService,
+      qty: customQty
+    });
+  }
+  render();
+}
+
+function updateCartQty(code, delta) {
+  const idx = state.cart.findIndex(c => c.code === code);
+  if (idx === -1) return;
+  const item = state.cart[idx];
+  const prod = state.products.find(p => p.code === code);
+  const nextQty = item.qty + delta;
+  if (nextQty <= 0) {
+    state.cart.splice(idx, 1);
+  } else {
+    if (prod && !prod.isService && nextQty > prod.stock) {
+      alert('Stok maksimal tercapai (' + prod.stock + ')');
+      return;
+    }
+    item.qty = nextQty;
+  }
+  render();
+}
+
+function setCartQtyExact(code, val) {
+  const q = parseInt(val, 10);
+  if (isNaN(q) || q <= 0) {
+    state.cart = state.cart.filter(c => c.code !== code);
+  } else {
+    const item = state.cart.find(c => c.code === code);
+    const prod = state.products.find(p => p.code === code);
+    if (item && prod && !prod.isService && q > prod.stock) {
+      alert('Stok tersedia hanya ' + prod.stock);
+      item.qty = prod.stock;
+    } else if (item) {
+      item.qty = q;
+    }
+  }
+  render();
+}
+
+function openPhotocopyModal() {
+  const services = state.products.filter(p => p.isService);
+  openModal(`
+    <h3>🖨️ Kalkulator Fotokopi & Print</h3>
+    <label>Jenis Layanan</label>
+    <select id="fcType">
+      ${services.map(s => `<option value="${s.code}">${s.name} (${rp(s.sellPrice)}/${s.unit})</option>`).join('')}
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label>Jumlah Lembar/Halaman</label><input id="fcPages" type="number" value="1" min="1"></div>
+      <div><label>Jumlah Rangkap/Copy</label><input id="fcCopies" type="number" value="1" min="1"></div>
+    </div>
+    <label>Tambah Jilid Otomatis?</label>
+    <select id="fcBind">
+      <option value="">Tidak perlu jilid</option>
+      ${services.filter(s => s.code.startsWith('JILID')).map(s => `<option value="${s.code}">${s.name} (${rp(s.sellPrice)})</option>`).join('')}
+    </select>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
+      <button class="btn" style="flex:1" onclick="applyPhotocopy()">Masukkan Keranjang</button>
+    </div>
+  `);
+}
+
+function applyPhotocopy() {
+  const code = $('#fcType').value;
+  const pages = Math.max(1, parseInt($('#fcPages').value || 1, 10));
+  const copies = Math.max(1, parseInt($('#fcCopies').value || 1, 10));
+  const bindCode = $('#fcBind').value;
+  addToCart(code, pages * copies);
+  if (bindCode) addToCart(bindCode, copies);
+  closeModal();
+}
+
+let scannerStream = null;
+async function openCameraScanner() {
+  openModal(`
+    <h3>📷 Scan Barcode Kamera HP</h3>
+    <p class="muted">Arahkan kamera ke barcode kemasan produk.</p>
+    <video id="scanVideo" autoplay playsinline style="width:100%;border-radius:12px;background:#000;max-height:260px;object-fit:cover"></video>
+    <div id="scanStatus" class="muted" style="margin:8px 0">Mengaktifkan kamera...</div>
+    <div style="display:flex;gap:8px">
+      <input id="manualScanCode" placeholder="Atau ketik kode barcode..." style="margin:0">
+      <button class="btn" onclick="submitManualScan()">Cari</button>
+    </div>
+    <button class="btn secondary" style="width:100%;margin-top:10px" onclick="stopScannerAndClose()">Tutup Kamera</button>
+  `);
+
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const video = $('#scanVideo');
+    if (video) video.srcObject = scannerStream;
+
+    if ('BarcodeDetector' in window) {
+      const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'code_128', 'qr_code', 'upc_a'] });
+      $('#scanStatus').textContent = 'Kamera aktif — mendeteksi barcode otomatis...';
+      const loop = async () => {
+        if (!scannerStream || !$('#scanVideo')) return;
+        try {
+          const codes = await detector.detect($('#scanVideo'));
+          if (codes.length > 0) {
+            const raw = codes[0].rawValue;
+            const prod = state.products.find(p => p.code === raw);
+            if (prod) {
+              stopScannerAndClose();
+              addToCart(prod.code, 1);
+              return;
+            } else {
+              $('#scanStatus').textContent = 'Barcode terbaca: ' + raw + ' (Belum terdaftar di Master Produk)';
+            }
+          }
+        } catch (e) {}
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    } else {
+      $('#scanStatus').textContent = 'Browser tidak mendukung auto-detect barcode. Gunakan input kode atau scanner USB.';
+    }
+  } catch (err) {
+    if ($('#scanStatus')) $('#scanStatus').textContent = 'Izin kamera ditolak atau tidak tersedia di perangkat ini.';
+  }
+}
+
+function submitManualScan() {
+  const code = $('#manualScanCode').value.trim();
+  const prod = state.products.find(p => p.code === code);
+  if (prod) {
+    stopScannerAndClose();
+    addToCart(prod.code, 1);
+  } else {
+    alert('Produk dengan kode "' + code + '" tidak ditemukan.');
+  }
+}
+
+function stopScannerAndClose() {
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(t => t.stop());
+    scannerStream = null;
+  }
+  closeModal();
+}
+
+/* =========================================================
+   6. CHECKOUT & SILENT ACCOUNTING ENGINE
+   ========================================================= */
+async function processCheckout() {
+  if (!state.cart.length) return;
+  const total = state.cart.reduce((s, c) => s + c.sellPrice * c.qty, 0);
+  const totalHpp = state.cart.reduce((s, c) => s + c.buyPrice * c.qty, 0);
+  const paid = state.paymentMethod === 'Tunai (Kas Laci)'
+    ? Number(state.cashPaid || total)
+    : total;
+
+  if (paid < total) {
+    alert('Jumlah uang dibayar kurang dari total belanja!');
+    return;
+  }
+
+  const invoice = 'INV-' + Date.now().toString().slice(-6);
+  const date = nowStr();
+  const isoDate = todayKey();
+
+  // 1. Kurangi stok produk fisik
+  state.cart.forEach(item => {
+    const prod = state.products.find(p => p.code === item.code);
+    if (prod && !prod.isService) {
+      prod.stock = Math.max(0, prod.stock - item.qty);
+      prod.updatedAt = new Date().toISOString();
+      queueSync('PRODUCT', prod);
+    }
+  });
+
+  // 2. Simpan transaksi penjualan
+  const sale = {
+    invoice,
+    date,
+    isoDate,
+    cashier: state.currentUser.name,
+    paymentMethod: state.paymentMethod,
+    subtotal: total,
+    total,
+    paid,
+    change: paid - total,
+    status: 'Selesai',
+    items: JSON.parse(JSON.stringify(state.cart))
+  };
+  state.sales.unshift(sale);
+  queueSync('SALE', sale);
+
+  // 3. Silent Accounting: Jurnal Penjualan & HPP otomatis
+  const cashAcc = state.paymentMethod === 'Tunai (Kas Laci)' ? '101 - Kas Laci Toko' : '102 - Bank / QRIS';
+  const jEntries = [
+    { id: invoice + '-1', date, isoDate, ref: invoice, desc: 'Penjualan ' + invoice, account: cashAcc, debit: total, credit: 0 },
+    { id: invoice + '-2', date, isoDate, ref: invoice, desc: 'Penjualan ' + invoice, account: '401 - Pendapatan Penjualan & Jasa', debit: 0, credit: total },
+    { id: invoice + '-3', date, isoDate, ref: invoice, desc: 'HPP ' + invoice, account: '501 - Harga Pokok Penjualan', debit: totalHpp, credit: 0 },
+    { id: invoice + '-4', date, isoDate, ref: invoice, desc: 'Persediaan ' + invoice, account: '104 - Persediaan Barang', debit: 0, credit: totalHpp }
+  ];
+  jEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
+
+  state.cart = [];
+  state.cashPaid = '';
+  await saveAppState();
+  render();
+  showReceiptModal(sale);
+  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+}
+
+async function voidSale(invoice) {
+  const sale = state.sales.find(s => s.invoice === invoice);
+  if (!sale || sale.status === 'Void') return;
+  const reason = prompt('Alasan pembatalan (Void) transaksi ' + invoice + ':', 'Salah input kasir');
+  if (!reason) return;
+
+  sale.status = 'Void';
+  sale.voidReason = reason;
+  queueSync('SALE', sale);
+
+  // Kembalikan stok
+  let totalHpp = 0;
+  sale.items.forEach(item => {
+    totalHpp += item.buyPrice * item.qty;
+    const prod = state.products.find(p => p.code === item.code);
+    if (prod && !prod.isService) {
+      prod.stock += item.qty;
+      queueSync('PRODUCT', prod);
+    }
+  });
+
+  // Jurnal Pembalik
+  const date = nowStr();
+  const isoDate = todayKey();
+  const cashAcc = sale.paymentMethod === 'Tunai (Kas Laci)' ? '101 - Kas Laci Toko' : '102 - Bank / QRIS';
+  const revEntries = [
+    { id: invoice + '-V1', date, isoDate, ref: invoice, desc: 'VOID: ' + reason, account: '401 - Pendapatan Penjualan & Jasa', debit: sale.total, credit: 0 },
+    { id: invoice + '-V2', date, isoDate, ref: invoice, desc: 'VOID: ' + reason, account: cashAcc, debit: 0, credit: sale.total },
+    { id: invoice + '-V3', date, isoDate, ref: invoice, desc: 'VOID HPP: ' + reason, account: '104 - Persediaan Barang', debit: totalHpp, credit: 0 },
+    { id: invoice + '-V4', date, isoDate, ref: invoice, desc: 'VOID HPP: ' + reason, account: '501 - Harga Pokok Penjualan', debit: 0, credit: totalHpp }
+  ];
+  revEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
+
+  await saveAppState();
+  render();
+  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+}
+
+/* =========================================================
+   7. THERMAL RECEIPT PRINT & PDF EXPORT
+   ========================================================= */
+function showReceiptModal(sale) {
+  openModal(`
+    <h3>🧾 Struk Transaksi</h3>
+    <div id="printArea" class="receipt-paper">
+      <div style="text-align:center">
+        <b>TOKO YADHIYA</b><br>
+        Retail, ATK & Fotokopi<br>
+        ${sale.date}<br>
+        No: ${sale.invoice} · Kasir: ${sale.cashier}
+      </div>
+      <hr>
+      ${sale.items.map(i => `
+        <div>${i.name}</div>
+        <div class="r-row"><span>${i.qty} ${i.unit} x ${rp(i.sellPrice)}</span><span>${rp(i.qty * i.sellPrice)}</span></div>
+      `).join('')}
+      <hr>
+      <div class="r-row"><b>TOTAL</b><b>${rp(sale.total)}</b></div>
+      <div class="r-row"><span>Bayar (${sale.paymentMethod.split(' ')[0]})</span><span>${rp(sale.paid)}</span></div>
+      <div class="r-row"><span>Kembali</span><span>${rp(sale.change)}</span></div>
+      <hr>
+      <div style="text-align:center">Terima kasih telah berbelanja!</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn secondary" style="flex:1" onclick="closeModal()">Tutup</button>
+      <button class="btn" style="flex:1" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+    </div>
+  `);
+}
+
+/* =========================================================
+   8. PEMBELIAN (AVERAGE COST) & TUTUP KASIR
+   ========================================================= */
+async function handlePurchaseSubmit(e) {
+  e.preventDefault();
+  const code = $('#purProd').value;
+  const qty = Math.max(1, parseInt($('#purQty').value || 1, 10));
+  const newBuy = Math.max(0, Number($('#purPrice').value || 0));
+  const supplier = $('#purSup').value.trim() || 'Supplier Umum';
+  const paySrc = $('#purPay').value;
+
+  const prod = state.products.find(p => p.code === code);
+  if (!prod) return;
+
+  // Rumus Average Cost (Harga Rata-Rata Tertimbang)
+  const oldVal = prod.stock * prod.buyPrice;
+  const newVal = qty * newBuy;
+  const totalQty = prod.stock + qty;
+  prod.buyPrice = totalQty > 0 ? Math.round((oldVal + newVal) / totalQty) : newBuy;
+  prod.stock = totalQty;
+  prod.updatedAt = new Date().toISOString();
+  queueSync('PRODUCT', prod);
+
+  const invoice = 'PO-' + Date.now().toString().slice(-6);
+  const date = nowStr();
+  const isoDate = todayKey();
+  const total = qty * newBuy;
+
+  const pur = { invoice, date, supplier, total, cashier: state.currentUser.name, items: [{ code: prod.code, name: prod.name, qty, buyPrice: newBuy }] };
+  state.purchases.unshift(pur);
+  queueSync('PURCHASE', pur);
+
+  const j1 = { id: invoice + '-1', date, isoDate, ref: invoice, desc: 'Pembelian ' + prod.name, account: '104 - Persediaan Barang', debit: total, credit: 0 };
+  const j2 = { id: invoice + '-2', date, isoDate, ref: invoice, desc: 'Pembelian ' + prod.name, account: paySrc, debit: 0, credit: total };
+  state.journals.unshift(j2, j1);
+  queueSync('JOURNAL', j1);
+  queueSync('JOURNAL', j2);
+
+  await saveAppState();
+  alert('Barang masuk tersimpan! HPP Rata-rata baru ' + prod.name + ': ' + rp(prod.buyPrice));
+  render();
+  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+}
+
+function openShiftClosingModal() {
+  const validSales = state.sales.filter(s => s.status === 'Selesai' && s.paymentMethod === 'Tunai (Kas Laci)');
+  const systemCash = validSales.reduce((s, x) => s + x.total, 0);
+
+  openModal(`
+    <h3>🔒 Tutup Kasir (Shift Closing)</h3>
+    <p class="muted">Hitung uang tunai fisik di dalam laci kasir lalu masukkan di bawah ini.</p>
+    <div class="panel soft">
+      <div class="r-row"><span>Kasir Bertugas:</span><b>${state.currentUser.name}</b></div>
+      <div class="r-row"><span>Penjualan Tunai Sistem:</span><b>${rp(systemCash)}</b></div>
+    </div>
+    <label>Uang Tunai Fisik di Laci (Rp)</label>
+    <input id="actualCashInput" type="number" placeholder="Contoh: ${systemCash}" value="${systemCash}">
+    <label>Catatan Shift</label>
+    <input id="shiftNote" placeholder="Opsional (misal: uang pecahan lengkap)">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
+      <button class="btn success" style="flex:1" onclick="submitShiftClosing(${systemCash})">Simpan Tutup Kasir</button>
+    </div>
+  `);
+}
+
+async function submitShiftClosing(systemCash) {
+  const actual = Number($('#actualCashInput').value || 0);
+  const diff = actual - systemCash;
+  const note = $('#shiftNote').value.trim();
+  const id = 'SHF-' + Date.now().toString().slice(-6);
+  const date = nowStr();
+  const isoDate = todayKey();
+
+  const shift = { id, date, cashier: state.currentUser.name, systemCash, actualCash: actual, diff, note };
+  state.shifts.unshift(shift);
+  queueSync('SHIFT', shift);
+
+  if (diff !== 0) {
+    const j1 = {
+      id: id + '-1', date, isoDate, ref: id, desc: 'Selisih Kas Shift',
+      account: diff > 0 ? '101 - Kas Laci Toko' : '605 - Beban Selisih Kas',
+      debit: Math.abs(diff), credit: 0
+    };
+    const j2 = {
+      id: id + '-2', date, isoDate, ref: id, desc: 'Selisih Kas Shift',
+      account: diff > 0 ? '409 - Pendapatan Lain-lain' : '101 - Kas Laci Toko',
+      debit: 0, credit: Math.abs(diff)
+    };
+    state.journals.unshift(j2, j1);
+    queueSync('JOURNAL', j1);
+    queueSync('JOURNAL', j2);
+  }
+
+  await saveAppState();
+  closeModal();
+  alert('Tutup kasir tercatat! Selisih kas: ' + rp(diff));
+  render();
+  if (state.online && state.gasUrl) syncToGoogleSheets(true);
+}
+
+/* =========================================================
+   9. GOOGLE SHEETS SYNC ENGINE (OFFLINE -> ONLINE)
+   ========================================================= */
+async function syncToGoogleSheets(silent = false) {
+  if (!state.online) {
+    if (!silent) alert('Perangkat sedang OFFLINE. Data aman tersimpan di memori HP/Laptop dan akan otomatis disinkronkan saat online.');
+    return;
+  }
+  if (!state.gasUrl) {
+    if (!silent) {
+      state.page = 'Master';
+      render();
+      alert('Masukkan URL Web App Google Apps Script terlebih dahulu di menu Master & Pengaturan.');
+    }
+    return;
+  }
+  if (state.syncQueue.length === 0) {
+    if (!silent) alert('Semua data sudah sinkron dengan Google Sheets!');
+    return;
+  }
+
+  const batch = {
+    products: state.syncQueue.filter(q => q.type === 'PRODUCT').map(q => q.item),
+    sales: state.syncQueue.filter(q => q.type === 'SALE').map(q => q.item),
+    purchases: state.syncQueue.filter(q => q.type === 'PURCHASE').map(q => q.item),
+    journals: state.syncQueue.filter(q => q.type === 'JOURNAL').map(q => q.item),
+    shifts: state.syncQueue.filter(q => q.type === 'SHIFT').map(q => q.item)
+  };
+
+  try {
+    const res = await fetch(state.gasUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'SYNC_BATCH', data: batch })
+    });
+    const json = await res.json();
+    if (json.status === 'ok') {
+      state.syncQueue = [];
+      state.lastSync = nowStr();
+      await saveAppState();
+      render();
+      if (!silent) alert('Berhasil sinkronisasi ke Google Sheets!');
+    } else {
+      if (!silent) alert('Gagal sinkron: ' + json.message);
+    }
+  } catch (err) {
+    if (!silent) alert('Koneksi ke Google Sheets terganggu. Data tetap aman di antrean lokal.');
+  }
+}
+
+/* =========================================================
+   10. PAGE VIEWS
+   ========================================================= */
+function viewDashboard() {
+  const validSales = state.sales.filter(s => s.status === 'Selesai');
+  const omzet = validSales.reduce((s, x) => s + x.total, 0);
+  const hpp = validSales.reduce((s, x) => s + x.items.reduce((a, b) => a + b.buyPrice * b.qty, 0), 0);
+  const labaKotor = omzet - hpp;
+  const lowStock = state.products.filter(p => !p.isService && p.stock <= (p.minStock || 5)).length;
+
+  return `
+    <div class="section-head">
+      <div><p class="eyebrow">RINGKASAN TOKO</p><h1>Dashboard YADHIYA</h1></div>
+      <button class="btn secondary sm" onclick="openShiftClosingModal()">🔒 Tutup Kasir</button>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="muted">Total Omzet</div><div class="value green">${rp(omzet)}</div></div>
+      <div class="metric"><div class="muted">Transaksi Sukses</div><div class="value">${validSales.length}</div></div>
+      <div class="metric"><div class="muted">Laba Kotor</div><div class="value">${rp(labaKotor)}</div></div>
+      <div class="metric"><div class="muted">Stok Menipis</div><div class="value red">${lowStock} item</div></div>
+    </div>
+    <div class="quick">
+      <button onclick="go('Kasir')"><span>🛒</span>Kasir</button>
+      <button onclick="openPhotocopyModal()"><span>🖨️</span>Fotokopi</button>
+      <button onclick="go('Pembelian')"><span>🧺</span>Kulakan</button>
+      <button onclick="syncToGoogleSheets(false)"><span>☁️</span>Sync (${state.syncQueue.length})</button>
+    </div>
+    <h2>Riwayat Transaksi Terakhir</h2>
+    <div class="panel">
+      ${state.sales.length ? state.sales.slice(0, 15).map(s => `
+        <div class="row">
+          <div class="ico">${s.status === 'Void' ? '🚫' : '🧾'}</div>
+          <div class="grow">
+            <strong>${s.invoice} · ${s.paymentMethod.split(' ')[0]} ${s.status === 'Void' ? '<span class="badge low">VOID</span>' : ''}</strong>
+            <small>${s.date} · Kasir: ${s.cashier}</small>
+          </div>
+          <div style="text-align:right">
+            <b class="${s.status === 'Void' ? 'red' : 'green'}">${rp(s.total)}</b><br>
+            <button class="btn secondary sm" onclick='showReceiptModal(${JSON.stringify(s)})'>Struk</button>
+            ${s.status === 'Selesai' ? `<button class="btn danger sm" onclick="voidSale('${s.invoice}')">Void</button>` : ''}
+          </div>
+        </div>
+      `).join('') : '<p class="muted">Belum ada transaksi penjualan.</p>'}
+    </div>`;
+}
+
+function viewKasir() {
+  const cats = ['Semua', ...new Set(state.products.map(p => p.category))];
+  const filtered = state.products.filter(p => {
+    const matchCat = state.catFilter === 'Semua' || p.category === state.catFilter;
+    const q = state.searchQuery.toLowerCase();
+    const matchQ = !q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+
+  const total = state.cart.reduce((s, c) => s + c.sellPrice * c.qty, 0);
+  const paidNum = Number(state.cashPaid || 0);
+  const change = paidNum > 0 ? paidNum - total : 0;
+
+  return `
+    <div class="pos-layout">
+      <div>
+        <div class="section-head">
+          <h1>Kasir & Fotokopi</h1>
+          <div style="display:flex;gap:6px">
+            <button class="btn secondary sm" onclick="openPhotocopyModal()">🖨️ Hitung Fotokopi</button>
+            <button class="btn sm" onclick="openCameraScanner()">📷 Scan HP</button>
+          </div>
+        </div>
+        <input id="posSearch" placeholder="Cari produk atau scan barcode [Tekan F2]..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;render();setTimeout(()=>{const el=$('#posSearch');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}},0)">
+        <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px">
+          ${cats.map(c => `<button class="btn sm ${state.catFilter === c ? '' : 'secondary'}" onclick="state.catFilter='${c}';render()">${c}</button>`).join('')}
+        </div>
+        <div class="prod-grid">
+          ${filtered.map(p => {
+            const out = !p.isService && p.stock <= 0;
+            return `
+            <div class="prod-card ${out ? 'out' : ''}" onclick="${out ? '' : `addToCart('${p.code}',1)`}">
+              <div>
+                <span class="badge ${!p.isService && p.stock <= p.minStock ? 'low' : ''}">
+                  ${p.isService ? 'Jasa' : 'Stok: ' + p.stock + ' ' + p.unit}
+                </span>
+                <div style="font-weight:700;margin-top:6px">${p.name}</div>
+                <small class="muted">${p.code}</small>
+              </div>
+              <div style="margin-top:10px;font-weight:800;color:var(--blue)">${rp(p.sellPrice)}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="cart-box">
+        <div class="section-head">
+          <h2 style="margin:0">🛒 Keranjang (${state.cart.reduce((s, c) => s + c.qty, 0)})</h2>
+          ${state.cart.length ? `<button class="btn danger sm" onclick="state.cart=[];render()">Kosongkan</button>` : ''}
+        </div>
+        ${state.cart.length ? `
+          <div style="max-height:290px;overflow-y:auto;margin-bottom:10px">
+            ${state.cart.map(c => `
+              <div class="row">
+                <div class="grow">
+                  <strong style="font-size:13px">${c.name}</strong>
+                  <small>${rp(c.sellPrice)} / ${c.unit}</small>
+                </div>
+                <div class="qty-ctrl">
+                  <button onclick="updateCartQty('${c.code}',-1)">-</button>
+                  <input type="number" value="${c.qty}" onchange="setCartQtyExact('${c.code}',this.value)" style="width:44px;margin:0;padding:2px;text-align:center;border:0;background:transparent;font-weight:700">
+                  <button onclick="updateCartQty('${c.code}',1)">+</button>
+                </div>
+                <div style="min-width:74px;text-align:right;font-weight:700">${rp(c.sellPrice * c.qty)}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="panel soft" style="padding:10px">
+            <div class="r-row" style="font-size:16px"><b>Total Tagihan</b><b class="green">${rp(total)}</b></div>
+            <label style="margin-top:8px">Metode Pembayaran (Akun)</label>
+            <select onchange="state.paymentMethod=this.value;render()">
+              <option ${state.paymentMethod === 'Tunai (Kas Laci)' ? 'selected' : ''}>Tunai (Kas Laci)</option>
+              <option ${state.paymentMethod === 'QRIS / Transfer Bank' ? 'selected' : ''}>QRIS / Transfer Bank</option>
+            </select>
+            ${state.paymentMethod === 'Tunai (Kas Laci)' ? `
+              <label>Uang Diterima (Rp)</label>
+              <input type="number" placeholder="Uang pas: ${total}" value="${state.cashPaid}" oninput="state.cashPaid=this.value;render()">
+              <div style="display:flex;gap:5px;margin-bottom:8px">
+                <button class="btn secondary sm" onclick="state.cashPaid=${total};render()">Uang Pas</button>
+                <button class="btn secondary sm" onclick="state.cashPaid=20000;render()">20rb</button>
+                <button class="btn secondary sm" onclick="state.cashPaid=50000;render()">50rb</button>
+                <button class="btn secondary sm" onclick="state.cashPaid=100000;render()">100rb</button>
+              </div>
+              <div class="r-row"><span>Kembalian:</span><b class="${change < 0 ? 'red' : 'green'}">${rp(Math.max(0, change))}</b></div>
+            ` : ''}
+          </div>
+          <button class="btn success" style="width:100%;padding:13px;font-size:15px" onclick="processCheckout()">✅ Proses Bayar & Cetak Struk</button>
+        ` : `<p class="muted" style="text-align:center;padding:28px 0">Pilih produk di sebelah kiri atau scan barcode untuk memulai transaksi.</p>`}
+      </div>
+    </div>`;
+}
+
+function viewPembelian() {
+  const physicalProducts = state.products.filter(p => !p.isService);
+  return `
+    <h1>Pencatatan Barang Masuk (Kulakan)</h1>
+    <p class="muted">HPP produk otomatis dihitung ulang menggunakan metode Average Cost.</p>
+    <div class="panel">
+      <form onsubmit="handlePurchaseSubmit(event)">
+        <label>Pilih Produk</label>
+        <select id="purProd">
+          ${physicalProducts.map(p => `<option value="${p.code}">${p.name} (Stok: ${p.stock} ${p.unit} · HPP saat ini: ${rp(p.buyPrice)})</option>`).join('')}
+        </select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label>Jumlah Masuk</label><input id="purQty" type="number" min="1" value="10" required></div>
+          <div><label>Harga Beli Satuan (Rp)</label><input id="purPrice" type="number" min="0" required placeholder="Contoh: 2100"></div>
+        </div>
+        <label>Nama Supplier</label>
+        <input id="purSup" placeholder="Contoh: Agen Sembako & ATK Blitar">
+        <label>Sumber Dana Pembayaran</label>
+        <select id="purPay">
+          <option value="101 - Kas Laci Toko">101 - Kas Laci Toko (Tunai)</option>
+          <option value="102 - Bank / QRIS">102 - Bank / QRIS (Transfer)</option>
+          <option value="201 - Utang Usaha">201 - Utang Usaha (Tempo)</option>
+        </select>
+        <button class="btn" type="submit" style="width:100%">💾 Simpan Pembelian & Update Stok</button>
+      </form>
+    </div>
+    <h2>Riwayat Pembelian</h2>
+    <div class="panel">
+      ${state.purchases.length ? state.purchases.map(p => `
+        <div class="row">
+          <div class="ico">🧺</div>
+          <div class="grow"><strong>${p.invoice} · ${p.supplier}</strong><small>${p.date} · ${p.items.map(i => i.name + ' (' + i.qty + ')').join(', ')}</small></div>
+          <b>${rp(p.total)}</b>
+        </div>
+      `).join('') : '<p class="muted">Belum ada catatan pembelian.</p>'}
+    </div>`;
+}
+
+function viewPersediaan() {
+  return `
+    <div class="section-head">
+      <h1>Manajemen Persediaan</h1>
+      <button class="btn sm" onclick="openAddProductModal()">＋ Produk Baru</button>
+    </div>
+    <div class="panel">
+      ${state.products.map(p => `
+        <div class="row">
+          <div class="ico">${p.isService ? '🖨️' : '📦'}</div>
+          <div class="grow">
+            <strong>${p.name} <span class="badge">${p.category}</span></strong>
+            <small>Kode: ${p.code} · HPP: ${rp(p.buyPrice)} · Jual: ${rp(p.sellPrice)}</small>
+          </div>
+          <div style="text-align:right">
+            <b>${p.isService ? 'Jasa' : p.stock + ' ' + p.unit}</b><br>
+            <button class="btn secondary sm" onclick="openEditProductModal('${p.code}')">Edit</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function viewKeuangan() {
+  const validSales = state.sales.filter(s => s.status === 'Selesai');
+  const omzet = validSales.reduce((s, x) => s + x.total, 0);
+  const hpp = validSales.reduce((s, x) => s + x.items.reduce((a, b) => a + b.buyPrice * b.qty, 0), 0);
+  const nilaiPersediaan = state.products.filter(p => !p.isService).reduce((s, p) => s + p.stock * p.buyPrice, 0);
+
+  return `
+    <h1>Keuangan & Jurnal Otomatis</h1>
+    <div class="metrics">
+      <div class="metric"><div class="muted">Pendapatan</div><div class="value green">${rp(omzet)}</div></div>
+      <div class="metric"><div class="muted">Total HPP</div><div class="value red">${rp(hpp)}</div></div>
+      <div class="metric"><div class="muted">Laba Kotor</div><div class="value">${rp(omzet - hpp)}</div></div>
+      <div class="metric"><div class="muted">Nilai Aset Stok</div><div class="value">${rp(nilaiPersediaan)}</div></div>
+    </div>
+    <h2>Jurnal Umum (Otomatis dari Transaksi)</h2>
+    <div class="panel" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:#f1f5f9;text-align:left">
+            <th style="padding:8px">Tanggal / Ref</th>
+            <th style="padding:8px">Akun</th>
+            <th style="padding:8px;text-align:right">Debit</th>
+            <th style="padding:8px;text-align:right">Kredit</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${state.journals.length ? state.journals.slice(0, 40).map(j => `
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:8px">${j.date}<br><small class="muted">${j.ref}</small></td>
+              <td style="padding:8px;padding-left:${j.credit > 0 ? '22px' : '8px'}">${j.account}<br><small class="muted">${j.desc}</small></td>
+              <td style="padding:8px;text-align:right">${j.debit ? rp(j.debit) : '-'}</td>
+              <td style="padding:8px;text-align:right">${j.credit ? rp(j.credit) : '-'}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="4" style="padding:14px" class="muted">Belum ada jurnal tercatat.</td></tr>'}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function viewMaster() {
+  return `
+    <h1>Master Data & Sinkronisasi Cloud</h1>
+
+    <div class="panel">
+      <h3>☁️ Koneksi Google Sheets (Online Sync)</h3>
+      <p class="muted">Saat offline, semua data disimpan di perangkat ini. Saat online, data disinkronkan ke Google Sheets kamu.</p>
+      <label>URL Web App Google Apps Script</label>
+      <input id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec" value="${state.gasUrl}">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="saveGasUrl()">Simpan URL</button>
+        <button class="btn success" onclick="syncToGoogleSheets(false)">🔄 Sinkronkan Sekarang (${state.syncQueue.length} antrean)</button>
+      </div>
+      <p class="muted" style="margin-top:8px">Sinkronisasi terakhir: <b>${state.lastSync}</b></p>
+    </div>
+
+    <div class="panel">
+      <div class="section-head">
+        <h3 style="margin:0">🧑‍💼 Pengguna (Owner & Kasir)</h3>
+        <button class="btn sm" onclick="addUserPrompt()">＋ Tambah Akun</button>
+      </div>
+      ${state.users.map(u => `
+        <div class="row">
+          <div class="ico">👤</div>
+          <div class="grow"><strong>${u.name} (${u.username})</strong><small>Peran: ${u.role} · Akses Penuh</small></div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="panel">
+      <h3>💾 Cadangan Data Lokal (JSON)</h3>
+      <p class="muted">Unduh file cadangan jika ingin memindahkan data antar perangkat tanpa internet.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn secondary" onclick="exportBackupJSON()">⬇️ Download Backup</button>
+        <button class="btn secondary" onclick="$('#importFile').click()">⬆️ Restore Backup</button>
+        <input id="importFile" type="file" accept=".json" style="display:none" onchange="importBackupJSON(event)">
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+   11. MASTER CRUD & BACKUP HELPERS
+   ========================================================= */
+function openAddProductModal() {
+  openModal(`
+    <h3>＋ Tambah Produk / Jasa Baru</h3>
+    <label>Kode Barcode / SKU</label><input id="pCode" value="BRG-${Date.now().toString().slice(-4)}">
+    <label>Nama Produk / Jasa</label><input id="pName" placeholder="Contoh: Penghapus Joyko">
+    <label>Kategori</label><input id="pCat" value="Alat Tulis">
+    <label>Satuan</label><input id="pUnit" value="Pcs">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label>Harga Beli / Modal</label><input id="pBuy" type="number" value="1000"></div>
+      <div><label>Harga Jual</label><input id="pSell" type="number" value="2000"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label>Stok Awal</label><input id="pStock" type="number" value="10"></div>
+      <div><label>Jenis Item</label><select id="pSrv"><option value="0">Barang Fisik (Pakai Stok)</option><option value="1">Jasa Fotokopi/Print</option></select></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
+      <button class="btn" style="flex:1" onclick="saveNewProduct()">Simpan Produk</button>
+    </div>
+  `);
+}
+
+async function saveNewProduct() {
+  const code = $('#pCode').value.trim();
+  const name = $('#pName').value.trim();
+  if (!code || !name) return alert('Kode dan nama wajib diisi!');
+  const prod = {
+    code, name,
+    category: $('#pCat').value.trim() || 'Umum',
+    unit: $('#pUnit').value.trim() || 'Pcs',
+    buyPrice: Number($('#pBuy').value || 0),
+    sellPrice: Number($('#pSell').value || 0),
+    stock: Number($('#pStock').value || 0),
+    minStock: 5,
+    isService: $('#pSrv').value === '1',
+    updatedAt: new Date().toISOString()
+  };
+  state.products.push(prod);
+  queueSync('PRODUCT', prod);
+  await saveAppState();
+  closeModal();
+  render();
+}
+
+function openEditProductModal(code) {
+  const p = state.products.find(x => x.code === code);
+  if (!p) return;
+  openModal(`
+    <h3>✏️ Edit ${p.name}</h3>
+    <label>Nama Produk</label><input id="eName" value="${p.name}">
+    <label>Harga Beli (HPP)</label><input id="eBuy" type="number" value="${p.buyPrice}">
+    <label>Harga Jual</label><input id="eSell" type="number" value="${p.sellPrice}">
+    ${p.isService ? '' : `<label>Penyesuaian Stok</label><input id="eStock" type="number" value="${p.stock}">`}
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
+      <button class="btn" style="flex:1" onclick="saveEditProduct('${p.code}')">Simpan</button>
+    </div>
+  `);
+}
+
+async function saveEditProduct(code) {
+  const p = state.products.find(x => x.code === code);
+  if (!p) return;
+  p.name = $('#eName').value.trim() || p.name;
+  p.buyPrice = Number($('#eBuy').value || 0);
+  p.sellPrice = Number($('#eSell').value || 0);
+  if (!p.isService && $('#eStock')) p.stock = Number($('#eStock').value || 0);
+  p.updatedAt = new Date().toISOString();
+  queueSync('PRODUCT', p);
+  await saveAppState();
+  closeModal();
+  render();
+}
+
+async function saveGasUrl() {
+  state.gasUrl = $('#gasUrlInput').value.trim();
+  await saveAppState();
+  alert('URL Google Apps Script tersimpan!');
+}
+
+async function addUserPrompt() {
+  const name = prompt('Nama lengkap pengguna:');
+  if (!name) return;
+  const username = prompt('Username untuk login:');
+  if (!username) return;
+  const password = prompt('Password:', '123') || '123';
+  const role = confirm('Klik OK untuk peran Owner, Cancel untuk Kasir (keduanya memiliki hak akses penuh yang sama):') ? 'Owner' : 'Kasir';
+  state.users.push({ name, username, password, role });
+  await saveAppState();
+  render();
+}
+
+function exportBackupJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'YADHIYA_POS_Backup_' + todayKey() + '.json';
+  a.click();
+}
+
+function importBackupJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      state = { ...state, ...parsed, online: navigator.onLine };
+      await saveAppState();
+      alert('Data berhasil dipulihkan!');
+      render();
+    } catch (err) {
+      alert('File backup tidak valid.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =========================================================
+   12. MAIN RENDERER & EVENTS
+   ========================================================= */
+const NAV_ITEMS = [
+  ['Dashboard', '📊', 'Beranda'],
+  ['Kasir', '🛒', 'Kasir'],
+  ['Pembelian', '🧺', 'Kulakan'],
+  ['Persediaan', '📦', 'Stok'],
+  ['Keuangan', '📒', 'Akuntansi'],
+  ['Master', '⚙️', 'Pengaturan']
+];
+
+function go(p) { state.page = p; render(); }
+function openModal(html) { $('#modalBody').innerHTML = html; $('#modalBg').classList.add('open'); }
+function closeModal() { $('#modalBg').classList.remove('open'); }
+
+function render() {
+  if (!state.currentUser) return renderLogin();
+
+  let content = '';
+  if (state.page === 'Dashboard') content = viewDashboard();
+  else if (state.page === 'Kasir') content = viewKasir();
+  else if (state.page === 'Pembelian') content = viewPembelian();
+  else if (state.page === 'Persediaan') content = viewPersediaan();
+  else if (state.page === 'Keuangan') content = viewKeuangan();
+  else if (state.page === 'Master') content = viewMaster();
+
+  $('#root').innerHTML = `
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="logo">Y</div>
+          <div><b>YADHIYA POS</b><small>Offline-First Retail</small></div>
+        </div>
+        ${NAV_ITEMS.map(([id, ico, label]) => `
+          <button class="${state.page === id ? 'active' : ''}" onclick="go('${id}')">
+            <span>${ico}</span> ${label}
+          </button>
+        `).join('')}
+        <div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.12)">
+          <button onclick="handleLogout()" style="color:#fca5a5">🚪 Keluar (${state.currentUser.username})</button>
+        </div>
+      </aside>
+
+      <div class="main-area">
+        <header>
+          <div class="brand">
+            <div class="logo">Y</div>
+            <div><b>YADHIYA POS</b><small>${state.currentUser.name} (${state.currentUser.role})</small></div>
+          </div>
+          <div class="status-bar">
+            <button class="pill ${state.online ? 'online' : 'offline'}" onclick="state.online=!state.online;render()">
+              ${state.online ? '🟢 Online' : '🔴 Offline'}
+            </button>
+            <button class="pill sync" onclick="syncToGoogleSheets(false)">
+              ☁️ Sync (${state.syncQueue.length})
+            </button>
+            <button class="pill user" onclick="handleLogout()">👤 ${state.currentUser.username}</button>
+          </div>
+        </header>
+        <main>${content}</main>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      ${NAV_ITEMS.map(([id, ico, label]) => `
+        <button class="${state.page === id ? 'active' : ''}" onclick="go('${id}')">
+          <b>${ico}</b>${label}
+        </button>
+      `).join('')}
+    </nav>
+  `;
+}
+
+window.addEventListener('online', () => {
+  state.online = true;
+  render();
+  if (state.gasUrl && state.syncQueue.length > 0) syncToGoogleSheets(true);
+});
+window.addEventListener('offline', () => { state.online = false; render(); });
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'F2' && state.page === 'Kasir') {
+    e.preventDefault();
+    const s = $('#posSearch');
+    if (s) s.focus();
+  }
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+loadAppState().then(render);
+</script>
+</body>
+</html>
