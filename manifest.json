@@ -3,8 +3,8 @@
   "short_name": "YADHIYA POS",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f4f6fb",
+  "background_color": "#f1f5f9",
   "theme_color": "#1d4ed8",
-  "description": "Aplikasi POS, Manufaktur BOM, Stok, dan Keuangan YADHIYA v1.6",
+  "description": "POS, Manufaktur BOM (Bahan + Listrik + Operasional), Stok, & Sinkronisasi v1.6",
   "icons": []
 }

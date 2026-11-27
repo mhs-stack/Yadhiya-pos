@@ -6,7 +6,7 @@
   <title>YADHIYA POS &amp; Manajemen Toko v1.6</title>
   <style>
     :root {
-      --bg: #f4f6fb;
+      --bg: #f1f5f9;
       --surface: #ffffff;
       --surface-alt: #f8fafc;
       --border: #e2e8f0;
@@ -25,12 +25,7 @@
       --shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
@@ -38,12 +33,9 @@
       line-height: 1.5;
       min-height: 100vh;
     }
+    .hidden { display: none !important; }
 
-    .hidden {
-      display: none !important;
-    }
-
-    /* Login Screen */
+    /* Login */
     .login-wrapper {
       min-height: 100vh;
       display: flex;
@@ -51,17 +43,15 @@
       justify-content: center;
       padding: 20px;
     }
-
     .login-card {
       width: 100%;
-      max-width: 410px;
+      max-width: 420px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 28px;
       box-shadow: var(--shadow);
     }
-
     .brand-badge {
       display: inline-flex;
       align-items: center;
@@ -74,30 +64,16 @@
       border-radius: 999px;
       margin-bottom: 12px;
     }
+    .login-card h1 { font-size: 22px; margin-bottom: 4px; }
+    .login-card p.subtitle { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
 
-    .login-card h1 {
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-
-    .login-card p.subtitle {
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      margin-bottom: 14px;
-    }
-
+    .form-group { margin-bottom: 14px; }
     .form-group label {
       display: block;
       font-size: 13px;
       font-weight: 600;
       margin-bottom: 6px;
-      color: var(--text);
     }
-
     .input-control, select, textarea {
       width: 100%;
       padding: 10px 12px;
@@ -106,25 +82,18 @@
       font-size: 14px;
       background: var(--surface);
       color: var(--text);
-      transition: border-color 0.15s, box-shadow 0.15s;
     }
-
     .input-control:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
     }
-
     .password-box {
       position: relative;
       display: flex;
       align-items: center;
     }
-
-    .password-box .input-control {
-      padding-right: 44px;
-    }
-
+    .password-box .input-control { padding-right: 44px; }
     .eye-btn {
       position: absolute;
       right: 8px;
@@ -139,62 +108,29 @@
       align-items: center;
       justify-content: center;
     }
-
-    .eye-btn:hover {
-      background: var(--surface-alt);
-      color: var(--text);
-    }
+    .eye-btn:hover { background: var(--surface-alt); color: var(--text); }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 10px 16px;
+      gap: 6px;
+      padding: 10px 15px;
       border-radius: 10px;
       border: 1px solid transparent;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
     }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #ffffff;
-      width: 100%;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-secondary {
-      background: var(--surface-alt);
-      color: var(--text);
-      border-color: var(--border);
-    }
-
-    .btn-secondary:hover {
-      background: #e2e8f0;
-    }
-
-    .btn-success {
-      background: var(--success);
-      color: #ffffff;
-    }
-
-    .btn-danger {
-      background: var(--danger-soft);
-      color: var(--danger);
-      border-color: #fecaca;
-    }
-
-    .btn-sm {
-      padding: 6px 10px;
-      font-size: 12px;
-      border-radius: 8px;
-    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--surface-alt); color: var(--text); border-color: var(--border); }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-danger { background: var(--danger-soft); color: var(--danger); border-color: #fecaca; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
 
     .alert-error {
       background: var(--danger-soft);
@@ -205,7 +141,6 @@
       font-size: 13px;
       margin-bottom: 14px;
     }
-
     .alert-success {
       background: var(--success-soft);
       color: var(--success);
@@ -215,84 +150,71 @@
       font-size: 13px;
       margin-bottom: 14px;
     }
-
-    /* App Layout */
-    .app-shell {
-      display: flex;
-      min-height: 100vh;
+    .alert-info {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 14px;
     }
 
+    /* App Shell */
+    .app-shell { display: flex; min-height: 100vh; }
     .sidebar {
-      width: 250px;
+      width: 256px;
       background: var(--surface);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 18px 14px;
+      padding: 16px 14px;
       position: sticky;
       top: 0;
       height: 100vh;
     }
-
     .sidebar-brand {
-      padding: 4px 8px 16px;
+      padding: 4px 8px 14px;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
+    .sidebar-brand h2 { font-size: 17px; font-weight: 800; }
+    .sidebar-brand span { font-size: 12px; color: var(--muted); }
 
-    .sidebar-brand h2 {
-      font-size: 17px;
-      font-weight: 800;
-    }
-
-    .sidebar-brand span {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .nav-list {
+    .sync-pill {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      margin-bottom: 12px;
     }
+    .dot-online { width: 8px; height: 8px; border-radius: 999px; background: var(--success); display: inline-block; }
+    .dot-offline { width: 8px; height: 8px; border-radius: 999px; background: var(--warning); display: inline-block; }
 
+    .nav-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
     .nav-btn {
       width: 100%;
       text-align: left;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border-radius: 10px;
       border: none;
       background: transparent;
       color: var(--text);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
+    .nav-btn:hover { background: var(--surface-alt); }
+    .nav-btn.active { background: var(--primary-soft); color: var(--primary); font-weight: 700; }
 
-    .nav-btn:hover {
-      background: var(--surface-alt);
-    }
-
-    .nav-btn.active {
-      background: var(--primary-soft);
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    .user-box {
-      border-top: 1px solid var(--border);
-      padding-top: 14px;
-    }
-
-    .user-meta {
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-
+    .user-box { border-top: 1px solid var(--border); padding-top: 12px; }
+    .user-meta { font-size: 13px; margin-bottom: 10px; }
     .role-pill {
       display: inline-block;
       font-size: 11px;
@@ -306,12 +228,11 @@
 
     .main-content {
       flex: 1;
-      padding: 24px;
-      max-width: 1280px;
+      padding: 22px;
+      max-width: 1340px;
       margin: 0 auto;
       width: 100%;
     }
-
     .mobile-header {
       display: none;
       background: var(--surface);
@@ -323,38 +244,21 @@
       top: 0;
       z-index: 20;
     }
-
     .page-header {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
+    .page-header h1 { font-size: 21px; }
+    .page-header p { font-size: 13px; color: var(--muted); }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
-    .page-header h1 {
-      font-size: 22px;
-    }
-
-    .page-header p {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px; }
 
     .card {
       background: var(--surface);
@@ -364,131 +268,37 @@
       box-shadow: var(--shadow);
       margin-bottom: 16px;
     }
+    .card h3 { font-size: 16px; margin-bottom: 12px; }
+    .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .stat-value { font-size: 20px; font-weight: 800; margin-top: 4px; }
 
-    .card h3 {
-      font-size: 16px;
-      margin-bottom: 12px;
-    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 9px 11px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+    th { background: var(--surface-alt); font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .text-right { text-align: right; }
 
-    .stat-label {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 600;
-    }
+    .badge-ok { background: var(--success-soft); color: var(--success); padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge-low { background: var(--warning-soft); color: var(--warning); padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge-exp { background: var(--danger-soft); color: var(--danger); padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
 
-    .stat-value {
-      font-size: 22px;
-      font-weight: 800;
-      margin-top: 4px;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      vertical-align: middle;
-    }
-
-    th {
-      background: var(--surface-alt);
-      font-weight: 700;
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-
-    .text-right {
-      text-align: right;
-    }
-
-    .badge-ok {
-      background: var(--success-soft);
-      color: var(--success);
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .badge-low {
-      background: var(--warning-soft);
-      color: var(--warning);
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .pos-layout {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr;
-      gap: 18px;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-
+    .pos-layout { display: grid; grid-template-columns: 1.45fr 1fr; gap: 18px; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 10px; margin-top: 10px; }
     .product-tile {
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 12px;
+      padding: 11px;
       background: var(--surface-alt);
       cursor: pointer;
       text-align: left;
-      transition: all 0.15s;
     }
+    .product-tile:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .product-tile .pname { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+    .product-tile .pprice { color: var(--primary); font-weight: 700; font-size: 13px; }
+    .product-tile .pmeta { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
-    .product-tile:hover {
-      border-color: var(--primary);
-      background: var(--primary-soft);
-    }
-
-    .product-tile .pname {
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-
-    .product-tile .pprice {
-      color: var(--primary);
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    .product-tile .pmeta {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      font-size: 14px;
-    }
-
-    .summary-total {
-      border-top: 2px solid var(--border);
-      margin-top: 8px;
-      padding-top: 10px;
-      font-size: 17px;
-      font-weight: 800;
-    }
+    .summary-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+    .summary-total { border-top: 2px solid var(--border); margin-top: 8px; padding-top: 10px; font-size: 16px; font-weight: 800; }
 
     .bom-item-row {
       display: grid;
@@ -498,39 +308,36 @@
       align-items: center;
     }
 
+    .receipt-box {
+      border: 1px dashed #94a3b8;
+      border-radius: 10px;
+      padding: 14px;
+      background: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
     @media (max-width: 900px) {
-      .grid-3, .grid-2, .pos-layout {
-        grid-template-columns: 1fr;
-      }
-      .mobile-header {
-        display: flex;
-      }
+      .grid-4, .grid-3, .grid-2, .pos-layout { grid-template-columns: 1fr; }
+      .mobile-header { display: flex; }
       .sidebar {
         position: fixed;
-        left: -260px;
+        left: -265px;
         top: 0;
         z-index: 30;
         transition: left 0.2s ease;
       }
-      .sidebar.open {
-        left: 0;
-      }
-      .main-content {
-        padding: 16px;
-      }
+      .sidebar.open { left: 0; }
+      .main-content { padding: 16px; }
     }
-
     @media print {
-      .sidebar, .mobile-header, .no-print {
-        display: none !important;
-      }
-      body {
-        background: #ffffff;
-      }
-      .card {
-        box-shadow: none;
-        border: 1px solid #cbd5e1;
-      }
+      .sidebar, .mobile-header, .no-print { display: none !important; }
+      body { background: #fff; }
+      .card { box-shadow: none; border: 1px solid #cbd5e1; }
     }
   </style>
 </head>
@@ -548,34 +355,14 @@
       <form id="loginForm" autocomplete="off">
         <div class="form-group">
           <label for="loginUsername">Username</label>
-          <input
-            type="text"
-            id="loginUsername"
-            class="input-control"
-            placeholder="Masukkan username"
-            value=""
-            required
-          />
+          <input type="text" id="loginUsername" class="input-control" placeholder="Masukkan username" value="" required />
         </div>
 
         <div class="form-group">
           <label for="loginPassword">Kata Sandi</label>
           <div class="password-box">
-            <input
-              type="password"
-              id="loginPassword"
-              class="input-control"
-              placeholder="Masukkan kata sandi"
-              value=""
-              required
-            />
-            <button
-              type="button"
-              id="togglePasswordBtn"
-              class="eye-btn"
-              aria-label="Tampilkan kata sandi"
-              title="Tampilkan / sembunyikan kata sandi"
-            >
+            <input type="password" id="loginPassword" class="input-control" placeholder="Masukkan kata sandi" value="" required />
+            <button type="button" id="togglePasswordBtn" class="eye-btn" aria-label="Tampilkan kata sandi" title="Tampilkan / sembunyikan kata sandi">
               <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
@@ -584,7 +371,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Masuk</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Masuk</button>
       </form>
     </div>
   </div>
@@ -595,8 +382,18 @@
       <div>
         <div class="sidebar-brand">
           <h2>YADHIYA POS</h2>
-          <span>Manajemen Toko &amp; Manufaktur v1.6</span>
+          <span>POS, Manufaktur BOM &amp; Sync v1.6</span>
         </div>
+
+        <div class="sync-pill">
+          <div>
+            <span id="netDot" class="dot-online"></span>
+            <strong id="netLabel">Online</strong>
+            <div id="syncStatusText" style="color:var(--muted);font-size:10px;">Lokal siap</div>
+          </div>
+          <button type="button" id="sidebarSyncBtn" class="btn btn-secondary btn-sm">Sync</button>
+        </div>
+
         <nav id="navList" class="nav-list"></nav>
       </div>
 
@@ -621,43 +418,54 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "yadhiya_pos_v1_6_db";
+    const STORAGE_KEY = "yadhiya_pos_v1_6_full_db";
+    const SYNC_QUEUE_KEY = "yadhiya_pos_v1_6_sync_queue";
+    const DEFAULT_APPS_SCRIPT_URL = "";
 
     const ROLE_PERMISSIONS = {
-      owner: ["dashboard", "pos", "manufacturing", "inventory", "accounting", "accounts"],
-      kasir: ["pos", "manufacturing", "inventory"],
-      accounting: ["dashboard", "manufacturing", "inventory", "accounting"]
+      owner: ["dashboard", "pos", "manufacturing", "inventory", "accounting", "sync", "accounts"],
+      kasir: ["pos", "manufacturing", "inventory", "sync"],
+      accounting: ["dashboard", "manufacturing", "inventory", "accounting", "sync"]
     };
 
     const MENU_META = {
-      dashboard: { label: "Dashboard", subtitle: "Ringkasan operasional & keuangan toko" },
-      pos: { label: "Kasir (POS)", subtitle: "Transaksi penjualan barang & hasil manufaktur" },
-      manufacturing: { label: "Manufaktur", subtitle: "Resep BOM (kertas, tinta, bahan) + biaya listrik & operasional" },
-      inventory: { label: "Stok & Restock", subtitle: "Bahan baku, produk jadi, dan pencatatan kulakan" },
-      accounting: { label: "Keuangan & Jurnal", subtitle: "Laba rugi, biaya listrik/operasional, dan jurnal umum" },
-      accounts: { label: "Manajemen Akun", subtitle: "Kelola pengguna dan kata sandi (Owner)" }
+      dashboard: { label: "Dashboard", subtitle: "Ringkasan penjualan, HPP manufaktur, biaya listrik/ops, dan stok" },
+      pos: { label: "Kasir (POS)", subtitle: "Scan barcode/SKU, produk toko, hasil manufaktur, & cetak struk" },
+      manufacturing: { label: "Manufaktur (BOM)", subtitle: "Komposisi bahan baku + biaya listrik & operasional per unit/batch" },
+      inventory: { label: "Stok & Restock", subtitle: "Barcode, stok minimum, tanggal kedaluwarsa, & kulakan" },
+      accounting: { label: "Keuangan & Jurnal", subtitle: "Laba rugi, biaya listrik/operasional, & jurnal umum" },
+      sync: { label: "Sinkronisasi Perangkat", subtitle: "Sinkronisasi Google Apps Script / Sheets, antrean offline, & backup JSON" },
+      accounts: { label: "Manajemen Akun", subtitle: "Kelola akun pengguna & ubah sandi (Owner)" }
     };
 
     function defaultDatabase() {
       return {
+        settings: {
+          storeName: "YADHIYA POS & TOKO",
+          storeAddress: "Jl. Usaha No. 1, Blitar",
+          appsScriptUrl: DEFAULT_APPS_SCRIPT_URL,
+          lastSyncedAt: "",
+          autoSyncOnSave: true
+        },
         users: [
           { id: "u-owner", name: "Pemilik Yadhiya", username: "owner", password: "123", role: "owner", active: true },
           { id: "u-kasir", name: "Kasir Toko", username: "kasir", password: "123", role: "kasir", active: true },
           { id: "u-acc", name: "Staf Accounting", username: "accounting", password: "123", role: "accounting", active: true }
         ],
         materials: [
-          { id: "mat-hvs-a4", name: "Kertas HVS A4 (Lembar)", unit: "lembar", stock: 2500, minStock: 500, unitCost: 110, isSellable: false, sellPrice: 0 },
-          { id: "mat-hvs-f4", name: "Kertas F4 Folio (Lembar)", unit: "lembar", stock: 1500, minStock: 300, unitCost: 130, isSellable: false, sellPrice: 0 },
-          { id: "mat-tinta-bw", name: "Tinta Hitam / Toner (ml/unit)", unit: "unit", stock: 8000, minStock: 1000, unitCost: 25, isSellable: false, sellPrice: 0 },
-          { id: "mat-tinta-clr", name: "Tinta Warna Cetak (unit)", unit: "unit", stock: 4000, minStock: 600, unitCost: 85, isSellable: false, sellPrice: 0 },
-          { id: "mat-jilid", name: "Cover & Spiral Jilid (set)", unit: "set", stock: 120, minStock: 25, unitCost: 2200, isSellable: false, sellPrice: 0 },
-          { id: "prd-pulpen", name: "Pulpen Standar", unit: "pcs", stock: 85, minStock: 20, unitCost: 1800, isSellable: true, sellPrice: 3000 },
-          { id: "prd-air", name: "Air Mineral Botol 600ml", unit: "botol", stock: 48, minStock: 12, unitCost: 2300, isSellable: true, sellPrice: 4000 }
+          { id: "mat-hvs-a4", barcode: "8990001001", name: "Kertas HVS A4", unit: "lembar", stock: 2500, minStock: 500, unitCost: 110, isSellable: false, sellPrice: 0, expiryDate: "" },
+          { id: "mat-hvs-f4", barcode: "8990001002", name: "Kertas F4 Folio", unit: "lembar", stock: 1500, minStock: 300, unitCost: 130, isSellable: false, sellPrice: 0, expiryDate: "" },
+          { id: "mat-tinta-bw", barcode: "8990001003", name: "Tinta Hitam / Toner", unit: "unit", stock: 8000, minStock: 1000, unitCost: 25, isSellable: false, sellPrice: 0, expiryDate: "" },
+          { id: "mat-tinta-clr", barcode: "8990001004", name: "Tinta Warna Cetak", unit: "unit", stock: 4000, minStock: 600, unitCost: 85, isSellable: false, sellPrice: 0, expiryDate: "" },
+          { id: "mat-jilid", barcode: "8990001005", name: "Cover & Spiral Jilid", unit: "set", stock: 120, minStock: 25, unitCost: 2200, isSellable: false, sellPrice: 0, expiryDate: "" },
+          { id: "prd-pulpen", barcode: "8990002001", name: "Pulpen Standar", unit: "pcs", stock: 85, minStock: 20, unitCost: 1800, isSellable: true, sellPrice: 3000, expiryDate: "" },
+          { id: "prd-air", barcode: "8990002002", name: "Air Mineral Botol 600ml", unit: "botol", stock: 48, minStock: 12, unitCost: 2300, isSellable: true, sellPrice: 4000, expiryDate: "2027-06-30" },
+          { id: "prd-roti", barcode: "8990002003", name: "Roti Kemasan", unit: "pcs", stock: 18, minStock: 8, unitCost: 4500, isSellable: true, sellPrice: 7000, expiryDate: "2026-12-05" }
         ],
         bomRecipes: [
           {
-            id: "bom-fc-bw",
-            name: "Fotokopi / Cetak Hitam Putih (Per Lembar)",
+            id: "bom-fc-a4-bw",
+            name: "Fotokopi / Cetak Hitam Putih A4",
             outputUnit: "lembar",
             defaultPrice: 500,
             electricityCostPerUnit: 65,
@@ -668,8 +476,8 @@
             ]
           },
           {
-            id: "bom-print-clr",
-            name: "Cetak Dokumen Warna (Per Lembar)",
+            id: "bom-print-a4-clr",
+            name: "Cetak Dokumen Warna A4",
             outputUnit: "lembar",
             defaultPrice: 1500,
             electricityCostPerUnit: 110,
@@ -680,8 +488,8 @@
             ]
           },
           {
-            id: "bom-jilid",
-            name: "Jilid Dokumen / Laporan (Per Buku)",
+            id: "bom-jilid-buku",
+            name: "Jilid Dokumen / Makalah",
             outputUnit: "buku",
             defaultPrice: 7500,
             electricityCostPerUnit: 250,
@@ -701,26 +509,61 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
         const seed = defaultDatabase();
-        saveDb(seed);
+        saveDbLocalOnly(seed);
         return seed;
       }
       try {
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        const seed = defaultDatabase();
+        return {
+          ...seed,
+          ...parsed,
+          settings: { ...seed.settings, ...(parsed.settings || {}) }
+        };
       } catch (e) {
         const seed = defaultDatabase();
-        saveDb(seed);
+        saveDbLocalOnly(seed);
         return seed;
       }
     }
 
-    function saveDb(data) {
+    function saveDbLocalOnly(data) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadSyncQueue() {
+      try {
+        return JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY) || "[]");
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveSyncQueue(q) {
+      localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(q));
+    }
+
+    function saveDb(data, triggerAutoSync = true) {
+      saveDbLocalOnly(data);
+      const queue = loadSyncQueue();
+      queue.push({
+        id: "sync-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+        queuedAt: new Date().toISOString(),
+        actor: currentUser ? currentUser.username : "system"
+      });
+      saveSyncQueue(queue);
+      updateSyncBadge();
+
+      if (triggerAutoSync && data.settings && data.settings.appsScriptUrl && navigator.onLine && data.settings.autoSyncOnSave) {
+        flushSyncQueue(true);
+      }
     }
 
     let db = loadDb();
     let currentUser = null;
     let activeTab = "dashboard";
     let posCart = [];
+    let lastReceipt = null;
     let draftBomItems = [{ materialId: "mat-hvs-a4", qty: 1 }];
 
     function formatRupiah(num) {
@@ -740,13 +583,13 @@
         const mat = getMaterial(item.materialId);
         return sum + (mat ? Number(mat.unitCost) * Number(item.qty) : 0);
       }, 0);
-      const elec = Number(recipe.electricityCostPerUnit || 0);
-      const oper = Number(recipe.operationalCostPerUnit || 0);
+      const electricityCost = Number(recipe.electricityCostPerUnit || 0);
+      const operationalCost = Number(recipe.operationalCostPerUnit || 0);
       return {
         materialCost,
-        electricityCost: elec,
-        operationalCost: oper,
-        totalUnitCost: materialCost + elec + oper
+        electricityCost,
+        operationalCost,
+        totalUnitCost: materialCost + electricityCost + operationalCost
       };
     }
 
@@ -759,7 +602,138 @@
       });
     }
 
-    // Login & Password Toggle
+    function updateSyncBadge() {
+      const online = navigator.onLine;
+      const queue = loadSyncQueue();
+      const dot = document.getElementById("netDot");
+      const lbl = document.getElementById("netLabel");
+      const txt = document.getElementById("syncStatusText");
+      if (!dot || !lbl || !txt) return;
+
+      dot.className = online ? "dot-online" : "dot-offline";
+      lbl.textContent = online ? "Online" : "Offline";
+      if (queue.length > 0) {
+        txt.textContent = `${queue.length} perubahan menunggu sync`;
+      } else if (db.settings && db.settings.lastSyncedAt) {
+        txt.textContent = `Sync: ${db.settings.lastSyncedAt.slice(11, 19)}`;
+      } else {
+        txt.textContent = "Data lokal tersimpan";
+      }
+    }
+
+    async function flushSyncQueue(silent = false) {
+      const url = (db.settings && db.settings.appsScriptUrl || "").trim();
+      const queue = loadSyncQueue();
+
+      if (!url) {
+        if (!silent) showBanner("syncFeedback", "URL Web App Google Apps Script belum diisi. Data tetap aman tersimpan di lokal.", true);
+        return;
+      }
+      if (!navigator.onLine) {
+        if (!silent) showBanner("syncFeedback", "Perangkat sedang offline. Perubahan akan dikirim saat koneksi kembali aktif.", true);
+        return;
+      }
+
+      try {
+        const payload = {
+          action: "syncSnapshot",
+          syncedAt: new Date().toISOString(),
+          snapshot: {
+            users: db.users,
+            materials: db.materials,
+            bomRecipes: db.bomRecipes,
+            sales: db.sales,
+            expenses: db.expenses,
+            journals: db.journals
+          }
+        };
+
+        await fetch(url, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        saveSyncQueue([]);
+        db.settings.lastSyncedAt = new Date().toISOString();
+        saveDbLocalOnly(db);
+        updateSyncBadge();
+        if (!silent) {
+          showBanner("syncFeedback", `Sinkronisasi ${queue.length || 1} batch data ke Google Apps Script / Sheets berhasil dikirim.`);
+          if (activeTab === "sync") renderMainView();
+        }
+      } catch (err) {
+        if (!silent) {
+          showBanner("syncFeedback", "Gagal mengirim sinkronisasi: " + err.message, true);
+        }
+      }
+    }
+
+    async function pullFromAppsScript() {
+      const url = (db.settings && db.settings.appsScriptUrl || "").trim();
+      if (!url) {
+        showBanner("syncFeedback", "Isi URL Web App Google Apps Script terlebih dahulu.", true);
+        return;
+      }
+      if (!navigator.onLine) {
+        showBanner("syncFeedback", "Tidak ada koneksi internet untuk menarik data terbaru.", true);
+        return;
+      }
+      try {
+        const sep = url.includes("?") ? "&" : "?";
+        const resp = await fetch(`${url}${sep}action=getLatestSnapshot`);
+        const json = await resp.json();
+        const snap = json.snapshot || json;
+        if (snap && (Array.isArray(snap.materials) || Array.isArray(snap.sales))) {
+          if (Array.isArray(snap.materials) && snap.materials.length > 0) {
+            db.materials = snap.materials.map((m) => ({
+              id: m.ID || m.id,
+              barcode: String(m.Barcode || m.barcode || ""),
+              name: m.Name || m.name,
+              unit: m.Unit || m.unit || "unit",
+              stock: Number(m.Stock ?? m.stock ?? 0),
+              minStock: Number(m.MinStock ?? m.minStock ?? 0),
+              unitCost: Number(m.UnitCost ?? m.unitCost ?? 0),
+              isSellable: Boolean(m.IsSellable ?? m.isSellable),
+              sellPrice: Number(m.SellPrice ?? m.sellPrice ?? 0),
+              expiryDate: m.ExpiryDate || m.expiryDate || ""
+            }));
+          }
+          if (Array.isArray(snap.bomRecipes) && snap.bomRecipes.length > 0) {
+            db.bomRecipes = snap.bomRecipes;
+          }
+          if (Array.isArray(snap.sales)) {
+            db.sales = snap.sales;
+          }
+          if (Array.isArray(snap.expenses)) {
+            db.expenses = snap.expenses;
+          }
+          if (Array.isArray(snap.journals)) {
+            db.journals = snap.journals;
+          }
+          db.settings.lastSyncedAt = new Date().toISOString();
+          saveDbLocalOnly(db);
+          updateSyncBadge();
+          renderMainView();
+          showBanner("syncFeedback", "Data terbaru berhasil ditarik dari Google Sheets / Apps Script.");
+        } else {
+          showBanner("syncFeedback", "Respons server diterima, namun format snapshot kosong atau belum sesuai.", true);
+        }
+      } catch (err) {
+        showBanner("syncFeedback", "Gagal menarik data (cek izin Web App 'Anyone' / CORS): " + err.message, true);
+      }
+    }
+
+    window.addEventListener("online", () => {
+      updateSyncBadge();
+      if (db.settings && db.settings.appsScriptUrl && loadSyncQueue().length > 0) {
+        flushSyncQueue(true);
+      }
+    });
+    window.addEventListener("offline", updateSyncBadge);
+
+    // Login & Eye Toggle
     const loginForm = document.getElementById("loginForm");
     const loginError = document.getElementById("loginError");
     const loginUsername = document.getElementById("loginUsername");
@@ -770,10 +744,7 @@
     togglePasswordBtn.addEventListener("click", () => {
       const isHidden = loginPassword.type === "password";
       loginPassword.type = isHidden ? "text" : "password";
-      togglePasswordBtn.setAttribute(
-        "aria-label",
-        isHidden ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
-      );
+      togglePasswordBtn.setAttribute("aria-label", isHidden ? "Sembunyikan kata sandi" : "Tampilkan kata sandi");
       eyeIcon.innerHTML = isHidden
         ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
         : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
@@ -784,35 +755,35 @@
       db = loadDb();
       const uname = loginUsername.value.trim().toLowerCase();
       const pwd = loginPassword.value;
-
       const found = db.users.find(
         (u) => u.username.toLowerCase() === uname && u.password === pwd && u.active !== false
       );
-
       if (!found) {
-        loginError.textContent = "Username atau kata sandi tidak valid, atau akun tidak aktif.";
+        loginError.textContent = "Username atau kata sandi salah, atau akun tidak aktif.";
         loginError.classList.remove("hidden");
         return;
       }
-
       loginError.classList.add("hidden");
       currentUser = found;
       loginUsername.value = "";
       loginPassword.value = "";
       loginPassword.type = "password";
+      posCart = [];
+      lastReceipt = null;
 
       const allowed = ROLE_PERMISSIONS[currentUser.role] || ["pos"];
       activeTab = allowed[0];
-      posCart = [];
 
       document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("appShell").classList.remove("hidden");
       renderShell();
+      updateSyncBadge();
     });
 
     function logout() {
       currentUser = null;
       posCart = [];
+      lastReceipt = null;
       document.getElementById("appShell").classList.add("hidden");
       document.getElementById("loginScreen").classList.remove("hidden");
       document.getElementById("sidebar").classList.remove("open");
@@ -822,6 +793,11 @@
     document.getElementById("mobileLogoutBtn").addEventListener("click", logout);
     document.getElementById("menuToggleBtn").addEventListener("click", () => {
       document.getElementById("sidebar").classList.toggle("open");
+    });
+    document.getElementById("sidebarSyncBtn").addEventListener("click", () => {
+      activeTab = "sync";
+      renderShell();
+      flushSyncQueue(false);
     });
 
     function renderShell() {
@@ -854,27 +830,29 @@
       const mainView = document.getElementById("mainView");
       const meta = MENU_META[activeTab];
 
-      let bodyHtml = `
+      let html = `
         <div class="page-header">
           <div>
             <h1>${meta.label}</h1>
             <p>${meta.subtitle}</p>
           </div>
-          <div class="no-print">
+          <div class="header-actions no-print">
             <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">Cetak / PDF</button>
           </div>
         </div>
       `;
 
-      if (activeTab === "dashboard") bodyHtml += buildDashboardView();
-      if (activeTab === "pos") bodyHtml += buildPosView();
-      if (activeTab === "manufacturing") bodyHtml += buildManufacturingView();
-      if (activeTab === "inventory") bodyHtml += buildInventoryView();
-      if (activeTab === "accounting") bodyHtml += buildAccountingView();
-      if (activeTab === "accounts") bodyHtml += buildAccountsView();
+      if (activeTab === "dashboard") html += buildDashboardView();
+      if (activeTab === "pos") html += buildPosView();
+      if (activeTab === "manufacturing") html += buildManufacturingView();
+      if (activeTab === "inventory") html += buildInventoryView();
+      if (activeTab === "accounting") html += buildAccountingView();
+      if (activeTab === "sync") html += buildSyncView();
+      if (activeTab === "accounts") html += buildAccountsView();
 
-      mainView.innerHTML = bodyHtml;
+      mainView.innerHTML = html;
       bindTabEvents();
+      updateSyncBadge();
     }
 
     function canSeeFinancials() {
@@ -887,33 +865,44 @@
       const mfgElec = db.sales.reduce((s, x) => s + Number(x.mfgElectricity || 0), 0);
       const mfgOper = db.sales.reduce((s, x) => s + Number(x.mfgOperational || 0), 0);
       const directOper = db.expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
-      const grossProfit = revenue - cogs;
-      const netProfit = revenue - cogs - mfgElec - mfgOper - directOper;
-      return { revenue, cogs, mfgElec, mfgOper, directOper, grossProfit, netProfit };
+      const totalCosts = cogs + mfgElec + mfgOper + directOper;
+      const netProfit = revenue - totalCosts;
+      return { revenue, cogs, mfgElec, mfgOper, directOper, totalCosts, netProfit };
+    }
+
+    function isExpired(dateStr) {
+      if (!dateStr) return false;
+      return dateStr < nowDateStr();
     }
 
     function buildDashboardView() {
       const fin = computeFinancialSummary();
-      const lowStockCount = db.materials.filter((m) => Number(m.stock) <= Number(m.minStock)).length;
+      const lowStock = db.materials.filter((m) => Number(m.stock) <= Number(m.minStock)).length;
+      const expiredCount = db.materials.filter((m) => isExpired(m.expiryDate)).length;
+      const queueCount = loadSyncQueue().length;
 
       return `
-        <div class="grid-3">
+        <div class="grid-4">
           <div class="card">
             <div class="stat-label">Total Penjualan &amp; Jasa</div>
             <div class="stat-value">${formatRupiah(fin.revenue)}</div>
           </div>
           <div class="card">
-            <div class="stat-label">Estimasi Laba Bersih</div>
+            <div class="stat-label">Total HPP + Listrik &amp; Ops</div>
+            <div class="stat-value">${formatRupiah(fin.totalCosts)}</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Laba / Rugi Bersih</div>
             <div class="stat-value" style="color:${fin.netProfit >= 0 ? "var(--success)" : "var(--danger)"}">${formatRupiah(fin.netProfit)}</div>
           </div>
           <div class="card">
-            <div class="stat-label">Item Stok Menipis</div>
-            <div class="stat-value">${lowStockCount} Item</div>
+            <div class="stat-label">Peringatan Stok / Exp / Sync</div>
+            <div class="stat-value">${lowStock} Stok &bull; ${expiredCount} Exp &bull; ${queueCount} Sync</div>
           </div>
         </div>
 
         <div class="card">
-          <h3>Transaksi Terakhir</h3>
+          <h3>Riwayat Transaksi Terakhir</h3>
           <div class="table-wrap">
             <table>
               <thead>
@@ -927,8 +916,8 @@
               <tbody>
                 ${
                   db.sales.length === 0
-                    ? `<tr><td colspan="4" style="text-align:center;color:var(--muted);">Belum ada transaksi tercatat.</td></tr>`
-                    : db.sales.slice(0, 8).map((s) => `
+                    ? `<tr><td colspan="4" style="text-align:center;color:var(--muted);">Belum ada transaksi.</td></tr>`
+                    : db.sales.slice(0, 10).map((s) => `
                       <tr>
                         <td>${s.date}</td>
                         <td>${s.id}</td>
@@ -945,28 +934,33 @@
     }
 
     function buildPosView() {
-      const sellableProducts = db.materials.filter((m) => m.isSellable);
+      const sellable = db.materials.filter((m) => m.isSellable);
       const subtotal = posCart.reduce((s, item) => s + item.price * item.qty, 0);
 
       return `
         <div id="posFeedback"></div>
         <div class="pos-layout">
           <div class="card">
-            <h3>Daftar Produk Toko</h3>
+            <h3>Scan Barcode / Cari Produk</h3>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <input type="text" id="posBarcodeInput" class="input-control" placeholder="Scan barcode atau ketik nama produk..." />
+              <button type="button" id="posBarcodeAddBtn" class="btn btn-primary">Tambah</button>
+            </div>
+
             <div class="product-grid">
-              ${sellableProducts.map((p) => `
+              ${sellable.map((p) => `
                 <button type="button" class="product-tile" data-add-product="${p.id}">
                   <div class="pname">${p.name}</div>
                   <div class="pprice">${formatRupiah(p.sellPrice)}</div>
-                  <div class="pmeta">Stok: ${p.stock} ${p.unit}</div>
+                  <div class="pmeta">Stok: ${p.stock} ${p.unit} ${p.barcode ? "&bull; " + p.barcode : ""}</div>
                 </button>
               `).join("")}
             </div>
 
-            <h3 style="margin-top:20px;">Tambah Hasil Manufaktur ke Keranjang</h3>
+            <h3 style="margin-top:20px;">Jasa Cetak / Hasil Manufaktur (BOM)</h3>
             <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px;align-items:end;">
               <div class="form-group" style="margin-bottom:0;">
-                <label for="posBomSelect">Resep Manufaktur</label>
+                <label for="posBomSelect">Pilih Layanan / Resep BOM</label>
                 <select id="posBomSelect">
                   ${db.bomRecipes.map((r) => `
                     <option value="${r.id}">${r.name} (${formatRupiah(r.defaultPrice)}/${r.outputUnit})</option>
@@ -982,7 +976,7 @@
           </div>
 
           <div class="card">
-            <h3>Keranjang Kasir</h3>
+            <h3>Keranjang Pembayaran</h3>
             <div class="table-wrap">
               <table>
                 <thead>
@@ -996,7 +990,7 @@
                 <tbody>
                   ${
                     posCart.length === 0
-                      ? `<tr><td colspan="4" style="text-align:center;color:var(--muted);">Keranjang masih kosong.</td></tr>`
+                      ? `<tr><td colspan="4" style="text-align:center;color:var(--muted);">Keranjang kosong.</td></tr>`
                       : posCart.map((c, idx) => `
                         <tr>
                           <td>${c.name}</td>
@@ -1020,15 +1014,31 @@
                 <input type="number" id="posPaidAmount" class="input-control" value="${subtotal}" min="0" />
               </div>
               <button type="button" id="checkoutPosBtn" class="btn btn-success" style="width:100%;" ${posCart.length === 0 ? "disabled" : ""}>
-                Proses Pembayaran
+                Proses Bayar &amp; Cetak Struk
               </button>
             </div>
+
+            ${
+              lastReceipt
+                ? `
+                <div class="receipt-box">
+                  <div style="text-align:center;font-weight:700;">${db.settings.storeName}</div>
+                  <div style="text-align:center;color:var(--muted);margin-bottom:8px;">${lastReceipt.id} &bull; ${lastReceipt.date} &bull; Kasir: ${lastReceipt.cashierName}</div>
+                  ${lastReceipt.items.map((it) => `<div>${it.name} x${it.qty} = ${formatRupiah(it.price * it.qty)}</div>`).join("")}
+                  <hr style="margin:8px 0;border:none;border-top:1px dashed #cbd5e1;" />
+                  <div><strong>TOTAL: ${formatRupiah(lastReceipt.total)}</strong></div>
+                  <div>BAYAR: ${formatRupiah(lastReceipt.paid)}</div>
+                  <div>KEMBALI: ${formatRupiah(Math.max(0, lastReceipt.paid - lastReceipt.total))}</div>
+                </div>
+              `
+                : ""
+            }
           </div>
         </div>
       `;
     }
 
-    function executeManufacturingProduction(recipeId, qty, sellImmediately = false, salePricePerUnit = null) {
+    function executeManufacturingProduction(recipeId, qty) {
       const recipe = db.bomRecipes.find((r) => r.id === recipeId);
       if (!recipe) return { ok: false, message: "Resep manufaktur tidak ditemukan." };
       const count = Number(qty);
@@ -1057,10 +1067,10 @@
       const operTotal = Number(recipe.operationalCostPerUnit || 0) * count;
       const totalHpp = materialCostTotal + elecTotal + operTotal;
 
-      addJournalEntry(`Produksi Manufaktur: ${recipe.name} (${count} ${recipe.outputUnit})`, [
+      addJournalEntry(`Manufaktur ${recipe.name} (${count} ${recipe.outputUnit})`, [
         { account: "HPP Manufaktur", debit: totalHpp, credit: 0 },
         { account: "Persediaan Bahan Baku", debit: 0, credit: materialCostTotal },
-        { account: "Beban Listrik & Operasional Mesin", debit: 0, credit: elecTotal + operTotal }
+        { account: "Biaya Listrik & Operasional Mesin", debit: 0, credit: elecTotal + operTotal }
       ]);
 
       return {
@@ -1070,8 +1080,7 @@
         materialCostTotal,
         elecTotal,
         operTotal,
-        totalHpp,
-        revenue: sellImmediately ? Number(salePricePerUnit ?? recipe.defaultPrice) * count : 0
+        totalHpp
       };
     }
 
@@ -1088,8 +1097,8 @@
                 <label for="mfgRecipeSelect">Pilih Resep / Layanan</label>
                 <select id="mfgRecipeSelect">
                   ${db.bomRecipes.map((r) => {
-                    const costInfo = calculateBomUnitCost(r);
-                    return `<option value="${r.id}">${r.name} — Jual ${formatRupiah(r.defaultPrice)}/${r.outputUnit}${showCost ? ` (HPP ${formatRupiah(costInfo.totalUnitCost)})` : ""}</option>`;
+                    const c = calculateBomUnitCost(r);
+                    return `<option value="${r.id}">${r.name} — Jual ${formatRupiah(r.defaultPrice)}/${r.outputUnit}${showCost ? ` (HPP ${formatRupiah(c.totalUnitCost)} = Bahan ${formatRupiah(c.materialCost)} + Listrik ${formatRupiah(c.electricityCost)} + Ops ${formatRupiah(c.operationalCost)})` : ""}</option>`;
                   }).join("")}
                 </select>
               </div>
@@ -1102,10 +1111,10 @@
           </div>
 
           <div class="card">
-            <h3>Tambah Resep BOM Baru</h3>
+            <h3>Buat / Tambah Resep BOM (Bahan + Listrik + Ops)</h3>
             <form id="createBomForm">
               <div class="form-group">
-                <label for="newBomName">Nama Resep / Layanan</label>
+                <label for="newBomName">Nama Layanan / Produk Manufaktur</label>
                 <input type="text" id="newBomName" class="input-control" placeholder="Contoh: Fotokopi Bolak-Balik A4" required />
               </div>
               <div class="grid-2" style="gap:10px;margin-bottom:10px;">
@@ -1120,11 +1129,11 @@
               </div>
               <div class="grid-2" style="gap:10px;margin-bottom:12px;">
                 <div class="form-group" style="margin-bottom:0;">
-                  <label for="newBomElec">Biaya Listrik / Satuan</label>
+                  <label for="newBomElec">Biaya Listrik Mesin / Satuan</label>
                   <input type="number" id="newBomElec" class="input-control" value="75" min="0" required />
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
-                  <label for="newBomOper">Biaya Operasional / Satuan</label>
+                  <label for="newBomOper">Biaya Operasional Lain / Satuan</label>
                   <input type="number" id="newBomOper" class="input-control" value="40" min="0" required />
                 </div>
               </div>
@@ -1142,7 +1151,7 @@
                     </div>
                   `).join("")}
                 </div>
-                <button type="button" id="addBomRowBtn" class="btn btn-secondary btn-sm">+ Tambah Bahan</button>
+                <button type="button" id="addBomRowBtn" class="btn btn-secondary btn-sm">+ Tambah Bahan Baku</button>
               </div>
 
               <button type="submit" class="btn btn-success" style="width:100%;">Simpan Resep BOM</button>
@@ -1151,22 +1160,23 @@
         </div>
 
         <div class="card">
-          <h3>Daftar Resep Manufaktur (BOM)</h3>
+          <h3>Daftar Resep Manufaktur &amp; Rincian Biaya per Satuan</h3>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Nama Resep</th>
                   <th>Komposisi Bahan</th>
-                  <th class="text-right">Listrik / Unit</th>
-                  <th class="text-right">Ops / Unit</th>
-                  ${showCost ? `<th class="text-right">HPP / Unit</th>` : ""}
+                  ${showCost ? `<th class="text-right">Bahan</th>` : ""}
+                  <th class="text-right">Listrik</th>
+                  <th class="text-right">Ops Lain</th>
+                  ${showCost ? `<th class="text-right">Total HPP</th>` : ""}
                   <th class="text-right">Harga Jual</th>
                 </tr>
               </thead>
               <tbody>
                 ${db.bomRecipes.map((r) => {
-                  const cost = calculateBomUnitCost(r);
+                  const c = calculateBomUnitCost(r);
                   const compText = (r.items || []).map((it) => {
                     const m = getMaterial(it.materialId);
                     return `${m ? m.name : it.materialId} (${it.qty})`;
@@ -1175,9 +1185,10 @@
                     <tr>
                       <td><strong>${r.name}</strong></td>
                       <td>${compText || "-"}</td>
-                      <td class="text-right">${formatRupiah(r.electricityCostPerUnit)}</td>
-                      <td class="text-right">${formatRupiah(r.operationalCostPerUnit)}</td>
-                      ${showCost ? `<td class="text-right"><strong>${formatRupiah(cost.totalUnitCost)}</strong></td>` : ""}
+                      ${showCost ? `<td class="text-right">${formatRupiah(c.materialCost)}</td>` : ""}
+                      <td class="text-right">${formatRupiah(c.electricityCost)}</td>
+                      <td class="text-right">${formatRupiah(c.operationalCost)}</td>
+                      ${showCost ? `<td class="text-right"><strong>${formatRupiah(c.totalUnitCost)}</strong></td>` : ""}
                       <td class="text-right">${formatRupiah(r.defaultPrice)}</td>
                     </tr>
                   `;
@@ -1195,8 +1206,8 @@
       return `
         <div id="invFeedback"></div>
         <div class="card">
-          <h3>Restock / Kulakan Bahan &amp; Barang</h3>
-          <form id="restockForm" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;">
+          <h3>Restock / Kulakan Bahan &amp; Produk</h3>
+          <form id="restockForm" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;">
             <div class="form-group" style="margin-bottom:0;">
               <label for="restockMatSelect">Pilih Item</label>
               <select id="restockMatSelect">
@@ -1211,33 +1222,46 @@
               <label for="restockCost">Total Biaya Kulakan</label>
               <input type="number" id="restockCost" class="input-control" min="0" value="10000" required />
             </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="restockExpiry">Tgl Kedaluwarsa (Opsional)</label>
+              <input type="date" id="restockExpiry" class="input-control" />
+            </div>
             <button type="submit" class="btn btn-primary">Catat Restock</button>
           </form>
         </div>
 
         <div class="card">
-          <h3>Daftar Stok Bahan Baku &amp; Produk</h3>
+          <h3>Daftar Stok, Barcode &amp; Kedaluwarsa</h3>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
+                  <th>Barcode</th>
                   <th>Nama Item</th>
                   <th>Satuan</th>
-                  <th class="text-right">Stok Saat Ini</th>
-                  ${showCost ? `<th class="text-right">Harga Modal / Unit</th>` : ""}
+                  <th class="text-right">Stok</th>
+                  ${showCost ? `<th class="text-right">Modal / Unit</th>` : ""}
+                  <th>Kedaluwarsa</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 ${db.materials.map((m) => {
-                  const isLow = Number(m.stock) <= Number(m.minStock);
+                  const exp = isExpired(m.expiryDate);
+                  const low = Number(m.stock) <= Number(m.minStock);
+                  let badge = `<span class="badge-ok">Aman</span>`;
+                  if (exp) badge = `<span class="badge-exp">Kedaluwarsa</span>`;
+                  else if (low) badge = `<span class="badge-low">Stok Menipis</span>`;
+
                   return `
                     <tr>
+                      <td>${m.barcode || "-"}</td>
                       <td><strong>${m.name}</strong></td>
                       <td>${m.unit}</td>
                       <td class="text-right">${m.stock}</td>
                       ${showCost ? `<td class="text-right">${formatRupiah(m.unitCost)}</td>` : ""}
-                      <td><span class="${isLow ? "badge-low" : "badge-ok"}">${isLow ? "Menipis" : "Aman"}</span></td>
+                      <td>${m.expiryDate || "-"}</td>
+                      <td>${badge}</td>
                     </tr>
                   `;
                 }).join("")}
@@ -1253,14 +1277,18 @@
 
       return `
         <div id="accFeedback"></div>
-        <div class="grid-3">
+        <div class="grid-4">
           <div class="card">
-            <div class="stat-label">Pendapatan Usaha</div>
+            <div class="stat-label">Pendapatan</div>
             <div class="stat-value">${formatRupiah(fin.revenue)}</div>
           </div>
           <div class="card">
-            <div class="stat-label">HPP + Listrik &amp; Operasional</div>
-            <div class="stat-value">${formatRupiah(fin.cogs + fin.mfgElec + fin.mfgOper + fin.directOper)}</div>
+            <div class="stat-label">HPP Barang &amp; Bahan</div>
+            <div class="stat-value">${formatRupiah(fin.cogs)}</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Biaya Listrik &amp; Ops</div>
+            <div class="stat-value">${formatRupiah(fin.mfgElec + fin.mfgOper + fin.directOper)}</div>
           </div>
           <div class="card">
             <div class="stat-label">Laba / Rugi Bersih</div>
@@ -1272,16 +1300,16 @@
           <h3>Catat Biaya Listrik / Operasional Tambahan</h3>
           <form id="expenseForm" style="display:grid;grid-template-columns:1fr 2fr 1fr auto;gap:10px;align-items:end;">
             <div class="form-group" style="margin-bottom:0;">
-              <label for="expenseCategory">Kategori</label>
+              <label for="expenseCategory">Kategori Biaya</label>
               <select id="expenseCategory">
-                <option value="Listrik Mesin & Toko">Listrik Mesin &amp; Toko</option>
-                <option value="Operasional Toko">Operasional Toko</option>
-                <option value="Perawatan Mesin">Perawatan Mesin</option>
+                <option value="Biaya Listrik Mesin & Toko">Biaya Listrik Mesin &amp; Toko</option>
+                <option value="Biaya Operasional Toko">Biaya Operasional Toko</option>
+                <option value="Perawatan & Sparepart Mesin">Perawatan &amp; Sparepart Mesin</option>
               </select>
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="expenseDesc">Keterangan</label>
-              <input type="text" id="expenseDesc" class="input-control" placeholder="Contoh: Token listrik / servis mesin" required />
+              <input type="text" id="expenseDesc" class="input-control" placeholder="Contoh: Token listrik / servis printer" required />
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="expenseAmount">Nominal (Rp)</label>
@@ -1307,9 +1335,9 @@
               <tbody>
                 ${
                   db.journals.length === 0
-                    ? `<tr><td colspan="5" style="text-align:center;color:var(--muted);">Belum ada entri jurnal.</td></tr>`
+                    ? `<tr><td colspan="5" style="text-align:center;color:var(--muted);">Belum ada jurnal.</td></tr>`
                     : db.journals.flatMap((j) =>
-                        j.lines.map((ln, i) => `
+                        (j.lines || []).map((ln, i) => `
                           <tr>
                             <td>${i === 0 ? j.date : ""}</td>
                             <td>${i === 0 ? j.memo : ""}</td>
@@ -1327,6 +1355,43 @@
       `;
     }
 
+    function buildSyncView() {
+      const queue = loadSyncQueue();
+      return `
+        <div id="syncFeedback"></div>
+        <div class="card">
+          <h3>Sinkronisasi Google Apps Script &amp; Google Sheets</h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+            Saat perangkat offline, semua transaksi &amp; produksi tetap berjalan dan masuk antrean sinkronisasi lokal. Begitu online atau tombol sinkron ditekan, data dikirim ke Web App Google Apps Script Anda.
+          </p>
+          <form id="syncUrlForm" style="display:grid;grid-template-columns:2fr auto auto;gap:10px;align-items:end;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="appsScriptUrlInput">URL Web App Google Apps Script</label>
+              <input type="url" id="appsScriptUrlInput" class="input-control" placeholder="https://script.google.com/macros/s/AKfycb.../exec" value="${db.settings.appsScriptUrl || ""}" />
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan URL</button>
+            <button type="button" id="pullSyncBtn" class="btn btn-secondary">Tarik dari Sheets</button>
+          </form>
+
+          <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <button type="button" id="pushSyncNowBtn" class="btn btn-success">Sinkronkan Sekarang (${queue.length} antrean)</button>
+            <span style="font-size:12px;color:var(--muted);">Sinkron terakhir: ${db.settings.lastSyncedAt || "Belum pernah"}</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Backup &amp; Restore Data JSON Antar Perangkat</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <button type="button" id="exportJsonBtn" class="btn btn-secondary">Unduh Backup JSON</button>
+            <label class="btn btn-secondary" style="cursor:pointer;">
+              Restore dari File JSON
+              <input type="file" id="importJsonInput" accept="application/json" style="display:none;" />
+            </label>
+          </div>
+        </div>
+      `;
+    }
+
     function buildAccountsView() {
       return `
         <div id="acctFeedback"></div>
@@ -1335,7 +1400,7 @@
           <form id="addUserForm" style="display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;align-items:end;">
             <div class="form-group" style="margin-bottom:0;">
               <label for="newUserName">Nama Lengkap</label>
-              <input type="text" id="newUserName" class="input-control" placeholder="Nama pengguna" required />
+              <input type="text" id="newUserName" class="input-control" placeholder="Nama lengkap" required />
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="newUserUsername">Username</label>
@@ -1343,7 +1408,7 @@
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="newUserPassword">Kata Sandi</label>
-              <input type="password" id="newUserPassword" class="input-control" placeholder="Sandinya" required />
+              <input type="password" id="newUserPassword" class="input-control" placeholder="Kata sandi" required />
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label for="newUserRole">Peran</label>
@@ -1400,36 +1465,66 @@
       el.innerHTML = `<div class="${isError ? "alert-error" : "alert-success"}">${msg}</div>`;
     }
 
-    function bindTabEvents() {
-      // POS events
-      document.querySelectorAll("[data-add-product]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const prod = getMaterial(btn.getAttribute("data-add-product"));
-          if (!prod) return;
-          const existing = posCart.find((c) => c.type === "product" && c.id === prod.id);
-          if (existing) {
-            if (existing.qty + 1 > prod.stock) {
-              showBanner("posFeedback", "Stok produk tidak mencukupi.", true);
-              return;
-            }
-            existing.qty += 1;
-          } else {
-            if (Number(prod.stock) < 1) {
-              showBanner("posFeedback", "Stok produk habis.", true);
-              return;
-            }
-            posCart.push({
-              type: "product",
-              id: prod.id,
-              name: prod.name,
-              price: Number(prod.sellPrice),
-              unitCost: Number(prod.unitCost),
-              qty: 1
-            });
-          }
-          renderMainView();
+    function addProductToCartById(prodId) {
+      const prod = getMaterial(prodId);
+      if (!prod) return;
+      if (!prod.isSellable) {
+        showBanner("posFeedback", `${prod.name} adalah bahan baku manufaktur, bukan produk jual langsung.`, true);
+        return;
+      }
+      const existing = posCart.find((c) => c.type === "product" && c.id === prod.id);
+      if (existing) {
+        if (existing.qty + 1 > Number(prod.stock)) {
+          showBanner("posFeedback", "Stok produk tidak mencukupi.", true);
+          return;
+        }
+        existing.qty += 1;
+      } else {
+        if (Number(prod.stock) < 1) {
+          showBanner("posFeedback", "Stok produk habis.", true);
+          return;
+        }
+        posCart.push({
+          type: "product",
+          id: prod.id,
+          name: prod.name,
+          price: Number(prod.sellPrice),
+          unitCost: Number(prod.unitCost),
+          qty: 1
         });
+      }
+      renderMainView();
+    }
+
+    function bindTabEvents() {
+      document.querySelectorAll("[data-add-product]").forEach((btn) => {
+        btn.addEventListener("click", () => addProductToCartById(btn.getAttribute("data-add-product")));
       });
+
+      const barcodeInput = document.getElementById("posBarcodeInput");
+      const barcodeAddBtn = document.getElementById("posBarcodeAddBtn");
+      const handleBarcodeLookup = () => {
+        if (!barcodeInput) return;
+        const q = barcodeInput.value.trim().toLowerCase();
+        if (!q) return;
+        const match = db.materials.find(
+          (m) => m.isSellable && ((m.barcode && m.barcode.toLowerCase() === q) || m.name.toLowerCase().includes(q))
+        );
+        if (!match) {
+          showBanner("posFeedback", `Produk dengan barcode/nama "${q}" tidak ditemukan.`, true);
+          return;
+        }
+        addProductToCartById(match.id);
+      };
+      if (barcodeAddBtn) barcodeAddBtn.addEventListener("click", handleBarcodeLookup);
+      if (barcodeInput) {
+        barcodeInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleBarcodeLookup();
+          }
+        });
+      }
 
       const addBomCartBtn = document.getElementById("addBomToCartBtn");
       if (addBomCartBtn) {
@@ -1451,8 +1546,7 @@
 
       document.querySelectorAll("[data-remove-cart]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const idx = Number(btn.getAttribute("data-remove-cart"));
-          posCart.splice(idx, 1);
+          posCart.splice(Number(btn.getAttribute("data-remove-cart")), 1);
           renderMainView();
         });
       });
@@ -1462,21 +1556,20 @@
         checkoutBtn.addEventListener("click", () => {
           if (posCart.length === 0) return;
 
-          let totalRevenue = 0;
-          let totalCogs = 0;
-          let totalElec = 0;
-          let totalOper = 0;
-
-          // Validate product stock first
           for (const item of posCart) {
             if (item.type === "product") {
               const mat = getMaterial(item.id);
               if (!mat || Number(mat.stock) < item.qty) {
-                showBanner("posFeedback", `Stok ${item.name} tidak mencukupi.`, true);
+                showBanner("posFeedback", `Stok ${item.name} tidak cukup.`, true);
                 return;
               }
             }
           }
+
+          let totalRevenue = 0;
+          let totalCogs = 0;
+          let totalElec = 0;
+          let totalOper = 0;
 
           for (const item of posCart) {
             totalRevenue += item.price * item.qty;
@@ -1485,7 +1578,7 @@
               mat.stock = Number(mat.stock) - item.qty;
               totalCogs += Number(mat.unitCost) * item.qty;
             } else if (item.type === "bom") {
-              const mfgRes = executeManufacturingProduction(item.id, item.qty, true, item.price);
+              const mfgRes = executeManufacturingProduction(item.id, item.qty);
               if (!mfgRes.ok) {
                 db = loadDb();
                 showBanner("posFeedback", mfgRes.message, true);
@@ -1497,40 +1590,43 @@
             }
           }
 
+          const paid = Number(document.getElementById("posPaidAmount")?.value || totalRevenue);
           const saleId = "INV-" + Date.now().toString().slice(-6);
-          db.sales.unshift({
+          const saleRecord = {
             id: saleId,
             date: nowDateStr(),
             cashierName: currentUser.name,
             items: [...posCart],
             total: totalRevenue,
+            paid,
             cogs: totalCogs,
             mfgElectricity: totalElec,
             mfgOperational: totalOper
-          });
+          };
 
+          db.sales.unshift(saleRecord);
           addJournalEntry(`Penjualan Kasir ${saleId}`, [
-            { account: "Kas / Piutang Penjualan", debit: totalRevenue, credit: 0 },
-            { account: "Pendapatan Penjualan & Jasa", debit: 0, credit: totalRevenue },
-            { account: "HPP Barang & Bahan Baku", debit: totalCogs, credit: 0 },
+            { account: "Kas / Penjualan", debit: totalRevenue, credit: 0 },
+            { account: "Pendapatan Usaha", debit: 0, credit: totalRevenue },
+            { account: "HPP Barang & Bahan", debit: totalCogs, credit: 0 },
             { account: "Persediaan", debit: 0, credit: totalCogs }
           ]);
 
+          lastReceipt = saleRecord;
           saveDb(db);
           posCart = [];
           renderMainView();
-          showBanner("posFeedback", `Transaksi ${saleId} berhasil diproses (${formatRupiah(totalRevenue)}).`);
+          showBanner("posFeedback", `Transaksi ${saleId} berhasil (${formatRupiah(totalRevenue)}). Struk siap dicetak.`);
         });
       }
 
-      // Manufacturing events
       const runMfgForm = document.getElementById("runMfgForm");
       if (runMfgForm) {
         runMfgForm.addEventListener("submit", (e) => {
           e.preventDefault();
           const recId = document.getElementById("mfgRecipeSelect").value;
           const qty = Number(document.getElementById("mfgQtyInput").value);
-          const res = executeManufacturingProduction(recId, qty, false);
+          const res = executeManufacturingProduction(recId, qty);
           if (!res.ok) {
             db = loadDb();
             showBanner("mfgFeedback", res.message, true);
@@ -1540,7 +1636,7 @@
           renderMainView();
           showBanner(
             "mfgFeedback",
-            `Produksi ${res.count} ${res.recipe.outputUnit} (${res.recipe.name}) selesai. Bahan baku & biaya listrik/operasional telah dibebankan.`
+            `Produksi ${res.count} ${res.recipe.outputUnit} (${res.recipe.name}) selesai. Bahan: ${formatRupiah(res.materialCostTotal)}, Listrik: ${formatRupiah(res.elecTotal)}, Ops: ${formatRupiah(res.operTotal)}.`
           );
         });
       }
@@ -1555,15 +1651,13 @@
 
       document.querySelectorAll("[data-bom-mat]").forEach((sel) => {
         sel.addEventListener("change", () => {
-          const i = Number(sel.getAttribute("data-bom-mat"));
-          draftBomItems[i].materialId = sel.value;
+          draftBomItems[Number(sel.getAttribute("data-bom-mat"))].materialId = sel.value;
         });
       });
 
       document.querySelectorAll("[data-bom-qty]").forEach((inp) => {
         inp.addEventListener("input", () => {
-          const i = Number(inp.getAttribute("data-bom-qty"));
-          draftBomItems[i].qty = Number(inp.value || 1);
+          draftBomItems[Number(inp.getAttribute("data-bom-qty"))].qty = Number(inp.value || 1);
         });
       });
 
@@ -1586,7 +1680,6 @@
           const defaultPrice = Number(document.getElementById("newBomPrice").value || 0);
           const electricityCostPerUnit = Number(document.getElementById("newBomElec").value || 0);
           const operationalCostPerUnit = Number(document.getElementById("newBomOper").value || 0);
-
           if (!name) return;
 
           db.bomRecipes.push({
@@ -1606,37 +1699,38 @@
         });
       }
 
-      // Inventory restock
       const restockForm = document.getElementById("restockForm");
       if (restockForm) {
         restockForm.addEventListener("submit", (e) => {
           e.preventDefault();
-          const matId = document.getElementById("restockMatSelect").value;
+          const mat = getMaterial(document.getElementById("restockMatSelect").value);
           const qty = Number(document.getElementById("restockQty").value);
           const totalCost = Number(document.getElementById("restockCost").value);
-          const mat = getMaterial(matId);
+          const expiryDate = document.getElementById("restockExpiry").value;
           if (!mat || qty <= 0) return;
 
           const oldStock = Number(mat.stock);
-          const oldCostTotal = oldStock * Number(mat.unitCost);
+          const oldTotal = oldStock * Number(mat.unitCost);
           const newStock = oldStock + qty;
           mat.stock = newStock;
           if (newStock > 0) {
-            mat.unitCost = Math.round((oldCostTotal + totalCost) / newStock);
+            mat.unitCost = Math.round((oldTotal + totalCost) / newStock);
+          }
+          if (expiryDate) {
+            mat.expiryDate = expiryDate;
           }
 
-          addJournalEntry(`Restock / Kulakan ${mat.name} (+${qty} ${mat.unit})`, [
+          addJournalEntry(`Restock ${mat.name} (+${qty} ${mat.unit})`, [
             { account: "Persediaan", debit: totalCost, credit: 0 },
-            { account: "Kas / Hutang Kulakan", debit: 0, credit: totalCost }
+            { account: "Kas / Kulakan", debit: 0, credit: totalCost }
           ]);
 
           saveDb(db);
           renderMainView();
-          showBanner("invFeedback", `Restock ${mat.name} sebanyak ${qty} ${mat.unit} berhasil dicatat.`);
+          showBanner("invFeedback", `Restock ${mat.name} (+${qty} ${mat.unit}) berhasil dicatat.`);
         });
       }
 
-      // Accounting expense
       const expenseForm = document.getElementById("expenseForm");
       if (expenseForm) {
         expenseForm.addEventListener("submit", (e) => {
@@ -1661,11 +1755,56 @@
 
           saveDb(db);
           renderMainView();
-          showBanner("accFeedback", `Biaya "${desc}" sebesar ${formatRupiah(amount)} berhasil dicatat.`);
+          showBanner("accFeedback", `${category} (${formatRupiah(amount)}) berhasil dicatat.`);
         });
       }
 
-      // Accounts management (Owner)
+      const syncUrlForm = document.getElementById("syncUrlForm");
+      if (syncUrlForm) {
+        syncUrlForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          db.settings.appsScriptUrl = document.getElementById("appsScriptUrlInput").value.trim();
+          saveDbLocalOnly(db);
+          showBanner("syncFeedback", "URL Web App Google Apps Script berhasil disimpan.");
+        });
+      }
+      const pushBtn = document.getElementById("pushSyncNowBtn");
+      if (pushBtn) pushBtn.addEventListener("click", () => flushSyncQueue(false));
+      const pullBtn = document.getElementById("pullSyncBtn");
+      if (pullBtn) pullBtn.addEventListener("click", pullFromAppsScript);
+
+      const exportBtn = document.getElementById("exportJsonBtn");
+      if (exportBtn) {
+        exportBtn.addEventListener("click", () => {
+          const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = `yadhiya-pos-v1.6-backup-${nowDateStr()}.json`;
+          a.click();
+        });
+      }
+
+      const importInput = document.getElementById("importJsonInput");
+      if (importInput) {
+        importInput.addEventListener("change", (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const parsed = JSON.parse(reader.result);
+              db = { ...defaultDatabase(), ...parsed, settings: { ...defaultDatabase().settings, ...(parsed.settings || {}) } };
+              saveDbLocalOnly(db);
+              renderMainView();
+              showBanner("syncFeedback", "Data backup JSON berhasil di-restore.");
+            } catch (err) {
+              showBanner("syncFeedback", "File JSON tidak valid.", true);
+            }
+          };
+          reader.readAsText(file);
+        });
+      }
+
       const addUserForm = document.getElementById("addUserForm");
       if (addUserForm) {
         addUserForm.addEventListener("submit", (e) => {
@@ -1674,22 +1813,12 @@
           const username = document.getElementById("newUserUsername").value.trim();
           const password = document.getElementById("newUserPassword").value;
           const role = document.getElementById("newUserRole").value;
-
           if (!name || !username || !password) return;
           if (db.users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
             showBanner("acctFeedback", "Username sudah digunakan.", true);
             return;
           }
-
-          db.users.push({
-            id: "u-" + Date.now(),
-            name,
-            username,
-            password,
-            role,
-            active: true
-          });
-
+          db.users.push({ id: "u-" + Date.now(), name, username, password, role, active: true });
           saveDb(db);
           renderMainView();
           showBanner("acctFeedback", `Akun "${username}" (${role}) berhasil ditambahkan.`);
@@ -1699,8 +1828,7 @@
       document.querySelectorAll("[data-change-pwd]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const uid = btn.getAttribute("data-change-pwd");
-          const input = document.getElementById("pwd-" + uid);
-          const newPwd = input ? input.value : "";
+          const newPwd = document.getElementById("pwd-" + uid)?.value || "";
           if (!newPwd) {
             showBanner("acctFeedback", "Masukkan kata sandi baru terlebih dahulu.", true);
             return;
@@ -1710,18 +1838,17 @@
             target.password = newPwd;
             saveDb(db);
             renderMainView();
-            showBanner("acctFeedback", `Kata sandi untuk ${target.username} berhasil diperbarui.`);
+            showBanner("acctFeedback", `Kata sandi untuk ${target.username} berhasil diubah.`);
           }
         });
       });
 
       document.querySelectorAll("[data-del-user]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const uid = btn.getAttribute("data-del-user");
-          db.users = db.users.filter((u) => u.id !== uid);
+          db.users = db.users.filter((u) => u.id !== btn.getAttribute("data-del-user"));
           saveDb(db);
           renderMainView();
-          showBanner("acctFeedback", "Akun pengguna telah dihapus.");
+          showBanner("acctFeedback", "Akun pengguna dihapus.");
         });
       });
     }
