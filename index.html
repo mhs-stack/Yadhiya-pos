@@ -339,6 +339,53 @@
       body { background: #fff; }
       .card { box-shadow: none; border: 1px solid #cbd5e1; }
     }
+  
+    .scanner-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 60;
+    }
+    .scanner-modal {
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    }
+    .scanner-video-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #090d16;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+    .scanner-video-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .scanner-reticle {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      top: 50%;
+      height: 2px;
+      background: rgba(239, 68, 68, 0.85);
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.9);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
   </style>
 </head>
 <body>
@@ -414,6 +461,28 @@
       </header>
 
       <main id="mainView" class="main-content"></main>
+    </div>
+  </div>
+
+  
+  <!-- CAMERA BARCODE SCANNER MODAL -->
+  <div id="cameraScannerModal" class="scanner-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="scannerTitle">
+    <div class="scanner-modal">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <h3 id="scannerTitle" style="margin:0;">Scan Barcode dengan Kamera</h3>
+        <button type="button" id="closeCameraModalBtn" class="btn btn-secondary btn-sm">Tutup</button>
+      </div>
+      <p id="scannerStatusText" style="font-size:12px;color:var(--muted);margin-top:6px;">
+        Arahkan kamera ke barcode produk. Jika browser tidak mendukung deteksi otomatis, masukkan kode secara manual di bawah.
+      </p>
+      <div class="scanner-video-wrap">
+        <video id="scannerVideo" playsinline autoplay muted></video>
+        <div class="scanner-reticle"></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="manualCameraCodeInput" class="input-control" placeholder="Kode barcode terdeteksi / ketik manual..." />
+        <button type="button" id="applyManualCameraCodeBtn" class="btn btn-primary btn-sm" style="width:auto;">Gunakan</button>
+      </div>
     </div>
   </div>
 
@@ -942,8 +1011,9 @@
         <div class="pos-layout">
           <div class="card">
             <h3>Scan Barcode / Cari Produk</h3>
-            <div style="display:flex;gap:8px;margin-bottom:12px;">
-              <input type="text" id="posBarcodeInput" class="input-control" placeholder="Scan barcode atau ketik nama produk..." />
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+              <input type="text" id="posBarcodeInput" class="input-control" style="flex:1;min-width:180px;" placeholder="Scan barcode atau ketik nama produk..." />
+              <button type="button" id="posCameraScanBtn" class="btn btn-secondary">Kamera</button>
               <button type="button" id="posBarcodeAddBtn" class="btn btn-primary">Tambah</button>
             </div>
 
@@ -1231,7 +1301,13 @@
         </div>
 
         <div class="card">
-          <h3>Daftar Stok, Barcode &amp; Kedaluwarsa</h3>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
+            <h3 style="margin:0;">Daftar Stok, Barcode &amp; Kedaluwarsa</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input type="text" id="invBarcodeFilterInput" class="input-control" style="max-width:220px;" placeholder="Cari barcode / nama item..." />
+              <button type="button" id="invCameraScanBtn" class="btn btn-secondary btn-sm">Scan Kamera</button>
+            </div>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -1253,8 +1329,9 @@
                   if (exp) badge = `<span class="badge-exp">Kedaluwarsa</span>`;
                   else if (low) badge = `<span class="badge-low">Stok Menipis</span>`;
 
+                  const searchKey = `${m.barcode || ""} ${m.name || ""} ${m.unit || ""}`.toLowerCase();
                   return `
-                    <tr>
+                    <tr data-inv-search="${searchKey.replace(/"/g, "&quot;")}">
                       <td>${m.barcode || "-"}</td>
                       <td><strong>${m.name}</strong></td>
                       <td>${m.unit}</td>
@@ -1843,6 +1920,27 @@
         });
       });
 
+      const posCamBtn = document.getElementById("posCameraScanBtn");
+      if (posCamBtn) {
+        posCamBtn.addEventListener("click", () => openCameraScanner("pos"));
+      }
+
+      const invCamBtn = document.getElementById("invCameraScanBtn");
+      if (invCamBtn) {
+        invCamBtn.addEventListener("click", () => openCameraScanner("inventory"));
+      }
+
+      const invFilterInp = document.getElementById("invBarcodeFilterInput");
+      if (invFilterInp) {
+        invFilterInp.addEventListener("input", () => {
+          const q = invFilterInp.value.trim().toLowerCase();
+          document.querySelectorAll("tr[data-inv-search]").forEach((row) => {
+            const key = row.getAttribute("data-inv-search") || "";
+            row.classList.toggle("hidden", Boolean(q) && !key.includes(q));
+          });
+        });
+      }
+
       document.querySelectorAll("[data-del-user]").forEach((btn) => {
         btn.addEventListener("click", () => {
           db.users = db.users.filter((u) => u.id !== btn.getAttribute("data-del-user"));
@@ -1852,6 +1950,136 @@
         });
       });
     }
+
+
+    let cameraStream = null;
+    let cameraScanTimer = null;
+    let cameraTargetContext = "pos"; // "pos" atau "inventory"
+
+    function stopCameraScanner() {
+      if (cameraScanTimer) {
+        clearInterval(cameraScanTimer);
+        cameraScanTimer = null;
+      }
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((t) => t.stop());
+        cameraStream = null;
+      }
+      const vid = document.getElementById("scannerVideo");
+      if (vid) vid.srcObject = null;
+    }
+
+    function closeCameraModal() {
+      stopCameraScanner();
+      const modal = document.getElementById("cameraScannerModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function handleScannedBarcodeValue(code) {
+      const clean = (code || "").trim();
+      if (!clean) return;
+      closeCameraModal();
+
+      if (cameraTargetContext === "inventory") {
+        const invInput = document.getElementById("invBarcodeFilterInput");
+        if (invInput) {
+          invInput.value = clean;
+          invInput.dispatchEvent(new Event("input"));
+        }
+        const matched = db.materials.find((m) => (m.barcode || "").toLowerCase() === clean.toLowerCase());
+        if (matched) {
+          const sel = document.getElementById("restockMatSelect");
+          if (sel) sel.value = matched.id;
+          showBanner("invFeedback", `Barcode ${clean} cocok dengan item: ${matched.name}.`);
+        } else {
+          showBanner("invFeedback", `Barcode ${clean} dipindai (belum terdaftar di master item).`, true);
+        }
+        return;
+      }
+
+      const posInput = document.getElementById("posBarcodeInput");
+      if (posInput) posInput.value = clean;
+      const match = db.materials.find(
+        (m) => m.isSellable && ((m.barcode && m.barcode.toLowerCase() === clean.toLowerCase()) || m.name.toLowerCase().includes(clean.toLowerCase()))
+      );
+      if (match) {
+        addProductToCartById(match.id);
+      } else {
+        showBanner("posFeedback", `Barcode "${clean}" tidak ditemukan pada daftar produk jual.`, true);
+      }
+    }
+
+    async function openCameraScanner(context = "pos") {
+      cameraTargetContext = context;
+      const modal = document.getElementById("cameraScannerModal");
+      const statusEl = document.getElementById("scannerStatusText");
+      const manualInp = document.getElementById("manualCameraCodeInput");
+      const videoEl = document.getElementById("scannerVideo");
+
+      if (!modal || !videoEl) return;
+      if (manualInp) manualInp.value = "";
+      modal.classList.remove("hidden");
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (statusEl) {
+          statusEl.textContent = "Kamera tidak tersedia di browser/koneksi ini (gunakan HTTPS/localhost atau ketik kode barcode manual).";
+        }
+        return;
+      }
+
+      try {
+        stopCameraScanner();
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false
+        });
+        videoEl.srcObject = cameraStream;
+        await videoEl.play();
+
+        if ("BarcodeDetector" in window) {
+          const detector = new window.BarcodeDetector({
+            formats: ["ean_13", "ean_8", "code_128", "code_39", "upc_a", "upc_e", "qr_code"]
+          });
+          if (statusEl) {
+            statusEl.textContent = "Kamera aktif. Arahkan barcode ke garis merah untuk memindai otomatis...";
+          }
+          cameraScanTimer = setInterval(async () => {
+            if (!videoEl || videoEl.readyState < 2) return;
+            try {
+              const codes = await detector.detect(videoEl);
+              if (codes && codes.length > 0 && codes[0].rawValue) {
+                if (manualInp) manualInp.value = codes[0].rawValue;
+                handleScannedBarcodeValue(codes[0].rawValue);
+              }
+            } catch (detectErr) {
+              // Abaikan frame yang belum terbaca
+            }
+          }, 350);
+        } else if (statusEl) {
+          statusEl.textContent = "Kamera aktif. Browser ini belum mendukung BarcodeDetector otomatis—silakan ketik atau tempel kode barcode di kolom bawah.";
+        }
+      } catch (err) {
+        if (statusEl) {
+          statusEl.textContent = "Izin kamera ditolak atau kamera tidak ditemukan (" + err.message + "). Anda tetap bisa memasukkan kode barcode secara manual.";
+        }
+      }
+    }
+
+    document.getElementById("closeCameraModalBtn").addEventListener("click", closeCameraModal);
+    document.getElementById("cameraScannerModal").addEventListener("click", (e) => {
+      if (e.target.id === "cameraScannerModal") closeCameraModal();
+    });
+    document.getElementById("applyManualCameraCodeBtn").addEventListener("click", () => {
+      const val = document.getElementById("manualCameraCodeInput")?.value || "";
+      handleScannedBarcodeValue(val);
+    });
+    document.getElementById("manualCameraCodeInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleScannedBarcodeValue(e.target.value);
+      }
+    });
+
   </script>
 </body>
 </html>
