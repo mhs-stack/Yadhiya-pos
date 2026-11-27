@@ -1,2396 +1,1730 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#172b4d">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>YADHIYA POS — Kasir & Akuntansi</title>
-<link rel="manifest" href="manifest.json">
-<style>
-:root{
-  --navy:#172b4d;--navy-dark:#0f1d36;--blue:#285a9d;--bg:#f4f6fa;--muted:#687386;
-  --line:#e6eaf0;--card:#fff;--green:#16834a;--red:#c43d3d;--amber:#d97706;--soft:#f7f9fc
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#172033}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YADHIYA POS &amp; Manajemen Toko v1.6</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #1d4ed8;
+      --primary-hover: #1e40af;
+      --primary-soft: #eff6ff;
+      --success: #15803d;
+      --success-soft: #f0fdf4;
+      --warning: #b45309;
+      --warning-soft: #fffbeb;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+      --radius: 12px;
+      --shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+    }
 
-/* LOGIN SCREEN */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#172b4d 0%,#285a9d 100%)}
-.login-box{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
-.login-logo{width:54px;height:54px;border-radius:14px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900;font-size:28px;margin-bottom:14px}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* APP SHELL */
-.shell{display:flex;min-height:100vh}
-.sidebar{display:none}
-.main-area{flex:1;display:flex;flex-direction:column;min-width:0}
-header{background:var(--navy);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{display:flex;align-items:center;gap:10px}
-.logo{width:36px;height:36px;background:#fff;color:var(--navy);border-radius:10px;display:grid;place-items:center;font-weight:900;font-size:20px;flex-shrink:0}
-.brand small{display:block;color:#cbd8ec;font-size:11px}
-.status-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.pill{border:0;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
-.pill.online{background:#dcfce7;color:#166534}
-.pill.offline{background:#fee2e2;color:#991b1b}
-.pill.sync{background:#e0e7ff;color:#1e3a8a}
-.pill.user{background:rgba(255,255,255,.15);color:#fff}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
 
-main{padding:16px 16px 96px;flex:1;max-width:1280px;width:100%;margin:0 auto}
-.eyebrow{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;margin:0 0 8px;text-transform:uppercase}
-h1{font-size:20px;margin:0}
-h2{font-size:16px;margin:16px 0 10px}
-.muted{color:var(--muted);font-size:12px}
-.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}
+    .hidden {
+      display: none !important;
+    }
 
-/* CARDS & GRIDS */
-.card,.metric,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px}
-.panel{padding:14px;margin-bottom:12px}
-.panel.soft{background:var(--soft)}
-.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
-.metric{padding:13px;background:#fff;text-align:left;font-family:inherit;cursor:pointer;transition:.15s;position:relative}
-.metric:hover{border-color:var(--blue);transform:translateY(-1px);box-shadow:0 6px 16px rgba(23,43,77,.07)}
-.metric:active{transform:scale(.99)}
-.metric .value{font-size:20px;font-weight:800;margin-top:4px}
-.metric .hint{font-size:11px;color:var(--blue);font-weight:700;margin-top:4px}
-.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.quick button{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 4px;font-weight:700;font-size:12px;cursor:pointer;color:#1e293b}
-.quick button span{display:block;font-size:20px;margin-bottom:4px}
+    /* Login Screen */
+    .login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-/* FORMS & BUTTONS */
-input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d5dce6;border-radius:10px;background:#fff;font:inherit;margin:4px 0 10px}
-input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(40,90,157,.12)}
-input[readonly]{background:#f1f5f9;color:#475569;font-weight:700}
-label{font-size:12px;font-weight:700;color:#475569;display:block}
-.btn{border:0;background:var(--blue);color:#fff;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.btn.secondary{background:#edf2f8;color:#1e3a5f}
-.btn.success{background:var(--green);color:#fff}
-.btn.danger{background:#fee2e2;color:var(--red)}
-.btn.warning{background:#fef3c7;color:#92400e}
-.btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
-.row:last-child{border:0}
-.row .grow{flex:1;min-width:0}
-.ico{width:34px;height:34px;border-radius:10px;background:#f0f4fa;display:grid;place-items:center;font-size:17px;flex-shrink:0}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+    .login-card {
+      width: 100%;
+      max-width: 410px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
 
-/* MODE SWITCHER (KULAKAN) */
-.mode-pills{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.mode-pill{border:1.5px solid #cbd5e1;background:#fff;border-radius:11px;padding:10px 12px;font-weight:700;font-size:12px;color:#334155;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left}
-.mode-pill.active{border-color:var(--green);background:#ecfdf5;color:#14532d}
-.mode-dot{width:14px;height:14px;border-radius:50%;border:2px solid #94a3b8;display:inline-grid;place-items:center;flex-shrink:0}
-.mode-pill.active .mode-dot{border-color:var(--green)}
-.mode-pill.active .mode-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--green)}
-.pur-entry-grid{display:grid;grid-template-columns:1fr;gap:8px}
-@media(min-width:640px){
-  .pur-entry-grid{grid-template-columns:1.6fr 1fr 0.75fr 1fr auto;align-items:end}
-}
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
 
-/* FILTER TOOLBAR (PERSEDIAAN) */
-.filter-bar{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px}
-@media(min-width:640px){
-  .filter-bar{grid-template-columns:1.4fr 1fr 1fr}
-}
+    .login-card h1 {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
 
-/* POS SPLIT LAYOUT */
-.pos-layout{display:grid;grid-template-columns:1fr;gap:14px}
-.prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.prod-card{border:1px solid var(--line);border-radius:13px;background:#fff;padding:12px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:.15s}
-.prod-card:active{transform:scale(.98)}
-.prod-card.out{opacity:.5;background:#f8fafc}
-.badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;background:#eef2f6;color:#475569}
-.badge.low{background:#fee2e2;color:#b91c1c}
-.badge.ok{background:#dcfce7;color:#166534}
-.badge.warn{background:#fef3c7;color:#92400e}
-.cart-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
-.qty-ctrl{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border-radius:8px;padding:2px}
-.qty-ctrl button{border:0;background:#fff;width:24px;height:24px;border-radius:6px;font-weight:800;cursor:pointer}
+    .login-card p.subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
 
-/* NAVIGATION (SCROLLABLE ON MOBILE FOR 8 MENUS) */
-nav.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;overflow-x:auto;padding:6px 4px max(8px,env(safe-area-inset-bottom));z-index:25;-webkit-overflow-scrolling:touch}
-nav.bottom-nav::-webkit-scrollbar{display:none}
-nav.bottom-nav button{flex:0 0 18.5%;min-width:62px;background:none;border:0;color:#64748b;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 2px}
-nav.bottom-nav button b{font-size:18px;font-weight:400}
-nav.bottom-nav button.active{color:var(--blue);font-weight:800}
+    .form-group {
+      margin-bottom: 14px;
+    }
 
-/* MODAL & PRINT RECEIPT */
-.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
-.modal-bg.open{display:flex}
-.modal{background:#fff;border-radius:18px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;padding:20px;box-shadow:0 20px 40px rgba(0,0,0,.25)}
-.receipt-paper{font-family:'Courier New',monospace;font-size:12px;background:#fff;color:#000;padding:12px;border:1px dashed #94a3b8;line-height:1.4}
-.receipt-paper hr{border:0;border-top:1px dashed #000;margin:6px 0}
-.r-row{display:flex;justify-content:space-between}
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
 
-/* DESKTOP & TABLET ADAPTIVE */
-@media(min-width:768px){
-  nav.bottom-nav{display:none}
-  .sidebar{display:flex;flex-direction:column;width:235px;background:var(--navy);color:#fff;padding:18px 12px;position:sticky;top:0;height:100vh;flex-shrink:0;overflow-y:auto}
-  .sidebar .brand{padding:0 8px 18px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:14px}
-  .sidebar button{background:none;border:0;color:#cbd5e1;text-align:left;padding:10px 12px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:4px}
-  .sidebar button:hover{background:rgba(255,255,255,.08);color:#fff}
-  .sidebar button.active{background:var(--blue);color:#fff}
-  header .brand{display:none}
-  main{padding:20px 24px 40px}
-  .metrics{grid-template-columns:repeat(4,1fr)}
-  .pos-layout{grid-template-columns:1.45fr 1fr;align-items:start}
-  .prod-grid{grid-template-columns:repeat(3,1fr)}
-  .cart-box{position:sticky;top:74px}
-}
+    .input-control, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
 
-/* THERMAL PRINT MODE */
-@media print{
-  body *{visibility:hidden}
-  #printArea, #printArea *{visibility:visible}
-  #printArea{position:fixed;left:0;top:0;width:58mm;padding:2mm;border:0}
-}
-</style>
+    .input-control:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+    }
+
+    .password-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-box .input-control {
+      padding-right: 44px;
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 8px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .eye-btn:hover {
+      background: var(--surface-alt);
+      color: var(--text);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-alt);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #ffffff;
+    }
+
+    .btn-danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-color: #fecaca;
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    .alert-error {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    .alert-success {
+      background: var(--success-soft);
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    /* App Layout */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-brand {
+      padding: 4px 8px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .sidebar-brand h2 {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .sidebar-brand span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-btn:hover {
+      background: var(--surface-alt);
+    }
+
+    .nav-btn.active {
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .user-box {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .user-meta {
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .role-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      margin-top: 4px;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .mobile-header {
+      display: none;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .page-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .page-header h1 {
+      font-size: 22px;
+    }
+
+    .page-header p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--surface-alt);
+      font-weight: 700;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .badge-ok {
+      background: var(--success-soft);
+      color: var(--success);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-low {
+      background: var(--warning-soft);
+      color: var(--warning);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .pos-layout {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 18px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .product-tile {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: var(--surface-alt);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .product-tile:hover {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .product-tile .pname {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .product-tile .pprice {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .product-tile .pmeta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+
+    .summary-total {
+      border-top: 2px solid var(--border);
+      margin-top: 8px;
+      padding-top: 10px;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .bom-item-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .grid-3, .grid-2, .pos-layout {
+        grid-template-columns: 1fr;
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        z-index: 30;
+        transition: left 0.2s ease;
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .main-content {
+        padding: 16px;
+      }
+    }
+
+    @media print {
+      .sidebar, .mobile-header, .no-print {
+        display: none !important;
+      }
+      body {
+        background: #ffffff;
+      }
+      .card {
+        box-shadow: none;
+        border: 1px solid #cbd5e1;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<div id="root"></div>
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="login-wrapper">
+    <div class="login-card">
+      <div class="brand-badge">YADHIYA POS &bull; v1.6</div>
+      <h1>Masuk Aplikasi</h1>
+      <p class="subtitle">Silakan masukkan username dan kata sandi akun Anda.</p>
 
-<!-- MODAL UNIVERSAL -->
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modalBody"></div>
-</div>
+      <div id="loginError" class="alert-error hidden"></div>
 
-<script>
-/* =========================================================
-   1. INDEXEDDB OFFLINE STORAGE ENGINE
-   ========================================================= */
-const DB_NAME = 'YadhiyaPosDB_v1';
-const DB_VER = 1;
-const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbylRtrTBXbtKpLgUoRWfJBnaA5SiDrIeuBcIdJVHsgfNkb1VimKNhiiaYIs4MnZeI69/exec';
-let db = null;
-let isSyncing = false;
+      <form id="loginForm" autocomplete="off">
+        <div class="form-group">
+          <label for="loginUsername">Username</label>
+          <input
+            type="text"
+            id="loginUsername"
+            class="input-control"
+            placeholder="Masukkan username"
+            value=""
+            required
+          />
+        </div>
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = (e) => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv');
-    };
-    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
-    req.onerror = (e) => reject(e.target.error);
-  });
-}
+        <div class="form-group">
+          <label for="loginPassword">Kata Sandi</label>
+          <div class="password-box">
+            <input
+              type="password"
+              id="loginPassword"
+              class="input-control"
+              placeholder="Masukkan kata sandi"
+              value=""
+              required
+            />
+            <button
+              type="button"
+              id="togglePasswordBtn"
+              class="eye-btn"
+              aria-label="Tampilkan kata sandi"
+              title="Tampilkan / sembunyikan kata sandi"
+            >
+              <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-function dbGet(key) {
-  return new Promise((resolve) => {
-    const tx = db.transaction('kv', 'readonly');
-    const req = tx.objectStore('kv').get(key);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => resolve(null);
-  });
-}
-
-function dbSet(key, val) {
-  return new Promise((resolve) => {
-    const tx = db.transaction('kv', 'readwrite');
-    tx.objectStore('kv').put(val, key);
-    tx.oncomplete = () => resolve(true);
-  });
-}
-
-/* =========================================================
-   2. DEFAULT STATE & SEED DATA
-   ========================================================= */
-const DEFAULT_USERS = [
-  { username: 'admin', password: '123', name: 'Owner YADHIYA', role: 'Owner' },
-  { username: 'kasir', password: '123', name: 'Kasir Toko', role: 'Kasir' }
-];
-
-const DEFAULT_PRODUCTS = [
-  { code: '8991001', name: 'Chiki Balls Keju', category: 'Makanan Ringan', unit: 'Pcs', buyPrice: 2000, sellPrice: 3000, stock: 30, minStock: 5, isService: false },
-  { code: '8991002', name: 'Pulpen Standard AE7', category: 'Alat Tulis', unit: 'Pcs', buyPrice: 1500, sellPrice: 2500, stock: 24, minStock: 5, isService: false },
-  { code: '8991003', name: 'Buku Tulis Sidu 38', category: 'Alat Tulis', unit: 'Pcs', buyPrice: 3200, sellPrice: 4500, stock: 18, minStock: 5, isService: false },
-  { code: '8991004', name: 'Kertas HVS A4 75gr', category: 'ATK', unit: 'Rim', buyPrice: 42000, sellPrice: 52000, stock: 4, minStock: 5, isService: false },
-  { code: 'FC-BW', name: 'Fotokopi Hitam Putih A4', category: 'Jasa Fotokopi', unit: 'Lembar', buyPrice: 120, sellPrice: 300, stock: 9999, minStock: 0, isService: true },
-  { code: 'PRT-CLR', name: 'Print Warna A4', category: 'Jasa Fotokopi', unit: 'Lembar', buyPrice: 500, sellPrice: 1500, stock: 9999, minStock: 0, isService: true },
-  { code: 'JILID-01', name: 'Jilid Lakban + Mika', category: 'Jasa Fotokopi', unit: 'Buku', buyPrice: 1500, sellPrice: 4000, stock: 9999, minStock: 0, isService: true }
-];
-
-let state = {
-  currentUser: null,
-  page: 'Kasir',
-  // Persediaan filters & sorting
-  stockFilterLow: false,
-  stockCatFilter: 'Semua',
-  stockSortBy: 'name_asc',
-  stockSearchQuery: '',
-  online: navigator.onLine,
-  gasUrl: DEFAULT_GAS_URL,
-  lastSync: 'Belum pernah',
-  syncQueue: [],
-  users: DEFAULT_USERS,
-  products: DEFAULT_PRODUCTS,
-  sales: [],
-  purchases: [],
-  debts: [],        // Utang & Piutang
-  manufactures: [], // Riwayat Produksi / Manufaktur
-  journals: [],
-  shifts: [],
-  cart: [],
-  searchQuery: '',
-  catFilter: 'Semua',
-  paymentMethod: 'Tunai (Kas Laci)',
-  customerName: '',
-  cashPaid: '',
-  // Purchase Draft
-  purMode: 'subtotal',
-  purSelectedCode: '',
-  purQtyInput: 1,
-  purTotalInput: '',
-  purUnitInput: '',
-  purItems: [],
-  purShowExtras: false,
-  purDiscount: 0,
-  purAdminFee: 0,
-  purShipping: 0,
-  purSupplier: '',
-  purDueDate: '',
-  purPaySrc: '101 - Kas Laci Toko',
-  // UtangPiutang UI state
-  debtTab: 'Semua', // 'Semua' | 'Utang' | 'Piutang'
-  debtStatusFilter: 'Belum Lunas', // 'Semua' | 'Belum Lunas' | 'Lunas'
-  // Manufaktur UI draft
-  mfgOutputCode: '',
-  mfgOutputQty: 1,
-  mfgExtraCost: 0,
-  mfgMatCode: '',
-  mfgMatQty: 1,
-  mfgMaterials: []
-};
-
-async function loadAppState() {
-  await openDB();
-  const saved = await dbGet('yadhiya_state_v1');
-  if (saved) {
-    state = {
-      ...state,
-      ...saved,
-      debts: saved.debts || [],
-      manufactures: saved.manufactures || [],
-      gasUrl: saved.gasUrl || DEFAULT_GAS_URL,
-      online: navigator.onLine
-    };
-  } else {
-    await saveAppState();
-  }
-}
-
-async function saveAppState() {
-  const toSave = {
-    currentUser: state.currentUser,
-    gasUrl: state.gasUrl,
-    lastSync: state.lastSync,
-    syncQueue: state.syncQueue,
-    users: state.users,
-    products: state.products,
-    sales: state.sales,
-    purchases: state.purchases,
-    debts: state.debts,
-    manufactures: state.manufactures,
-    journals: state.journals,
-    shifts: state.shifts
-  };
-  await dbSet('yadhiya_state_v1', toSave);
-}
-
-/* =========================================================
-   3. HELPERS & FORMATTERS
-   ========================================================= */
-const $ = (s) => document.querySelector(s);
-const rp = (n) => 'Rp' + Math.round(Number(n || 0)).toLocaleString('id-ID');
-const nowStr = () => new Date().toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
-const todayKey = () => new Date().toISOString().slice(0, 10);
-
-function queueSync(type, item) {
-  state.syncQueue.push({ type, item, ts: Date.now() + Math.random() });
-}
-
-/* =========================================================
-   4. AUTHENTICATION (OWNER & KASIR)
-   ========================================================= */
-function renderLogin() {
-  $('#root').innerHTML = `
-  <div class="login-wrap">
-    <div class="login-box">
-      <div class="login-logo">Y</div>
-      <h1 style="font-size:22px">YADHIYA POS</h1>
-      <p class="muted" style="margin-top:4px">Kasir, Fotokopi & Akuntansi Offline-First</p>
-      <form onsubmit="handleLogin(event)" style="margin-top:18px">
-        <label>Username</label>
-        <input id="loginUser" placeholder="Masukkan username (admin / kasir)" required autocomplete="username">
-        <label>Password</label>
-        <input id="loginPass" type="password" placeholder="Masukkan password (default: 123)" required autocomplete="current-password">
-        <button class="btn" style="width:100%;padding:12px;margin-top:6px" type="submit">Masuk ke Aplikasi</button>
+        <button type="submit" class="btn btn-primary">Masuk</button>
       </form>
-      <div class="panel soft" style="margin-top:16px;margin-bottom:0;font-size:11px">
-        <b>Akun Bawaan Offline:</b><br>
-        • Owner: <code>admin</code> / Password: <code>123</code><br>
-        • Kasir: <code>kasir</code> / Password: <code>123</code><br>
-        <span class="muted">Transaksi di HP dan Laptop otomatis disinkronkan dua arah saat online.</span>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="appShell" class="app-shell hidden">
+    <aside id="sidebar" class="sidebar">
+      <div>
+        <div class="sidebar-brand">
+          <h2>YADHIYA POS</h2>
+          <span>Manajemen Toko &amp; Manufaktur v1.6</span>
+        </div>
+        <nav id="navList" class="nav-list"></nav>
       </div>
+
+      <div class="user-box">
+        <div class="user-meta">
+          <div id="activeUserName" style="font-weight:700;"></div>
+          <div id="activeUserRole" class="role-pill"></div>
+        </div>
+        <button type="button" id="logoutBtn" class="btn btn-secondary btn-sm" style="width:100%;">Keluar</button>
+      </div>
+    </aside>
+
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <header class="mobile-header">
+        <button type="button" id="menuToggleBtn" class="btn btn-secondary btn-sm">Menu</button>
+        <strong>YADHIYA POS v1.6</strong>
+        <button type="button" id="mobileLogoutBtn" class="btn btn-secondary btn-sm">Keluar</button>
+      </header>
+
+      <main id="mainView" class="main-content"></main>
     </div>
-  </div>`;
-}
+  </div>
 
-async function handleLogin(e) {
-  e.preventDefault();
-  const u = $('#loginUser').value.trim().toLowerCase();
-  const p = $('#loginPass').value.trim();
-  const found = state.users.find(x => x.username.toLowerCase() === u && x.password === p);
-  if (!found) {
-    alert('Username atau password salah!');
-    return;
-  }
-  state.currentUser = found;
-  await saveAppState();
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
+  <script>
+    const STORAGE_KEY = "yadhiya_pos_v1_6_db";
 
-async function handleLogout() {
-  if (!confirm('Keluar dari akun ' + state.currentUser.name + '?')) return;
-  state.currentUser = null;
-  await saveAppState();
-  render();
-}
+    const ROLE_PERMISSIONS = {
+      owner: ["dashboard", "pos", "manufacturing", "inventory", "accounting", "accounts"],
+      kasir: ["pos", "manufacturing", "inventory"],
+      accounting: ["dashboard", "manufacturing", "inventory", "accounting"]
+    };
 
-/* =========================================================
-   5. POS CART, PHOTOCOPY CALCULATOR & CAMERA SCANNER
-   ========================================================= */
-function addToCart(code, customQty = 1) {
-  const prod = state.products.find(p => p.code === code);
-  if (!prod) return;
-  const existing = state.cart.find(c => c.code === code);
-  const currentQty = existing ? existing.qty : 0;
+    const MENU_META = {
+      dashboard: { label: "Dashboard", subtitle: "Ringkasan operasional & keuangan toko" },
+      pos: { label: "Kasir (POS)", subtitle: "Transaksi penjualan barang & hasil manufaktur" },
+      manufacturing: { label: "Manufaktur", subtitle: "Resep BOM (kertas, tinta, bahan) + biaya listrik & operasional" },
+      inventory: { label: "Stok & Restock", subtitle: "Bahan baku, produk jadi, dan pencatatan kulakan" },
+      accounting: { label: "Keuangan & Jurnal", subtitle: "Laba rugi, biaya listrik/operasional, dan jurnal umum" },
+      accounts: { label: "Manajemen Akun", subtitle: "Kelola pengguna dan kata sandi (Owner)" }
+    };
 
-  if (!prod.isService && currentQty + customQty > prod.stock) {
-    alert('Stok ' + prod.name + ' tidak mencukupi! Sisa stok: ' + prod.stock);
-    return;
-  }
-  if (existing) {
-    existing.qty += customQty;
-  } else {
-    state.cart.push({
-      code: prod.code,
-      name: prod.name,
-      unit: prod.unit,
-      buyPrice: prod.buyPrice,
-      sellPrice: prod.sellPrice,
-      isService: prod.isService,
-      qty: customQty
-    });
-  }
-  render();
-}
-
-function updateCartQty(code, delta) {
-  const idx = state.cart.findIndex(c => c.code === code);
-  if (idx === -1) return;
-  const item = state.cart[idx];
-  const prod = state.products.find(p => p.code === code);
-  const nextQty = item.qty + delta;
-  if (nextQty <= 0) {
-    state.cart.splice(idx, 1);
-  } else {
-    if (prod && !prod.isService && nextQty > prod.stock) {
-      alert('Stok maksimal tercapai (' + prod.stock + ')');
-      return;
-    }
-    item.qty = nextQty;
-  }
-  render();
-}
-
-function setCartQtyExact(code, val) {
-  const q = parseInt(val, 10);
-  if (isNaN(q) || q <= 0) {
-    state.cart = state.cart.filter(c => c.code !== code);
-  } else {
-    const item = state.cart.find(c => c.code === code);
-    const prod = state.products.find(p => p.code === code);
-    if (item && prod && !prod.isService && q > prod.stock) {
-      alert('Stok tersedia hanya ' + prod.stock);
-      item.qty = prod.stock;
-    } else if (item) {
-      item.qty = q;
-    }
-  }
-  render();
-}
-
-function openPhotocopyModal() {
-  const services = state.products.filter(p => p.isService);
-  openModal(`
-    <h3>🖨️ Kalkulator Fotokopi & Print</h3>
-    <label>Jenis Layanan</label>
-    <select id="fcType">
-      ${services.map(s => `<option value="${s.code}">${s.name} (${rp(s.sellPrice)}/${s.unit})</option>`).join('')}
-    </select>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label>Jumlah Lembar/Halaman</label><input id="fcPages" type="number" value="1" min="1"></div>
-      <div><label>Jumlah Rangkap/Copy</label><input id="fcCopies" type="number" value="1" min="1"></div>
-    </div>
-    <label>Tambah Jilid Otomatis?</label>
-    <select id="fcBind">
-      <option value="">Tidak perlu jilid</option>
-      ${services.filter(s => s.code.startsWith('JILID')).map(s => `<option value="${s.code}">${s.name} (${rp(s.sellPrice)})</option>`).join('')}
-    </select>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
-      <button class="btn" style="flex:1" onclick="applyPhotocopy()">Masukkan Keranjang</button>
-    </div>
-  `);
-}
-
-function applyPhotocopy() {
-  const code = $('#fcType').value;
-  const pages = Math.max(1, parseInt($('#fcPages').value || 1, 10));
-  const copies = Math.max(1, parseInt($('#fcCopies').value || 1, 10));
-  const bindCode = $('#fcBind').value;
-  addToCart(code, pages * copies);
-  if (bindCode) addToCart(bindCode, copies);
-  closeModal();
-}
-
-let scannerStream = null;
-async function openCameraScanner() {
-  openModal(`
-    <h3>📷 Scan Barcode Kamera HP</h3>
-    <p class="muted">Arahkan kamera ke barcode kemasan produk.</p>
-    <video id="scanVideo" autoplay playsinline style="width:100%;border-radius:12px;background:#000;max-height:260px;object-fit:cover"></video>
-    <div id="scanStatus" class="muted" style="margin:8px 0">Mengaktifkan kamera...</div>
-    <div style="display:flex;gap:8px">
-      <input id="manualScanCode" placeholder="Atau ketik kode barcode..." style="margin:0">
-      <button class="btn" onclick="submitManualScan()">Cari</button>
-    </div>
-    <button class="btn secondary" style="width:100%;margin-top:10px" onclick="stopScannerAndClose()">Tutup Kamera</button>
-  `);
-
-  try {
-    scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    const video = $('#scanVideo');
-    if (video) video.srcObject = scannerStream;
-
-    if ('BarcodeDetector' in window) {
-      const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'code_128', 'qr_code', 'upc_a'] });
-      $('#scanStatus').textContent = 'Kamera aktif — mendeteksi barcode otomatis...';
-      const loop = async () => {
-        if (!scannerStream || !$('#scanVideo')) return;
-        try {
-          const codes = await detector.detect($('#scanVideo'));
-          if (codes.length > 0) {
-            const raw = codes[0].rawValue;
-            const prod = state.products.find(p => p.code === raw);
-            if (prod) {
-              stopScannerAndClose();
-              addToCart(prod.code, 1);
-              return;
-            } else {
-              $('#scanStatus').textContent = 'Barcode terbaca: ' + raw + ' (Belum terdaftar di Master Produk)';
-            }
+    function defaultDatabase() {
+      return {
+        users: [
+          { id: "u-owner", name: "Pemilik Yadhiya", username: "owner", password: "123", role: "owner", active: true },
+          { id: "u-kasir", name: "Kasir Toko", username: "kasir", password: "123", role: "kasir", active: true },
+          { id: "u-acc", name: "Staf Accounting", username: "accounting", password: "123", role: "accounting", active: true }
+        ],
+        materials: [
+          { id: "mat-hvs-a4", name: "Kertas HVS A4 (Lembar)", unit: "lembar", stock: 2500, minStock: 500, unitCost: 110, isSellable: false, sellPrice: 0 },
+          { id: "mat-hvs-f4", name: "Kertas F4 Folio (Lembar)", unit: "lembar", stock: 1500, minStock: 300, unitCost: 130, isSellable: false, sellPrice: 0 },
+          { id: "mat-tinta-bw", name: "Tinta Hitam / Toner (ml/unit)", unit: "unit", stock: 8000, minStock: 1000, unitCost: 25, isSellable: false, sellPrice: 0 },
+          { id: "mat-tinta-clr", name: "Tinta Warna Cetak (unit)", unit: "unit", stock: 4000, minStock: 600, unitCost: 85, isSellable: false, sellPrice: 0 },
+          { id: "mat-jilid", name: "Cover & Spiral Jilid (set)", unit: "set", stock: 120, minStock: 25, unitCost: 2200, isSellable: false, sellPrice: 0 },
+          { id: "prd-pulpen", name: "Pulpen Standar", unit: "pcs", stock: 85, minStock: 20, unitCost: 1800, isSellable: true, sellPrice: 3000 },
+          { id: "prd-air", name: "Air Mineral Botol 600ml", unit: "botol", stock: 48, minStock: 12, unitCost: 2300, isSellable: true, sellPrice: 4000 }
+        ],
+        bomRecipes: [
+          {
+            id: "bom-fc-bw",
+            name: "Fotokopi / Cetak Hitam Putih (Per Lembar)",
+            outputUnit: "lembar",
+            defaultPrice: 500,
+            electricityCostPerUnit: 65,
+            operationalCostPerUnit: 35,
+            items: [
+              { materialId: "mat-hvs-a4", qty: 1 },
+              { materialId: "mat-tinta-bw", qty: 1 }
+            ]
+          },
+          {
+            id: "bom-print-clr",
+            name: "Cetak Dokumen Warna (Per Lembar)",
+            outputUnit: "lembar",
+            defaultPrice: 1500,
+            electricityCostPerUnit: 110,
+            operationalCostPerUnit: 60,
+            items: [
+              { materialId: "mat-hvs-a4", qty: 1 },
+              { materialId: "mat-tinta-clr", qty: 2 }
+            ]
+          },
+          {
+            id: "bom-jilid",
+            name: "Jilid Dokumen / Laporan (Per Buku)",
+            outputUnit: "buku",
+            defaultPrice: 7500,
+            electricityCostPerUnit: 250,
+            operationalCostPerUnit: 300,
+            items: [
+              { materialId: "mat-jilid", qty: 1 }
+            ]
           }
-        } catch (e) {}
-        requestAnimationFrame(loop);
+        ],
+        sales: [],
+        expenses: [],
+        journals: []
       };
-      requestAnimationFrame(loop);
-    } else {
-      $('#scanStatus').textContent = 'Browser tidak mendukung auto-detect barcode. Gunakan input kode atau scanner USB.';
     }
-  } catch (err) {
-    if ($('#scanStatus')) $('#scanStatus').textContent = 'Izin kamera ditolak atau tidak tersedia di perangkat ini.';
-  }
-}
 
-function submitManualScan() {
-  const code = $('#manualScanCode').value.trim();
-  const prod = state.products.find(p => p.code === code);
-  if (prod) {
-    stopScannerAndClose();
-    addToCart(prod.code, 1);
-  } else {
-    alert('Produk dengan kode "' + code + '" tidak ditemukan.');
-  }
-}
-
-function stopScannerAndClose() {
-  if (scannerStream) {
-    scannerStream.getTracks().forEach(t => t.stop());
-    scannerStream = null;
-  }
-  closeModal();
-}
-
-/* =========================================================
-   6. CHECKOUT & SILENT ACCOUNTING ENGINE (TERMASUK PIUTANG TEMPO)
-   ========================================================= */
-async function processCheckout() {
-  if (!state.cart.length) return;
-  const total = state.cart.reduce((s, c) => s + c.sellPrice * c.qty, 0);
-  const totalHpp = state.cart.reduce((s, c) => s + c.buyPrice * c.qty, 0);
-  const isPiutang = state.paymentMethod === 'Piutang (Tempo Pelanggan)';
-
-  if (isPiutang && !(state.customerName || '').trim()) {
-    alert('Masukkan Nama Pelanggan terlebih dahulu untuk transaksi Piutang / Tempo!');
-    return;
-  }
-
-  const paid = state.paymentMethod === 'Tunai (Kas Laci)'
-    ? Number(state.cashPaid || total)
-    : (isPiutang ? 0 : total);
-
-  if (!isPiutang && paid < total) {
-    alert('Jumlah uang dibayar kurang dari total belanja!');
-    return;
-  }
-
-  const invoice = 'INV-' + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89);
-  const date = nowStr();
-  const isoDate = todayKey();
-  const custName = (state.customerName || '').trim();
-
-  state.cart.forEach(item => {
-    const prod = state.products.find(p => p.code === item.code);
-    if (prod && !prod.isService) {
-      prod.stock = Math.max(0, prod.stock - item.qty);
-      prod.updatedAt = new Date().toISOString();
-      queueSync('STOCK_DELTA', { code: prod.code, delta: -item.qty });
+    function loadDb() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        const seed = defaultDatabase();
+        saveDb(seed);
+        return seed;
+      }
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        const seed = defaultDatabase();
+        saveDb(seed);
+        return seed;
+      }
     }
-  });
 
-  const sale = {
-    invoice,
-    date,
-    isoDate,
-    cashier: state.currentUser.name,
-    paymentMethod: isPiutang ? 'Piutang (' + custName + ')' : state.paymentMethod,
-    subtotal: total,
-    total,
-    paid,
-    change: isPiutang ? 0 : (paid - total),
-    status: 'Selesai',
-    items: JSON.parse(JSON.stringify(state.cart))
-  };
-  state.sales.unshift(sale);
-  queueSync('SALE', sale);
-
-  let debitAcc = '101 - Kas Laci Toko';
-  if (state.paymentMethod === 'QRIS / Transfer Bank') debitAcc = '102 - Bank / QRIS';
-  if (isPiutang) {
-    debitAcc = '103 - Piutang Usaha';
-    const debtItem = {
-      id: 'PIU-' + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89),
-      kind: 'Piutang',
-      party: custName,
-      ref: invoice,
-      date,
-      dueDate: '',
-      totalAmount: total,
-      paidAmount: 0,
-      remaining: total,
-      status: 'Belum Lunas',
-      note: 'Penjualan kasir ' + invoice
-    };
-    state.debts.unshift(debtItem);
-    queueSync('DEBT', debtItem);
-  }
-
-  const jEntries = [
-    { id: invoice + '-1', date, isoDate, ref: invoice, desc: 'Penjualan ' + invoice + (custName ? ' (' + custName + ')' : ''), account: debitAcc, debit: total, credit: 0 },
-    { id: invoice + '-2', date, isoDate, ref: invoice, desc: 'Penjualan ' + invoice, account: '401 - Pendapatan Penjualan & Jasa', debit: 0, credit: total },
-    { id: invoice + '-3', date, isoDate, ref: invoice, desc: 'HPP ' + invoice, account: '501 - Harga Pokok Penjualan', debit: totalHpp, credit: 0 },
-    { id: invoice + '-4', date, isoDate, ref: invoice, desc: 'Persediaan ' + invoice, account: '104 - Persediaan Barang', debit: 0, credit: totalHpp }
-  ];
-  jEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
-
-  state.cart = [];
-  state.cashPaid = '';
-  state.customerName = '';
-  await saveAppState();
-  render();
-  showReceiptModal(sale);
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-async function voidSale(invoice) {
-  const sale = state.sales.find(s => s.invoice === invoice);
-  if (!sale || sale.status === 'Void') return;
-  const reason = prompt('Alasan pembatalan (Void) transaksi ' + invoice + ':', 'Salah input kasir');
-  if (!reason) return;
-
-  sale.status = 'Void';
-  sale.voidReason = reason;
-  queueSync('SALE', sale);
-
-  let totalHpp = 0;
-  sale.items.forEach(item => {
-    totalHpp += item.buyPrice * item.qty;
-    const prod = state.products.find(p => p.code === item.code);
-    if (prod && !prod.isService) {
-      prod.stock += item.qty;
-      queueSync('STOCK_DELTA', { code: prod.code, delta: +item.qty });
+    function saveDb(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
-  });
 
-  const date = nowStr();
-  const isoDate = todayKey();
-  let cashAcc = '101 - Kas Laci Toko';
-  if (sale.paymentMethod.startsWith('QRIS')) cashAcc = '102 - Bank / QRIS';
-  if (sale.paymentMethod.startsWith('Piutang')) {
-    cashAcc = '103 - Piutang Usaha';
-    const dRec = state.debts.find(d => d.ref === invoice);
-    if (dRec && dRec.remaining > 0) {
-      dRec.remaining = 0;
-      dRec.status = 'Void';
-      dRec.note = (dRec.note || '') + ' [VOID: ' + reason + ']';
-      queueSync('DEBT', dRec);
+    let db = loadDb();
+    let currentUser = null;
+    let activeTab = "dashboard";
+    let posCart = [];
+    let draftBomItems = [{ materialId: "mat-hvs-a4", qty: 1 }];
+
+    function formatRupiah(num) {
+      return "Rp " + Number(num || 0).toLocaleString("id-ID");
     }
-  }
 
-  const revEntries = [
-    { id: invoice + '-V1', date, isoDate, ref: invoice, desc: 'VOID: ' + reason, account: '401 - Pendapatan Penjualan & Jasa', debit: sale.total, credit: 0 },
-    { id: invoice + '-V2', date, isoDate, ref: invoice, desc: 'VOID: ' + reason, account: cashAcc, debit: 0, credit: sale.total },
-    { id: invoice + '-V3', date, isoDate, ref: invoice, desc: 'VOID HPP: ' + reason, account: '104 - Persediaan Barang', debit: totalHpp, credit: 0 },
-    { id: invoice + '-V4', date, isoDate, ref: invoice, desc: 'VOID HPP: ' + reason, account: '501 - Harga Pokok Penjualan', debit: 0, credit: totalHpp }
-  ];
-  revEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
+    function nowDateStr() {
+      return new Date().toISOString().slice(0, 10);
+    }
 
-  await saveAppState();
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
+    function getMaterial(id) {
+      return db.materials.find((m) => m.id === id);
+    }
 
-/* =========================================================
-   7. THERMAL RECEIPT PRINT & PDF EXPORT
-   ========================================================= */
-function showReceiptModal(sale) {
-  openModal(`
-    <h3>🧾 Struk Transaksi</h3>
-    <div id="printArea" class="receipt-paper">
-      <div style="text-align:center">
-        <b>TOKO YADHIYA</b><br>
-        Retail, ATK & Fotokopi<br>
-        ${sale.date}<br>
-        No: ${sale.invoice} · Kasir: ${sale.cashier}
-      </div>
-      <hr>
-      ${sale.items.map(i => `
-        <div>${i.name}</div>
-        <div class="r-row"><span>${i.qty} ${i.unit} x ${rp(i.sellPrice)}</span><span>${rp(i.qty * i.sellPrice)}</span></div>
-      `).join('')}
-      <hr>
-      <div class="r-row"><b>TOTAL</b><b>${rp(sale.total)}</b></div>
-      <div class="r-row"><span>Metode</span><span>${sale.paymentMethod}</span></div>
-      <div class="r-row"><span>Bayar</span><span>${rp(sale.paid)}</span></div>
-      <div class="r-row"><span>Kembali</span><span>${rp(sale.change)}</span></div>
-      <hr>
-      <div style="text-align:center">Terima kasih telah berbelanja!</div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="btn secondary" style="flex:1" onclick="closeModal()">Tutup</button>
-      <button class="btn" style="flex:1" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
-    </div>
-  `);
-}
+    function calculateBomUnitCost(recipe) {
+      const materialCost = (recipe.items || []).reduce((sum, item) => {
+        const mat = getMaterial(item.materialId);
+        return sum + (mat ? Number(mat.unitCost) * Number(item.qty) : 0);
+      }, 0);
+      const elec = Number(recipe.electricityCostPerUnit || 0);
+      const oper = Number(recipe.operationalCostPerUnit || 0);
+      return {
+        materialCost,
+        electricityCost: elec,
+        operationalCost: oper,
+        totalUnitCost: materialCost + elec + oper
+      };
+    }
 
-/* =========================================================
-   8. PEMBELIAN / KULAKAN (MULTI-ITEM + SUBTOTAL/UNIT + DISKON/ADMIN/ONGKIR + UTANG TEMPO)
-   ========================================================= */
-function recalcPurchaseEntry() {
-  const qty = Math.max(1, Number(state.purQtyInput || 1));
-  if (state.purMode === 'subtotal') {
-    const tot = Number(state.purTotalInput || 0);
-    state.purUnitInput = tot > 0 ? Math.round(tot / qty) : '';
-  } else {
-    const unit = Number(state.purUnitInput || 0);
-    state.purTotalInput = unit > 0 ? Math.round(unit * qty) : '';
-  }
-}
+    function addJournalEntry(memo, lines) {
+      db.journals.unshift({
+        id: "jrn-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+        date: nowDateStr(),
+        memo,
+        lines
+      });
+    }
 
-function setPurchaseMode(mode) {
-  state.purMode = mode;
-  recalcPurchaseEntry();
-  render();
-}
+    // Login & Password Toggle
+    const loginForm = document.getElementById("loginForm");
+    const loginError = document.getElementById("loginError");
+    const loginUsername = document.getElementById("loginUsername");
+    const loginPassword = document.getElementById("loginPassword");
+    const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+    const eyeIcon = document.getElementById("eyeIcon");
 
-function onPurQtyChange(val) {
-  state.purQtyInput = Math.max(1, parseInt(val || 1, 10));
-  recalcPurchaseEntry();
-  const unitEl = $('#purUnitField');
-  const totEl = $('#purTotalField');
-  if (unitEl) unitEl.value = state.purUnitInput;
-  if (totEl) totEl.value = state.purTotalInput;
-}
-
-function onPurTotalChange(val) {
-  state.purTotalInput = val;
-  const qty = Math.max(1, Number(state.purQtyInput || 1));
-  const tot = Number(val || 0);
-  state.purUnitInput = tot > 0 ? Math.round(tot / qty) : '';
-  const unitEl = $('#purUnitField');
-  if (unitEl) unitEl.value = state.purUnitInput;
-}
-
-function onPurUnitChange(val) {
-  state.purUnitInput = val;
-  const qty = Math.max(1, Number(state.purQtyInput || 1));
-  const unit = Number(val || 0);
-  state.purTotalInput = unit > 0 ? Math.round(unit * qty) : '';
-  const totEl = $('#purTotalField');
-  if (totEl) totEl.value = state.purTotalInput;
-}
-
-function addPurchaseItem() {
-  const physicalProducts = state.products.filter(p => !p.isService);
-  if (!physicalProducts.length) return;
-  const code = state.purSelectedCode || physicalProducts[0].code;
-  const prod = physicalProducts.find(p => p.code === code);
-  if (!prod) return;
-
-  const qty = Math.max(1, parseInt(state.purQtyInput || 1, 10));
-  let lineTotal = 0;
-  let unitPrice = 0;
-
-  if (state.purMode === 'subtotal') {
-    lineTotal = Math.max(0, Number(state.purTotalInput || 0));
-    unitPrice = qty > 0 ? lineTotal / qty : 0;
-  } else {
-    unitPrice = Math.max(0, Number(state.purUnitInput || 0));
-    lineTotal = unitPrice * qty;
-  }
-
-  if (lineTotal <= 0) {
-    alert('Masukkan Total Harga Beli atau Harga Satuan terlebih dahulu!');
-    return;
-  }
-
-  const existing = state.purItems.find(x => x.code === prod.code);
-  if (existing) {
-    existing.qty += qty;
-    existing.lineTotal += lineTotal;
-    existing.buyPrice = Math.round(existing.lineTotal / existing.qty);
-  } else {
-    state.purItems.push({
-      code: prod.code,
-      name: prod.name,
-      unit: prod.unit,
-      qty,
-      buyPrice: Math.round(unitPrice),
-      lineTotal: Math.round(lineTotal)
+    togglePasswordBtn.addEventListener("click", () => {
+      const isHidden = loginPassword.type === "password";
+      loginPassword.type = isHidden ? "text" : "password";
+      togglePasswordBtn.setAttribute(
+        "aria-label",
+        isHidden ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+      );
+      eyeIcon.innerHTML = isHidden
+        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
     });
-  }
 
-  state.purQtyInput = 1;
-  state.purTotalInput = '';
-  state.purUnitInput = '';
-  render();
-}
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      db = loadDb();
+      const uname = loginUsername.value.trim().toLowerCase();
+      const pwd = loginPassword.value;
 
-function removePurchaseItem(idx) {
-  state.purItems.splice(idx, 1);
-  render();
-}
+      const found = db.users.find(
+        (u) => u.username.toLowerCase() === uname && u.password === pwd && u.active !== false
+      );
 
-async function submitPurchaseOrder() {
-  if (!state.purItems.length) {
-    alert('Tambahkan minimal 1 barang ke daftar kulakan terlebih dahulu!');
-    return;
-  }
-
-  const subtotal = state.purItems.reduce((s, x) => s + Number(x.lineTotal || 0), 0);
-  const discount = Math.max(0, Number(state.purDiscount || 0));
-  const adminFee = Math.max(0, Number(state.purAdminFee || 0));
-  const shipping = Math.max(0, Number(state.purShipping || 0));
-  const netExtra = adminFee + shipping - discount;
-  const grandTotal = Math.max(0, subtotal + netExtra);
-
-  const invoice = 'PO-' + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89);
-  const date = nowStr();
-  const isoDate = todayKey();
-  const supplier = (state.purSupplier || '').trim() || 'Supplier Umum';
-  const paySrc = state.purPaySrc || '101 - Kas Laci Toko';
-
-  const finalizedItems = state.purItems.map(item => {
-    const weight = subtotal > 0 ? (item.lineTotal / subtotal) : (1 / state.purItems.length);
-    const allocatedCost = Math.max(0, item.lineTotal + netExtra * weight);
-    const effectiveUnitCost = item.qty > 0 ? Math.round(allocatedCost / item.qty) : item.buyPrice;
-
-    const prod = state.products.find(p => p.code === item.code);
-    if (prod) {
-      const oldVal = prod.stock * prod.buyPrice;
-      const totalQty = prod.stock + item.qty;
-      prod.buyPrice = totalQty > 0 ? Math.round((oldVal + allocatedCost) / totalQty) : effectiveUnitCost;
-      prod.stock = totalQty;
-      prod.updatedAt = new Date().toISOString();
-      queueSync('STOCK_DELTA', { code: prod.code, delta: +item.qty, newBuyPrice: prod.buyPrice });
-    }
-
-    return {
-      code: item.code,
-      name: item.name,
-      unit: item.unit,
-      qty: item.qty,
-      buyPrice: effectiveUnitCost,
-      lineTotal: item.lineTotal
-    };
-  });
-
-  const pur = {
-    invoice,
-    date,
-    supplier,
-    subtotal,
-    discount,
-    adminFee,
-    shipping,
-    total: grandTotal,
-    cashier: state.currentUser.name,
-    items: finalizedItems
-  };
-  state.purchases.unshift(pur);
-  queueSync('PURCHASE', pur);
-
-  // Jika Sumber Dana = 201 - Utang Usaha, otomatis catat ke Buku Utang Usaha
-  if (paySrc === '201 - Utang Usaha') {
-    const debtRec = {
-      id: 'UTG-' + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89),
-      kind: 'Utang',
-      party: supplier,
-      ref: invoice,
-      date,
-      dueDate: state.purDueDate || '',
-      totalAmount: grandTotal,
-      paidAmount: 0,
-      remaining: grandTotal,
-      status: 'Belum Lunas',
-      note: 'Kulakan tempo ' + invoice
-    };
-    state.debts.unshift(debtRec);
-    queueSync('DEBT', debtRec);
-  }
-
-  const jEntries = [
-    { id: invoice + '-1', date, isoDate, ref: invoice, desc: 'Kulakan ' + supplier + ' (' + finalizedItems.length + ' item)', account: '104 - Persediaan Barang', debit: grandTotal, credit: 0 },
-    { id: invoice + '-2', date, isoDate, ref: invoice, desc: 'Pembayaran Kulakan ' + supplier, account: paySrc, debit: 0, credit: grandTotal }
-  ];
-  jEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
-
-  state.purItems = [];
-  state.purDiscount = 0;
-  state.purAdminFee = 0;
-  state.purShipping = 0;
-  state.purSupplier = '';
-  state.purDueDate = '';
-  state.purQtyInput = 1;
-  state.purTotalInput = '';
-  state.purUnitInput = '';
-
-  await saveAppState();
-  alert('Nota kulakan ' + invoice + ' tersimpan! Total transaksi: ' + rp(grandTotal) + (paySrc === '201 - Utang Usaha' ? ' (Tercatat di Utang Usaha)' : ''));
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-/* =========================================================
-   9. UTANG & PIUTANG ENGINE
-   ========================================================= */
-function openNewDebtModal(defaultKind = 'Piutang') {
-  openModal(`
-    <h3>➕ Catat Utang / Piutang Manual</h3>
-    <p class="muted">Gunakan form ini untuk mencatat saldo utang/piutang lama (cut-off) atau pinjaman/tempo di luar nota otomatis.</p>
-    <label>Jenis Catatan</label>
-    <select id="dKind">
-      <option value="Piutang" ${defaultKind === 'Piutang' ? 'selected' : ''}>Piutang Usaha (Pelanggan berutang ke Toko)</option>
-      <option value="Utang" ${defaultKind === 'Utang' ? 'selected' : ''}>Utang Usaha (Toko berutang ke Supplier)</option>
-    </select>
-    <label>Nama Pelanggan / Supplier</label>
-    <input id="dParty" placeholder="Contoh: Bu Siti / Agen Sembako">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label>Nominal (Rp)</label><input id="dAmount" type="number" min="1" placeholder="50000"></div>
-      <div><label>Jatuh Tempo (Opsional)</label><input id="dDue" type="date"></div>
-    </div>
-    <label>Catatan / No. Referensi Lama</label>
-    <input id="dNote" placeholder="Contoh: Saldo awal buku lama">
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
-      <button class="btn" style="flex:1" onclick="saveManualDebt()">Simpan</button>
-    </div>
-  `);
-}
-
-async function saveManualDebt() {
-  const kind = $('#dKind').value;
-  const party = $('#dParty').value.trim();
-  const amount = Math.max(0, Number($('#dAmount').value || 0));
-  const dueDate = $('#dDue').value;
-  const note = $('#dNote').value.trim();
-
-  if (!party || amount <= 0) {
-    alert('Nama pihak dan nominal wajib diisi!');
-    return;
-  }
-
-  const id = (kind === 'Utang' ? 'UTG-' : 'PIU-') + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89);
-  const date = nowStr();
-  const isoDate = todayKey();
-
-  const item = {
-    id,
-    kind,
-    party,
-    ref: id,
-    date,
-    dueDate,
-    totalAmount: amount,
-    paidAmount: 0,
-    remaining: amount,
-    status: 'Belum Lunas',
-    note: note || 'Catatan manual'
-  };
-  state.debts.unshift(item);
-  queueSync('DEBT', item);
-
-  // Jurnal pembukaan / pencatatan utang piutang
-  const jEntries = kind === 'Piutang'
-    ? [
-        { id: id + '-1', date, isoDate, ref: id, desc: 'Piutang ' + party + (note ? ' - ' + note : ''), account: '103 - Piutang Usaha', debit: amount, credit: 0 },
-        { id: id + '-2', date, isoDate, ref: id, desc: 'Piutang ' + party, account: '301 - Modal / Saldo Awal', debit: 0, credit: amount }
-      ]
-    : [
-        { id: id + '-1', date, isoDate, ref: id, desc: 'Utang ' + party + (note ? ' - ' + note : ''), account: '301 - Modal / Saldo Awal', debit: amount, credit: 0 },
-        { id: id + '-2', date, isoDate, ref: id, desc: 'Utang ' + party, account: '201 - Utang Usaha', debit: 0, credit: amount }
-      ];
-  jEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
-
-  await saveAppState();
-  closeModal();
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-function openPayDebtModal(id) {
-  const d = state.debts.find(x => x.id === id);
-  if (!d || d.remaining <= 0) return;
-
-  openModal(`
-    <h3>💵 Pembayaran / Pelunasan ${d.kind}</h3>
-    <div class="panel soft">
-      <div class="r-row"><span>Pihak:</span><b>${d.party}</b></div>
-      <div class="r-row"><span>No. Ref:</span><b>${d.ref}</b></div>
-      <div class="r-row"><span>Total Awal:</span><b>${rp(d.totalAmount)}</b></div>
-      <div class="r-row"><span>Sisa Tagihan:</span><b class="red">${rp(d.remaining)}</b></div>
-    </div>
-    <label>Nominal Dibayar Sekarang (Rp)</label>
-    <input id="payDebtAmt" type="number" min="1" max="${d.remaining}" value="${d.remaining}">
-    <label>Akun Kas / Bank</label>
-    <select id="payDebtAcc">
-      <option value="101 - Kas Laci Toko">101 - Kas Laci Toko (Tunai)</option>
-      <option value="102 - Bank / QRIS">102 - Bank / QRIS (Transfer)</option>
-    </select>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
-      <button class="btn success" style="flex:1" onclick="submitPayDebt('${d.id}')">Proses Pembayaran</button>
-    </div>
-  `);
-}
-
-async function submitPayDebt(id) {
-  const d = state.debts.find(x => x.id === id);
-  if (!d) return;
-  const amt = Math.max(0, Number($('#payDebtAmt').value || 0));
-  const acc = $('#payDebtAcc').value;
-
-  if (amt <= 0 || amt > d.remaining) {
-    alert('Nominal pembayaran harus antara Rp1 sampai ' + rp(d.remaining));
-    return;
-  }
-
-  d.paidAmount = Number(d.paidAmount || 0) + amt;
-  d.remaining = Math.max(0, Number(d.totalAmount || 0) - d.paidAmount);
-  d.status = d.remaining === 0 ? 'Lunas' : 'Belum Lunas';
-  queueSync('DEBT', d);
-
-  const payRef = 'PAY-' + Date.now().toString().slice(-6);
-  const date = nowStr();
-  const isoDate = todayKey();
-
-  const jEntries = d.kind === 'Piutang'
-    ? [
-        { id: payRef + '-1', date, isoDate, ref: d.ref, desc: 'Pelunasan Piutang ' + d.party, account: acc, debit: amt, credit: 0 },
-        { id: payRef + '-2', date, isoDate, ref: d.ref, desc: 'Pelunasan Piutang ' + d.party, account: '103 - Piutang Usaha', debit: 0, credit: amt }
-      ]
-    : [
-        { id: payRef + '-1', date, isoDate, ref: d.ref, desc: 'Pembayaran Utang ' + d.party, account: '201 - Utang Usaha', debit: amt, credit: 0 },
-        { id: payRef + '-2', date, isoDate, ref: d.ref, desc: 'Pembayaran Utang ' + d.party, account: acc, debit: 0, credit: amt }
-      ];
-  jEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
-
-  await saveAppState();
-  closeModal();
-  alert('Pembayaran sebesar ' + rp(amt) + ' tercatat! Status: ' + d.status);
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-/* =========================================================
-   10. MANUFAKTUR / PRODUKSI BARANG RAKITAN
-   ========================================================= */
-function addMfgMaterial() {
-  const physicalProducts = state.products.filter(p => !p.isService);
-  if (!physicalProducts.length) return;
-  const code = state.mfgMatCode || physicalProducts[0].code;
-  if (code === state.mfgOutputCode) {
-    alert('Bahan baku tidak boleh sama dengan Produk Jadi yang diproduksi!');
-    return;
-  }
-  const prod = physicalProducts.find(p => p.code === code);
-  if (!prod) return;
-
-  const qty = Math.max(0.01, Number(state.mfgMatQty || 1));
-  const existing = state.mfgMaterials.find(m => m.code === prod.code);
-  const nextQty = (existing ? existing.qty : 0) + qty;
-
-  if (nextQty > prod.stock) {
-    alert('Stok bahan baku ' + prod.name + ' tidak mencukupi! Tersedia: ' + prod.stock + ' ' + prod.unit);
-    return;
-  }
-
-  if (existing) {
-    existing.qty = nextQty;
-    existing.unitCost = prod.buyPrice;
-    existing.totalCost = Math.round(existing.qty * prod.buyPrice);
-  } else {
-    state.mfgMaterials.push({
-      code: prod.code,
-      name: prod.name,
-      unit: prod.unit,
-      qty,
-      unitCost: prod.buyPrice,
-      totalCost: Math.round(qty * prod.buyPrice)
-    });
-  }
-  state.mfgMatQty = 1;
-  render();
-}
-
-function removeMfgMaterial(idx) {
-  state.mfgMaterials.splice(idx, 1);
-  render();
-}
-
-async function submitManufactureOrder() {
-  const physicalProducts = state.products.filter(p => !p.isService);
-  const outCode = state.mfgOutputCode || (physicalProducts[0] && physicalProducts[0].code);
-  const outProd = physicalProducts.find(p => p.code === outCode);
-  const outQty = Math.max(1, Number(state.mfgOutputQty || 1));
-  const extraCost = Math.max(0, Number(state.mfgExtraCost || 0));
-
-  if (!outProd) {
-    alert('Pilih produk hasil produksi terlebih dahulu!');
-    return;
-  }
-  if (!state.mfgMaterials.length) {
-    alert('Tambahkan minimal 1 bahan baku yang terpakai!');
-    return;
-  }
-
-  // Validasi stok semua bahan baku
-  for (const m of state.mfgMaterials) {
-    const pMat = state.products.find(p => p.code === m.code);
-    if (!pMat || pMat.stock < m.qty) {
-      alert('Stok bahan baku ' + m.name + ' tidak mencukupi untuk produksi ini!');
-      return;
-    }
-  }
-
-  const matTotalCost = state.mfgMaterials.reduce((s, m) => s + Number(m.totalCost || 0), 0);
-  const grandCost = matTotalCost + extraCost;
-  const unitHpp = Math.round(grandCost / outQty);
-
-  const id = 'MFG-' + Date.now().toString().slice(-6) + '-' + Math.floor(10 + Math.random() * 89);
-  const date = nowStr();
-  const isoDate = todayKey();
-
-  // 1. Kurangi stok bahan baku
-  state.mfgMaterials.forEach(m => {
-    const pMat = state.products.find(p => p.code === m.code);
-    if (pMat) {
-      pMat.stock = Math.max(0, Number((pMat.stock - m.qty).toFixed(4)));
-      pMat.updatedAt = new Date().toISOString();
-      queueSync('STOCK_DELTA', { code: pMat.code, delta: -m.qty });
-    }
-  });
-
-  // 2. Tambah stok produk jadi & update HPP rata-rata (Average Cost)
-  const oldVal = outProd.stock * outProd.buyPrice;
-  const nextStock = outProd.stock + outQty;
-  outProd.buyPrice = nextStock > 0 ? Math.round((oldVal + grandCost) / nextStock) : unitHpp;
-  outProd.stock = nextStock;
-  outProd.updatedAt = new Date().toISOString();
-  queueSync('STOCK_DELTA', { code: outProd.code, delta: +outQty, newBuyPrice: outProd.buyPrice });
-
-  const mfgRecord = {
-    id,
-    date,
-    outputCode: outProd.code,
-    outputName: outProd.name,
-    outputQty: outQty,
-    extraCost,
-    totalCost: grandCost,
-    unitCost: unitHpp,
-    cashier: state.currentUser.name,
-    materials: JSON.parse(JSON.stringify(state.mfgMaterials))
-  };
-  state.manufactures.unshift(mfgRecord);
-  queueSync('MANUFACTURE', mfgRecord);
-
-  // 3. Jurnal Akuntansi Produksi
-  const jEntries = [
-    { id: id + '-1', date, isoDate, ref: id, desc: 'Produksi ' + outQty + ' ' + outProd.unit + ' ' + outProd.name, account: '104 - Persediaan Barang', debit: grandCost, credit: 0 },
-    { id: id + '-2', date, isoDate, ref: id, desc: 'Pemakaian Bahan Baku ' + id, account: '104 - Persediaan Barang', debit: 0, credit: matTotalCost }
-  ];
-  if (extraCost > 0) {
-    jEntries.push({ id: id + '-3', date, isoDate, ref: id, desc: 'Biaya Produksi Tambahan ' + id, account: '101 - Kas Laci Toko', debit: 0, credit: extraCost });
-  }
-  jEntries.forEach(j => { state.journals.unshift(j); queueSync('JOURNAL', j); });
-
-  state.mfgMaterials = [];
-  state.mfgOutputQty = 1;
-  state.mfgExtraCost = 0;
-
-  await saveAppState();
-  alert('Produksi ' + id + ' selesai! Stok ' + outProd.name + ' bertambah +' + outQty + ' (HPP baru: ' + rp(outProd.buyPrice) + ').');
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-/* =========================================================
-   11. SHIFT CLOSING & TWO-WAY SYNC ENGINE
-   ========================================================= */
-function openShiftClosingModal() {
-  const validSales = state.sales.filter(s => s.status === 'Selesai' && s.paymentMethod === 'Tunai (Kas Laci)');
-  const systemCash = validSales.reduce((s, x) => s + x.total, 0);
-
-  openModal(`
-    <h3>🔒 Tutup Kasir (Shift Closing)</h3>
-    <p class="muted">Hitung uang tunai fisik di dalam laci kasir lalu masukkan di bawah ini.</p>
-    <div class="panel soft">
-      <div class="r-row"><span>Kasir Bertugas:</span><b>${state.currentUser.name}</b></div>
-      <div class="r-row"><span>Penjualan Tunai Sistem:</span><b>${rp(systemCash)}</b></div>
-    </div>
-    <label>Uang Tunai Fisik di Laci (Rp)</label>
-    <input id="actualCashInput" type="number" placeholder="Contoh: ${systemCash}" value="${systemCash}">
-    <label>Catatan Shift</label>
-    <input id="shiftNote" placeholder="Opsional (misal: uang pecahan lengkap)">
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
-      <button class="btn success" style="flex:1" onclick="submitShiftClosing(${systemCash})">Simpan Tutup Kasir</button>
-    </div>
-  `);
-}
-
-async function submitShiftClosing(systemCash) {
-  const actual = Number($('#actualCashInput').value || 0);
-  const diff = actual - systemCash;
-  const note = $('#shiftNote').value.trim();
-  const id = 'SHF-' + Date.now().toString().slice(-6);
-  const date = nowStr();
-  const isoDate = todayKey();
-
-  const shift = { id, date, cashier: state.currentUser.name, systemCash, actualCash: actual, diff, note };
-  state.shifts.unshift(shift);
-  queueSync('SHIFT', shift);
-
-  if (diff !== 0) {
-    const j1 = {
-      id: id + '-1', date, isoDate, ref: id, desc: 'Selisih Kas Shift',
-      account: diff > 0 ? '101 - Kas Laci Toko' : '605 - Beban Selisih Kas',
-      debit: Math.abs(diff), credit: 0
-    };
-    const j2 = {
-      id: id + '-2', date, isoDate, ref: id, desc: 'Selisih Kas Shift',
-      account: diff > 0 ? '409 - Pendapatan Lain-lain' : '101 - Kas Laci Toko',
-      debit: 0, credit: Math.abs(diff)
-    };
-    state.journals.unshift(j2, j1);
-    queueSync('JOURNAL', j1);
-    queueSync('JOURNAL', j2);
-  }
-
-  await saveAppState();
-  closeModal();
-  alert('Tutup kasir tercatat! Selisih kas: ' + rp(diff));
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-async function syncTwoWay(silent = false) {
-  if (isSyncing) return;
-  if (!state.online) {
-    if (!silent) alert('Perangkat sedang OFFLINE. Data tersimpan di memori perangkat dan akan otomatis disinkronkan saat online.');
-    return;
-  }
-  if (!state.gasUrl) {
-    if (!silent) {
-      state.page = 'Master';
-      render();
-      alert('Masukkan URL Web App Google Apps Script terlebih dahulu di menu Pengaturan.');
-    }
-    return;
-  }
-
-  isSyncing = true;
-  render();
-
-  const queueSnapshot = [...state.syncQueue];
-  const batch = {
-    users: queueSnapshot.filter(q => q.type === 'USER').map(q => q.item),
-    products: queueSnapshot.filter(q => q.type === 'PRODUCT').map(q => q.item),
-    stockDeltas: queueSnapshot.filter(q => q.type === 'STOCK_DELTA').map(q => q.item),
-    sales: queueSnapshot.filter(q => q.type === 'SALE').map(q => q.item),
-    purchases: queueSnapshot.filter(q => q.type === 'PURCHASE').map(q => q.item),
-    debts: queueSnapshot.filter(q => q.type === 'DEBT').map(q => q.item),
-    manufactures: queueSnapshot.filter(q => q.type === 'MANUFACTURE').map(q => q.item),
-    journals: queueSnapshot.filter(q => q.type === 'JOURNAL').map(q => q.item),
-    shifts: queueSnapshot.filter(q => q.type === 'SHIFT').map(q => q.item)
-  };
-
-  try {
-    const res = await fetch(state.gasUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'SYNC_TWO_WAY', data: batch })
-    });
-    const json = await res.json();
-    if (json.status === 'ok' && json.data) {
-      const sentTs = new Set(queueSnapshot.map(q => q.ts));
-      state.syncQueue = state.syncQueue.filter(q => !sentTs.has(q.ts));
-
-      const cloud = json.data;
-
-      if (cloud.users && cloud.users.length) {
-        state.users = cloud.users.filter(u => String(u.Aktif || 'Ya').toLowerCase() !== 'tidak').map(u => ({
-          username: String(u.Username),
-          password: String(u.Password),
-          name: String(u.Nama),
-          role: String(u.Peran || 'Kasir')
-        }));
+      if (!found) {
+        loginError.textContent = "Username atau kata sandi tidak valid, atau akun tidak aktif.";
+        loginError.classList.remove("hidden");
+        return;
       }
 
-      if (cloud.products && cloud.products.length) {
-        state.products = cloud.products.map(p => {
-          const code = String(p.Kode);
-          const cat = String(p.Kategori || 'Umum');
-          const isService = cat.toLowerCase().includes('jasa') || cat.toLowerCase().includes('fotokopi') || Number(p.Stok) >= 9000;
+      loginError.classList.add("hidden");
+      currentUser = found;
+      loginUsername.value = "";
+      loginPassword.value = "";
+      loginPassword.type = "password";
+
+      const allowed = ROLE_PERMISSIONS[currentUser.role] || ["pos"];
+      activeTab = allowed[0];
+      posCart = [];
+
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("appShell").classList.remove("hidden");
+      renderShell();
+    });
+
+    function logout() {
+      currentUser = null;
+      posCart = [];
+      document.getElementById("appShell").classList.add("hidden");
+      document.getElementById("loginScreen").classList.remove("hidden");
+      document.getElementById("sidebar").classList.remove("open");
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    document.getElementById("mobileLogoutBtn").addEventListener("click", logout);
+    document.getElementById("menuToggleBtn").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("open");
+    });
+
+    function renderShell() {
+      if (!currentUser) return;
+      document.getElementById("activeUserName").textContent = currentUser.name;
+      document.getElementById("activeUserRole").textContent = currentUser.role.toUpperCase();
+
+      const allowedTabs = ROLE_PERMISSIONS[currentUser.role] || [];
+      const navList = document.getElementById("navList");
+      navList.innerHTML = "";
+
+      allowedTabs.forEach((tabKey) => {
+        const meta = MENU_META[tabKey];
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "nav-btn" + (activeTab === tabKey ? " active" : "");
+        btn.textContent = meta.label;
+        btn.addEventListener("click", () => {
+          activeTab = tabKey;
+          document.getElementById("sidebar").classList.remove("open");
+          renderShell();
+        });
+        navList.appendChild(btn);
+      });
+
+      renderMainView();
+    }
+
+    function renderMainView() {
+      const mainView = document.getElementById("mainView");
+      const meta = MENU_META[activeTab];
+
+      let bodyHtml = `
+        <div class="page-header">
+          <div>
+            <h1>${meta.label}</h1>
+            <p>${meta.subtitle}</p>
+          </div>
+          <div class="no-print">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">Cetak / PDF</button>
+          </div>
+        </div>
+      `;
+
+      if (activeTab === "dashboard") bodyHtml += buildDashboardView();
+      if (activeTab === "pos") bodyHtml += buildPosView();
+      if (activeTab === "manufacturing") bodyHtml += buildManufacturingView();
+      if (activeTab === "inventory") bodyHtml += buildInventoryView();
+      if (activeTab === "accounting") bodyHtml += buildAccountingView();
+      if (activeTab === "accounts") bodyHtml += buildAccountsView();
+
+      mainView.innerHTML = bodyHtml;
+      bindTabEvents();
+    }
+
+    function canSeeFinancials() {
+      return currentUser && (currentUser.role === "owner" || currentUser.role === "accounting");
+    }
+
+    function computeFinancialSummary() {
+      const revenue = db.sales.reduce((s, x) => s + Number(x.total || 0), 0);
+      const cogs = db.sales.reduce((s, x) => s + Number(x.cogs || 0), 0);
+      const mfgElec = db.sales.reduce((s, x) => s + Number(x.mfgElectricity || 0), 0);
+      const mfgOper = db.sales.reduce((s, x) => s + Number(x.mfgOperational || 0), 0);
+      const directOper = db.expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+      const grossProfit = revenue - cogs;
+      const netProfit = revenue - cogs - mfgElec - mfgOper - directOper;
+      return { revenue, cogs, mfgElec, mfgOper, directOper, grossProfit, netProfit };
+    }
+
+    function buildDashboardView() {
+      const fin = computeFinancialSummary();
+      const lowStockCount = db.materials.filter((m) => Number(m.stock) <= Number(m.minStock)).length;
+
+      return `
+        <div class="grid-3">
+          <div class="card">
+            <div class="stat-label">Total Penjualan &amp; Jasa</div>
+            <div class="stat-value">${formatRupiah(fin.revenue)}</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Estimasi Laba Bersih</div>
+            <div class="stat-value" style="color:${fin.netProfit >= 0 ? "var(--success)" : "var(--danger)"}">${formatRupiah(fin.netProfit)}</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Item Stok Menipis</div>
+            <div class="stat-value">${lowStockCount} Item</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Transaksi Terakhir</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>No. Nota</th>
+                  <th>Kasir</th>
+                  <th class="text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${
+                  db.sales.length === 0
+                    ? `<tr><td colspan="4" style="text-align:center;color:var(--muted);">Belum ada transaksi tercatat.</td></tr>`
+                    : db.sales.slice(0, 8).map((s) => `
+                      <tr>
+                        <td>${s.date}</td>
+                        <td>${s.id}</td>
+                        <td>${s.cashierName}</td>
+                        <td class="text-right">${formatRupiah(s.total)}</td>
+                      </tr>
+                    `).join("")
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildPosView() {
+      const sellableProducts = db.materials.filter((m) => m.isSellable);
+      const subtotal = posCart.reduce((s, item) => s + item.price * item.qty, 0);
+
+      return `
+        <div id="posFeedback"></div>
+        <div class="pos-layout">
+          <div class="card">
+            <h3>Daftar Produk Toko</h3>
+            <div class="product-grid">
+              ${sellableProducts.map((p) => `
+                <button type="button" class="product-tile" data-add-product="${p.id}">
+                  <div class="pname">${p.name}</div>
+                  <div class="pprice">${formatRupiah(p.sellPrice)}</div>
+                  <div class="pmeta">Stok: ${p.stock} ${p.unit}</div>
+                </button>
+              `).join("")}
+            </div>
+
+            <h3 style="margin-top:20px;">Tambah Hasil Manufaktur ke Keranjang</h3>
+            <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px;align-items:end;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label for="posBomSelect">Resep Manufaktur</label>
+                <select id="posBomSelect">
+                  ${db.bomRecipes.map((r) => `
+                    <option value="${r.id}">${r.name} (${formatRupiah(r.defaultPrice)}/${r.outputUnit})</option>
+                  `).join("")}
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label for="posBomQty">Jumlah</label>
+                <input type="number" id="posBomQty" class="input-control" min="1" value="1" />
+              </div>
+              <button type="button" id="addBomToCartBtn" class="btn btn-secondary">Tambah</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Keranjang Kasir</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th class="text-right">Subtotal</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${
+                    posCart.length === 0
+                      ? `<tr><td colspan="4" style="text-align:center;color:var(--muted);">Keranjang masih kosong.</td></tr>`
+                      : posCart.map((c, idx) => `
+                        <tr>
+                          <td>${c.name}</td>
+                          <td>${c.qty}</td>
+                          <td class="text-right">${formatRupiah(c.price * c.qty)}</td>
+                          <td><button type="button" class="btn btn-danger btn-sm" data-remove-cart="${idx}">x</button></td>
+                        </tr>
+                      `).join("")
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="summary-row summary-total">
+                <span>Total Bayar</span>
+                <span>${formatRupiah(subtotal)}</span>
+              </div>
+              <div class="form-group" style="margin-top:12px;">
+                <label for="posPaidAmount">Uang Diterima</label>
+                <input type="number" id="posPaidAmount" class="input-control" value="${subtotal}" min="0" />
+              </div>
+              <button type="button" id="checkoutPosBtn" class="btn btn-success" style="width:100%;" ${posCart.length === 0 ? "disabled" : ""}>
+                Proses Pembayaran
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function executeManufacturingProduction(recipeId, qty, sellImmediately = false, salePricePerUnit = null) {
+      const recipe = db.bomRecipes.find((r) => r.id === recipeId);
+      if (!recipe) return { ok: false, message: "Resep manufaktur tidak ditemukan." };
+      const count = Number(qty);
+      if (!count || count <= 0) return { ok: false, message: "Jumlah produksi harus lebih dari 0." };
+
+      for (const item of recipe.items || []) {
+        const mat = getMaterial(item.materialId);
+        const needed = Number(item.qty) * count;
+        if (!mat || Number(mat.stock) < needed) {
           return {
-            code,
-            name: String(p.Nama),
-            category: cat,
-            unit: String(p.Satuan || 'Pcs'),
-            buyPrice: Number(p.HargaBeli || 0),
-            sellPrice: Number(p.HargaJual || 0),
-            stock: Number(p.Stok || 0),
-            minStock: Number(p.MinStok || 5),
-            isService,
-            updatedAt: String(p.UpdatedAt || '')
+            ok: false,
+            message: `Stok bahan ${mat ? mat.name : item.materialId} tidak cukup (butuh ${needed}, tersedia ${mat ? mat.stock : 0}).`
           };
+        }
+      }
+
+      let materialCostTotal = 0;
+      for (const item of recipe.items || []) {
+        const mat = getMaterial(item.materialId);
+        const needed = Number(item.qty) * count;
+        mat.stock = Number(mat.stock) - needed;
+        materialCostTotal += Number(mat.unitCost) * needed;
+      }
+
+      const elecTotal = Number(recipe.electricityCostPerUnit || 0) * count;
+      const operTotal = Number(recipe.operationalCostPerUnit || 0) * count;
+      const totalHpp = materialCostTotal + elecTotal + operTotal;
+
+      addJournalEntry(`Produksi Manufaktur: ${recipe.name} (${count} ${recipe.outputUnit})`, [
+        { account: "HPP Manufaktur", debit: totalHpp, credit: 0 },
+        { account: "Persediaan Bahan Baku", debit: 0, credit: materialCostTotal },
+        { account: "Beban Listrik & Operasional Mesin", debit: 0, credit: elecTotal + operTotal }
+      ]);
+
+      return {
+        ok: true,
+        recipe,
+        count,
+        materialCostTotal,
+        elecTotal,
+        operTotal,
+        totalHpp,
+        revenue: sellImmediately ? Number(salePricePerUnit ?? recipe.defaultPrice) * count : 0
+      };
+    }
+
+    function buildManufacturingView() {
+      const showCost = canSeeFinancials();
+
+      return `
+        <div id="mfgFeedback"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Jalankan Produksi / Jasa Cetak</h3>
+            <form id="runMfgForm">
+              <div class="form-group">
+                <label for="mfgRecipeSelect">Pilih Resep / Layanan</label>
+                <select id="mfgRecipeSelect">
+                  ${db.bomRecipes.map((r) => {
+                    const costInfo = calculateBomUnitCost(r);
+                    return `<option value="${r.id}">${r.name} — Jual ${formatRupiah(r.defaultPrice)}/${r.outputUnit}${showCost ? ` (HPP ${formatRupiah(costInfo.totalUnitCost)})` : ""}</option>`;
+                  }).join("")}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="mfgQtyInput">Jumlah Produksi</label>
+                <input type="number" id="mfgQtyInput" class="input-control" min="1" value="10" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Proses Produksi &amp; Potong Bahan</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Tambah Resep BOM Baru</h3>
+            <form id="createBomForm">
+              <div class="form-group">
+                <label for="newBomName">Nama Resep / Layanan</label>
+                <input type="text" id="newBomName" class="input-control" placeholder="Contoh: Fotokopi Bolak-Balik A4" required />
+              </div>
+              <div class="grid-2" style="gap:10px;margin-bottom:10px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="newBomUnit">Satuan Hasil</label>
+                  <input type="text" id="newBomUnit" class="input-control" value="lembar" required />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="newBomPrice">Harga Jual / Satuan</label>
+                  <input type="number" id="newBomPrice" class="input-control" value="700" min="0" required />
+                </div>
+              </div>
+              <div class="grid-2" style="gap:10px;margin-bottom:12px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="newBomElec">Biaya Listrik / Satuan</label>
+                  <input type="number" id="newBomElec" class="input-control" value="75" min="0" required />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="newBomOper">Biaya Operasional / Satuan</label>
+                  <input type="number" id="newBomOper" class="input-control" value="40" min="0" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Komposisi Bahan Baku (Kertas, Tinta, dll.)</label>
+                <div id="draftBomRows">
+                  ${draftBomItems.map((row, i) => `
+                    <div class="bom-item-row">
+                      <select data-bom-mat="${i}">
+                        ${db.materials.map((m) => `<option value="${m.id}" ${m.id === row.materialId ? "selected" : ""}>${m.name} (${m.unit})</option>`).join("")}
+                      </select>
+                      <input type="number" step="any" min="0.1" class="input-control" data-bom-qty="${i}" value="${row.qty}" />
+                      <button type="button" class="btn btn-danger btn-sm" data-bom-del="${i}">Hapus</button>
+                    </div>
+                  `).join("")}
+                </div>
+                <button type="button" id="addBomRowBtn" class="btn btn-secondary btn-sm">+ Tambah Bahan</button>
+              </div>
+
+              <button type="submit" class="btn btn-success" style="width:100%;">Simpan Resep BOM</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Daftar Resep Manufaktur (BOM)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama Resep</th>
+                  <th>Komposisi Bahan</th>
+                  <th class="text-right">Listrik / Unit</th>
+                  <th class="text-right">Ops / Unit</th>
+                  ${showCost ? `<th class="text-right">HPP / Unit</th>` : ""}
+                  <th class="text-right">Harga Jual</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${db.bomRecipes.map((r) => {
+                  const cost = calculateBomUnitCost(r);
+                  const compText = (r.items || []).map((it) => {
+                    const m = getMaterial(it.materialId);
+                    return `${m ? m.name : it.materialId} (${it.qty})`;
+                  }).join(", ");
+                  return `
+                    <tr>
+                      <td><strong>${r.name}</strong></td>
+                      <td>${compText || "-"}</td>
+                      <td class="text-right">${formatRupiah(r.electricityCostPerUnit)}</td>
+                      <td class="text-right">${formatRupiah(r.operationalCostPerUnit)}</td>
+                      ${showCost ? `<td class="text-right"><strong>${formatRupiah(cost.totalUnitCost)}</strong></td>` : ""}
+                      <td class="text-right">${formatRupiah(r.defaultPrice)}</td>
+                    </tr>
+                  `;
+                }).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildInventoryView() {
+      const showCost = canSeeFinancials();
+
+      return `
+        <div id="invFeedback"></div>
+        <div class="card">
+          <h3>Restock / Kulakan Bahan &amp; Barang</h3>
+          <form id="restockForm" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="restockMatSelect">Pilih Item</label>
+              <select id="restockMatSelect">
+                ${db.materials.map((m) => `<option value="${m.id}">${m.name} (Stok: ${m.stock} ${m.unit})</option>`).join("")}
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="restockQty">Jumlah Masuk</label>
+              <input type="number" id="restockQty" class="input-control" min="1" value="100" required />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="restockCost">Total Biaya Kulakan</label>
+              <input type="number" id="restockCost" class="input-control" min="0" value="10000" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Catat Restock</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Daftar Stok Bahan Baku &amp; Produk</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama Item</th>
+                  <th>Satuan</th>
+                  <th class="text-right">Stok Saat Ini</th>
+                  ${showCost ? `<th class="text-right">Harga Modal / Unit</th>` : ""}
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${db.materials.map((m) => {
+                  const isLow = Number(m.stock) <= Number(m.minStock);
+                  return `
+                    <tr>
+                      <td><strong>${m.name}</strong></td>
+                      <td>${m.unit}</td>
+                      <td class="text-right">${m.stock}</td>
+                      ${showCost ? `<td class="text-right">${formatRupiah(m.unitCost)}</td>` : ""}
+                      <td><span class="${isLow ? "badge-low" : "badge-ok"}">${isLow ? "Menipis" : "Aman"}</span></td>
+                    </tr>
+                  `;
+                }).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildAccountingView() {
+      const fin = computeFinancialSummary();
+
+      return `
+        <div id="accFeedback"></div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="stat-label">Pendapatan Usaha</div>
+            <div class="stat-value">${formatRupiah(fin.revenue)}</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">HPP + Listrik &amp; Operasional</div>
+            <div class="stat-value">${formatRupiah(fin.cogs + fin.mfgElec + fin.mfgOper + fin.directOper)}</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Laba / Rugi Bersih</div>
+            <div class="stat-value" style="color:${fin.netProfit >= 0 ? "var(--success)" : "var(--danger)"}">${formatRupiah(fin.netProfit)}</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Catat Biaya Listrik / Operasional Tambahan</h3>
+          <form id="expenseForm" style="display:grid;grid-template-columns:1fr 2fr 1fr auto;gap:10px;align-items:end;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="expenseCategory">Kategori</label>
+              <select id="expenseCategory">
+                <option value="Listrik Mesin & Toko">Listrik Mesin &amp; Toko</option>
+                <option value="Operasional Toko">Operasional Toko</option>
+                <option value="Perawatan Mesin">Perawatan Mesin</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="expenseDesc">Keterangan</label>
+              <input type="text" id="expenseDesc" class="input-control" placeholder="Contoh: Token listrik / servis mesin" required />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="expenseAmount">Nominal (Rp)</label>
+              <input type="number" id="expenseAmount" class="input-control" min="1" value="50000" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan Biaya</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Jurnal Umum Otomatis</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Keterangan</th>
+                  <th>Akun</th>
+                  <th class="text-right">Debit</th>
+                  <th class="text-right">Kredit</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${
+                  db.journals.length === 0
+                    ? `<tr><td colspan="5" style="text-align:center;color:var(--muted);">Belum ada entri jurnal.</td></tr>`
+                    : db.journals.flatMap((j) =>
+                        j.lines.map((ln, i) => `
+                          <tr>
+                            <td>${i === 0 ? j.date : ""}</td>
+                            <td>${i === 0 ? j.memo : ""}</td>
+                            <td>${ln.account}</td>
+                            <td class="text-right">${ln.debit ? formatRupiah(ln.debit) : "-"}</td>
+                            <td class="text-right">${ln.credit ? formatRupiah(ln.credit) : "-"}</td>
+                          </tr>
+                        `)
+                      ).join("")
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildAccountsView() {
+      return `
+        <div id="acctFeedback"></div>
+        <div class="card">
+          <h3>Tambah Akun Pengguna Baru</h3>
+          <form id="addUserForm" style="display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;align-items:end;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="newUserName">Nama Lengkap</label>
+              <input type="text" id="newUserName" class="input-control" placeholder="Nama pengguna" required />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="newUserUsername">Username</label>
+              <input type="text" id="newUserUsername" class="input-control" placeholder="username" required />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="newUserPassword">Kata Sandi</label>
+              <input type="password" id="newUserPassword" class="input-control" placeholder="Sandinya" required />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="newUserRole">Peran</label>
+              <select id="newUserRole">
+                <option value="kasir">Kasir</option>
+                <option value="accounting">Accounting</option>
+                <option value="owner">Owner</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Tambah</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Daftar Akun &amp; Ubah Sandi</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Username</th>
+                  <th>Peran</th>
+                  <th>Ubah Sandi</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${db.users.map((u) => `
+                  <tr>
+                    <td><strong>${u.name}</strong></td>
+                    <td>${u.username}</td>
+                    <td><span class="role-pill">${u.role.toUpperCase()}</span></td>
+                    <td>
+                      <div style="display:flex;gap:6px;">
+                        <input type="password" class="input-control" style="max-width:150px;" placeholder="Sandi baru" id="pwd-${u.id}" />
+                        <button type="button" class="btn btn-secondary btn-sm" data-change-pwd="${u.id}">Simpan Sandi</button>
+                      </div>
+                    </td>
+                    <td>
+                      ${u.id === currentUser.id ? `<span style="color:var(--muted);font-size:12px;">Akun Aktif</span>` : `<button type="button" class="btn btn-danger btn-sm" data-del-user="${u.id}">Hapus</button>`}
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function showBanner(containerId, msg, isError = false) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      el.innerHTML = `<div class="${isError ? "alert-error" : "alert-success"}">${msg}</div>`;
+    }
+
+    function bindTabEvents() {
+      // POS events
+      document.querySelectorAll("[data-add-product]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const prod = getMaterial(btn.getAttribute("data-add-product"));
+          if (!prod) return;
+          const existing = posCart.find((c) => c.type === "product" && c.id === prod.id);
+          if (existing) {
+            if (existing.qty + 1 > prod.stock) {
+              showBanner("posFeedback", "Stok produk tidak mencukupi.", true);
+              return;
+            }
+            existing.qty += 1;
+          } else {
+            if (Number(prod.stock) < 1) {
+              showBanner("posFeedback", "Stok produk habis.", true);
+              return;
+            }
+            posCart.push({
+              type: "product",
+              id: prod.id,
+              name: prod.name,
+              price: Number(prod.sellPrice),
+              unitCost: Number(prod.unitCost),
+              qty: 1
+            });
+          }
+          renderMainView();
+        });
+      });
+
+      const addBomCartBtn = document.getElementById("addBomToCartBtn");
+      if (addBomCartBtn) {
+        addBomCartBtn.addEventListener("click", () => {
+          const recId = document.getElementById("posBomSelect").value;
+          const qty = Number(document.getElementById("posBomQty").value || 1);
+          const rec = db.bomRecipes.find((r) => r.id === recId);
+          if (!rec || qty <= 0) return;
+          posCart.push({
+            type: "bom",
+            id: rec.id,
+            name: `${rec.name} (${qty} ${rec.outputUnit})`,
+            price: Number(rec.defaultPrice),
+            qty
+          });
+          renderMainView();
         });
       }
 
-      if (cloud.sales) {
-        state.sales = cloud.sales.map(s => {
-          let items = [];
-          try { items = typeof s.ItemsJSON === 'string' ? JSON.parse(s.ItemsJSON) : (s.ItemsJSON || []); } catch (e) {}
-          return {
-            invoice: String(s.NoFaktur),
-            date: String(s.Tanggal),
-            cashier: String(s.Kasir),
-            paymentMethod: String(s.MetodeBayar),
-            subtotal: Number(s.Subtotal || 0),
-            total: Number(s.Total || 0),
-            paid: Number(s.Bayar || 0),
-            change: Number(s.Kembali || 0),
-            status: String(s.Status || 'Selesai'),
-            voidReason: String(s.AlasanVoid || ''),
-            items
-          };
-        }).reverse();
+      document.querySelectorAll("[data-remove-cart]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.getAttribute("data-remove-cart"));
+          posCart.splice(idx, 1);
+          renderMainView();
+        });
+      });
+
+      const checkoutBtn = document.getElementById("checkoutPosBtn");
+      if (checkoutBtn) {
+        checkoutBtn.addEventListener("click", () => {
+          if (posCart.length === 0) return;
+
+          let totalRevenue = 0;
+          let totalCogs = 0;
+          let totalElec = 0;
+          let totalOper = 0;
+
+          // Validate product stock first
+          for (const item of posCart) {
+            if (item.type === "product") {
+              const mat = getMaterial(item.id);
+              if (!mat || Number(mat.stock) < item.qty) {
+                showBanner("posFeedback", `Stok ${item.name} tidak mencukupi.`, true);
+                return;
+              }
+            }
+          }
+
+          for (const item of posCart) {
+            totalRevenue += item.price * item.qty;
+            if (item.type === "product") {
+              const mat = getMaterial(item.id);
+              mat.stock = Number(mat.stock) - item.qty;
+              totalCogs += Number(mat.unitCost) * item.qty;
+            } else if (item.type === "bom") {
+              const mfgRes = executeManufacturingProduction(item.id, item.qty, true, item.price);
+              if (!mfgRes.ok) {
+                db = loadDb();
+                showBanner("posFeedback", mfgRes.message, true);
+                return;
+              }
+              totalCogs += mfgRes.materialCostTotal;
+              totalElec += mfgRes.elecTotal;
+              totalOper += mfgRes.operTotal;
+            }
+          }
+
+          const saleId = "INV-" + Date.now().toString().slice(-6);
+          db.sales.unshift({
+            id: saleId,
+            date: nowDateStr(),
+            cashierName: currentUser.name,
+            items: [...posCart],
+            total: totalRevenue,
+            cogs: totalCogs,
+            mfgElectricity: totalElec,
+            mfgOperational: totalOper
+          });
+
+          addJournalEntry(`Penjualan Kasir ${saleId}`, [
+            { account: "Kas / Piutang Penjualan", debit: totalRevenue, credit: 0 },
+            { account: "Pendapatan Penjualan & Jasa", debit: 0, credit: totalRevenue },
+            { account: "HPP Barang & Bahan Baku", debit: totalCogs, credit: 0 },
+            { account: "Persediaan", debit: 0, credit: totalCogs }
+          ]);
+
+          saveDb(db);
+          posCart = [];
+          renderMainView();
+          showBanner("posFeedback", `Transaksi ${saleId} berhasil diproses (${formatRupiah(totalRevenue)}).`);
+        });
       }
 
-      if (cloud.purchases) {
-        state.purchases = cloud.purchases.map(pur => {
-          let items = [];
-          try { items = typeof pur.ItemsJSON === 'string' ? JSON.parse(pur.ItemsJSON) : (pur.ItemsJSON || []); } catch (e) {}
-          return {
-            invoice: String(pur.NoFaktur),
-            date: String(pur.Tanggal),
-            supplier: String(pur.Supplier),
-            subtotal: Number(pur.Subtotal !== undefined ? pur.Subtotal : (pur.Total || 0)),
-            discount: Number(pur.Diskon || 0),
-            adminFee: Number(pur.BiayaAdmin || 0),
-            shipping: Number(pur.Ongkir || 0),
-            total: Number(pur.Total || 0),
-            cashier: String(pur.Kasir),
-            items
-          };
-        }).reverse();
+      // Manufacturing events
+      const runMfgForm = document.getElementById("runMfgForm");
+      if (runMfgForm) {
+        runMfgForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const recId = document.getElementById("mfgRecipeSelect").value;
+          const qty = Number(document.getElementById("mfgQtyInput").value);
+          const res = executeManufacturingProduction(recId, qty, false);
+          if (!res.ok) {
+            db = loadDb();
+            showBanner("mfgFeedback", res.message, true);
+            return;
+          }
+          saveDb(db);
+          renderMainView();
+          showBanner(
+            "mfgFeedback",
+            `Produksi ${res.count} ${res.recipe.outputUnit} (${res.recipe.name}) selesai. Bahan baku & biaya listrik/operasional telah dibebankan.`
+          );
+        });
       }
 
-      if (cloud.debts) {
-        state.debts = cloud.debts.map(d => ({
-          id: String(d.ID),
-          kind: String(d.Jenis || 'Piutang'),
-          party: String(d.Pihak || ''),
-          ref: String(d.NoRef || ''),
-          date: String(d.Tanggal || ''),
-          dueDate: String(d.JatuhTempo || ''),
-          totalAmount: Number(d.TotalAwal || 0),
-          paidAmount: Number(d.Terbayar || 0),
-          remaining: Number(d.Sisa || 0),
-          status: String(d.Status || 'Belum Lunas'),
-          note: String(d.Catatan || '')
-        })).reverse();
+      const addBomRowBtn = document.getElementById("addBomRowBtn");
+      if (addBomRowBtn) {
+        addBomRowBtn.addEventListener("click", () => {
+          draftBomItems.push({ materialId: db.materials[0].id, qty: 1 });
+          renderMainView();
+        });
       }
 
-      if (cloud.manufactures) {
-        state.manufactures = cloud.manufactures.map(m => {
-          let materials = [];
-          try { materials = typeof m.BahanJSON === 'string' ? JSON.parse(m.BahanJSON) : (m.BahanJSON || []); } catch (e) {}
-          return {
-            id: String(m.NoProduksi),
-            date: String(m.Tanggal),
-            outputCode: String(m.KodeProdukJadi),
-            outputName: String(m.NamaProdukJadi),
-            outputQty: Number(m.QtyHasil || 0),
-            extraCost: Number(m.BiayaTambahan || 0),
-            totalCost: Number(m.TotalHPP || 0),
-            unitCost: Number(m.HPPSatuan || 0),
-            cashier: String(m.Kasir || ''),
-            materials
-          };
-        }).reverse();
+      document.querySelectorAll("[data-bom-mat]").forEach((sel) => {
+        sel.addEventListener("change", () => {
+          const i = Number(sel.getAttribute("data-bom-mat"));
+          draftBomItems[i].materialId = sel.value;
+        });
+      });
+
+      document.querySelectorAll("[data-bom-qty]").forEach((inp) => {
+        inp.addEventListener("input", () => {
+          const i = Number(inp.getAttribute("data-bom-qty"));
+          draftBomItems[i].qty = Number(inp.value || 1);
+        });
+      });
+
+      document.querySelectorAll("[data-bom-del]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.getAttribute("data-bom-del"));
+          if (draftBomItems.length > 1) {
+            draftBomItems.splice(i, 1);
+            renderMainView();
+          }
+        });
+      });
+
+      const createBomForm = document.getElementById("createBomForm");
+      if (createBomForm) {
+        createBomForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("newBomName").value.trim();
+          const outputUnit = document.getElementById("newBomUnit").value.trim() || "unit";
+          const defaultPrice = Number(document.getElementById("newBomPrice").value || 0);
+          const electricityCostPerUnit = Number(document.getElementById("newBomElec").value || 0);
+          const operationalCostPerUnit = Number(document.getElementById("newBomOper").value || 0);
+
+          if (!name) return;
+
+          db.bomRecipes.push({
+            id: "bom-" + Date.now(),
+            name,
+            outputUnit,
+            defaultPrice,
+            electricityCostPerUnit,
+            operationalCostPerUnit,
+            items: draftBomItems.map((x) => ({ materialId: x.materialId, qty: Number(x.qty || 1) }))
+          });
+
+          saveDb(db);
+          draftBomItems = [{ materialId: db.materials[0].id, qty: 1 }];
+          renderMainView();
+          showBanner("mfgFeedback", `Resep BOM "${name}" berhasil disimpan.`);
+        });
       }
 
-      if (cloud.journals) {
-        state.journals = cloud.journals.map(j => ({
-          id: String(j.ID),
-          date: String(j.Tanggal),
-          ref: String(j.NoRef),
-          desc: String(j.Keterangan),
-          account: String(j.Akun),
-          debit: Number(j.Debit || 0),
-          credit: Number(j.Kredit || 0)
-        })).reverse();
+      // Inventory restock
+      const restockForm = document.getElementById("restockForm");
+      if (restockForm) {
+        restockForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const matId = document.getElementById("restockMatSelect").value;
+          const qty = Number(document.getElementById("restockQty").value);
+          const totalCost = Number(document.getElementById("restockCost").value);
+          const mat = getMaterial(matId);
+          if (!mat || qty <= 0) return;
+
+          const oldStock = Number(mat.stock);
+          const oldCostTotal = oldStock * Number(mat.unitCost);
+          const newStock = oldStock + qty;
+          mat.stock = newStock;
+          if (newStock > 0) {
+            mat.unitCost = Math.round((oldCostTotal + totalCost) / newStock);
+          }
+
+          addJournalEntry(`Restock / Kulakan ${mat.name} (+${qty} ${mat.unit})`, [
+            { account: "Persediaan", debit: totalCost, credit: 0 },
+            { account: "Kas / Hutang Kulakan", debit: 0, credit: totalCost }
+          ]);
+
+          saveDb(db);
+          renderMainView();
+          showBanner("invFeedback", `Restock ${mat.name} sebanyak ${qty} ${mat.unit} berhasil dicatat.`);
+        });
       }
 
-      if (cloud.shifts) {
-        state.shifts = cloud.shifts.map(st => ({
-          id: String(st.ID),
-          date: String(st.Tanggal),
-          cashier: String(st.Kasir),
-          systemCash: Number(st.SaldoSistem || 0),
-          actualCash: Number(st.UangFisik || 0),
-          diff: Number(st.Selisih || 0),
-          note: String(st.Catatan || '')
-        })).reverse();
+      // Accounting expense
+      const expenseForm = document.getElementById("expenseForm");
+      if (expenseForm) {
+        expenseForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const category = document.getElementById("expenseCategory").value;
+          const desc = document.getElementById("expenseDesc").value.trim();
+          const amount = Number(document.getElementById("expenseAmount").value);
+          if (!desc || amount <= 0) return;
+
+          db.expenses.unshift({
+            id: "exp-" + Date.now(),
+            date: nowDateStr(),
+            category,
+            desc,
+            amount
+          });
+
+          addJournalEntry(`${category}: ${desc}`, [
+            { account: category, debit: amount, credit: 0 },
+            { account: "Kas", debit: 0, credit: amount }
+          ]);
+
+          saveDb(db);
+          renderMainView();
+          showBanner("accFeedback", `Biaya "${desc}" sebesar ${formatRupiah(amount)} berhasil dicatat.`);
+        });
       }
 
-      state.lastSync = nowStr();
-      await saveAppState();
-      if (!silent) alert('Sinkronisasi 2 arah berhasil! Data HP & Laptop sudah sama.');
-    } else {
-      if (!silent) alert('Gagal sinkron: ' + (json.message || 'Respons tidak valid'));
+      // Accounts management (Owner)
+      const addUserForm = document.getElementById("addUserForm");
+      if (addUserForm) {
+        addUserForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("newUserName").value.trim();
+          const username = document.getElementById("newUserUsername").value.trim();
+          const password = document.getElementById("newUserPassword").value;
+          const role = document.getElementById("newUserRole").value;
+
+          if (!name || !username || !password) return;
+          if (db.users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
+            showBanner("acctFeedback", "Username sudah digunakan.", true);
+            return;
+          }
+
+          db.users.push({
+            id: "u-" + Date.now(),
+            name,
+            username,
+            password,
+            role,
+            active: true
+          });
+
+          saveDb(db);
+          renderMainView();
+          showBanner("acctFeedback", `Akun "${username}" (${role}) berhasil ditambahkan.`);
+        });
+      }
+
+      document.querySelectorAll("[data-change-pwd]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const uid = btn.getAttribute("data-change-pwd");
+          const input = document.getElementById("pwd-" + uid);
+          const newPwd = input ? input.value : "";
+          if (!newPwd) {
+            showBanner("acctFeedback", "Masukkan kata sandi baru terlebih dahulu.", true);
+            return;
+          }
+          const target = db.users.find((u) => u.id === uid);
+          if (target) {
+            target.password = newPwd;
+            saveDb(db);
+            renderMainView();
+            showBanner("acctFeedback", `Kata sandi untuk ${target.username} berhasil diperbarui.`);
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-del-user]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const uid = btn.getAttribute("data-del-user");
+          db.users = db.users.filter((u) => u.id !== uid);
+          saveDb(db);
+          renderMainView();
+          showBanner("acctFeedback", "Akun pengguna telah dihapus.");
+        });
+      });
     }
-  } catch (err) {
-    if (!silent) alert('Koneksi ke Google Sheets terganggu. Data tetap aman di perangkat.');
-  } finally {
-    isSyncing = false;
-    render();
-  }
-}
-
-/* =========================================================
-   12. RESPONSIVE DASHBOARD SHORTCUTS & PAGE VIEWS
-   ========================================================= */
-function goToTransactionsList() {
-  state.page = 'Dashboard';
-  render();
-  setTimeout(() => {
-    const el = $('#dashboardTransactionsSection');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 40);
-}
-
-function goToLowStockList() {
-  state.stockFilterLow = true;
-  state.page = 'Persediaan';
-  render();
-}
-
-function goToJournalList() {
-  state.page = 'Keuangan';
-  render();
-  setTimeout(() => {
-    const el = $('#journalSection');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 40);
-}
-
-function viewDashboard() {
-  const validSales = state.sales.filter(s => s.status === 'Selesai');
-  const omzet = validSales.reduce((s, x) => s + x.total, 0);
-  const hpp = validSales.reduce((s, x) => s + x.items.reduce((a, b) => a + b.buyPrice * b.qty, 0), 0);
-  const labaKotor = omzet - hpp;
-  const lowStock = state.products.filter(p => !p.isService && p.stock <= (p.minStock || 5)).length;
-
-  return `
-    <div class="section-head">
-      <div><p class="eyebrow">RINGKASAN TOKO</p><h1>Dashboard YADHIYA</h1></div>
-      <button class="btn secondary sm" onclick="openShiftClosingModal()">🔒 Tutup Kasir</button>
-    </div>
-    <div class="metrics">
-      <button type="button" class="metric" onclick="goToTransactionsList()">
-        <div class="muted">Total Omzet</div>
-        <div class="value green">${rp(omzet)}</div>
-        <div class="hint">Lihat daftar transaksi →</div>
-      </button>
-      <button type="button" class="metric" onclick="goToTransactionsList()">
-        <div class="muted">Transaksi Sukses</div>
-        <div class="value">${validSales.length}</div>
-        <div class="hint">Buka riwayat transaksi →</div>
-      </button>
-      <button type="button" class="metric" onclick="goToJournalList()">
-        <div class="muted">Laba Kotor</div>
-        <div class="value">${rp(labaKotor)}</div>
-        <div class="hint">Buka jurnal keuangan →</div>
-      </button>
-      <button type="button" class="metric" onclick="goToLowStockList()">
-        <div class="muted">Stok Menipis</div>
-        <div class="value red">${lowStock} item</div>
-        <div class="hint">${lowStock > 0 ? 'Cek barang menipis →' : 'Lihat semua stok →'}</div>
-      </button>
-    </div>
-    <div class="quick">
-      <button onclick="go('Kasir')"><span>🛒</span>Kasir</button>
-      <button onclick="openPhotocopyModal()"><span>🖨️</span>Fotokopi</button>
-      <button onclick="go('Pembelian')"><span>🧺</span>Kulakan</button>
-      <button onclick="go('UtangPiutang')"><span>💳</span>Utang/Piutang</button>
-    </div>
-    <div id="dashboardTransactionsSection">
-      <h2>Riwayat Transaksi Terakhir (Semua Perangkat)</h2>
-      <div class="panel">
-        ${state.sales.length ? state.sales.slice(0, 25).map(s => `
-          <div class="row">
-            <div class="ico">${s.status === 'Void' ? '🚫' : '🧾'}</div>
-            <div class="grow">
-              <strong>${s.invoice} · ${s.paymentMethod} ${s.status === 'Void' ? '<span class="badge low">VOID</span>' : ''}</strong>
-              <small>${s.date} · Kasir: ${s.cashier}</small>
-            </div>
-            <div style="text-align:right">
-              <b class="${s.status === 'Void' ? 'red' : 'green'}">${rp(s.total)}</b><br>
-              <button class="btn secondary sm" onclick='showReceiptModal(${JSON.stringify(s)})'>Struk</button>
-              ${s.status === 'Selesai' ? `<button class="btn danger sm" onclick="voidSale('${s.invoice}')">Void</button>` : ''}
-            </div>
-          </div>
-        `).join('') : '<p class="muted">Belum ada transaksi penjualan.</p>'}
-      </div>
-    </div>`;
-}
-
-function viewKasir() {
-  const cats = ['Semua', ...new Set(state.products.map(p => p.category))];
-  const filtered = state.products.filter(p => {
-    const matchCat = state.catFilter === 'Semua' || p.category === state.catFilter;
-    const q = state.searchQuery.toLowerCase();
-    const matchQ = !q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
-    return matchCat && matchQ;
-  });
-
-  const total = state.cart.reduce((s, c) => s + c.sellPrice * c.qty, 0);
-  const paidNum = Number(state.cashPaid || 0);
-  const change = paidNum > 0 ? paidNum - total : 0;
-  const isPiutang = state.paymentMethod === 'Piutang (Tempo Pelanggan)';
-
-  return `
-    <div class="pos-layout">
-      <div>
-        <div class="section-head">
-          <h1>Kasir & Fotokopi</h1>
-          <div style="display:flex;gap:6px">
-            <button class="btn secondary sm" onclick="openPhotocopyModal()">🖨️ Hitung Fotokopi</button>
-            <button class="btn sm" onclick="openCameraScanner()">📷 Scan HP</button>
-          </div>
-        </div>
-        <input id="posSearch" placeholder="Cari produk atau scan barcode [Tekan F2]..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;render();setTimeout(()=>{const el=$('#posSearch');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}},0)">
-        <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px">
-          ${cats.map(c => `<button class="btn sm ${state.catFilter === c ? '' : 'secondary'}" onclick="state.catFilter='${c}';render()">${c}</button>`).join('')}
-        </div>
-        <div class="prod-grid">
-          ${filtered.map(p => {
-            const out = !p.isService && p.stock <= 0;
-            return `
-            <div class="prod-card ${out ? 'out' : ''}" onclick="${out ? '' : `addToCart('${p.code}',1)`}">
-              <div>
-                <span class="badge ${!p.isService && p.stock <= p.minStock ? 'low' : ''}">
-                  ${p.isService ? 'Jasa' : 'Stok: ' + p.stock + ' ' + p.unit}
-                </span>
-                <div style="font-weight:700;margin-top:6px">${p.name}</div>
-                <small class="muted">${p.code}</small>
-              </div>
-              <div style="margin-top:10px;font-weight:800;color:var(--blue)">${rp(p.sellPrice)}</div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-
-      <div class="cart-box">
-        <div class="section-head">
-          <h2 style="margin:0">🛒 Keranjang (${state.cart.reduce((s, c) => s + c.qty, 0)})</h2>
-          ${state.cart.length ? `<button class="btn danger sm" onclick="state.cart=[];render()">Kosongkan</button>` : ''}
-        </div>
-        ${state.cart.length ? `
-          <div style="max-height:290px;overflow-y:auto;margin-bottom:10px">
-            ${state.cart.map(c => `
-              <div class="row">
-                <div class="grow">
-                  <strong style="font-size:13px">${c.name}</strong>
-                  <small>${rp(c.sellPrice)} / ${c.unit}</small>
-                </div>
-                <div class="qty-ctrl">
-                  <button onclick="updateCartQty('${c.code}',-1)">-</button>
-                  <input type="number" value="${c.qty}" onchange="setCartQtyExact('${c.code}',this.value)" style="width:44px;margin:0;padding:2px;text-align:center;border:0;background:transparent;font-weight:700">
-                  <button onclick="updateCartQty('${c.code}',1)">+</button>
-                </div>
-                <div style="min-width:74px;text-align:right;font-weight:700">${rp(c.sellPrice * c.qty)}</div>
-              </div>
-            `).join('')}
-          </div>
-          <div class="panel soft" style="padding:10px">
-            <div class="r-row" style="font-size:16px"><b>Total Tagihan</b><b class="green">${rp(total)}</b></div>
-            <label style="margin-top:8px">Metode Pembayaran (Akun)</label>
-            <select onchange="state.paymentMethod=this.value;render()">
-              <option ${state.paymentMethod === 'Tunai (Kas Laci)' ? 'selected' : ''}>Tunai (Kas Laci)</option>
-              <option ${state.paymentMethod === 'QRIS / Transfer Bank' ? 'selected' : ''}>QRIS / Transfer Bank</option>
-              <option ${isPiutang ? 'selected' : ''}>Piutang (Tempo Pelanggan)</option>
-            </select>
-            ${isPiutang ? `
-              <label>Nama Pelanggan (Wajib untuk Piutang)</label>
-              <input placeholder="Contoh: Pak Budi / Ibu Ani" value="${state.customerName}" oninput="state.customerName=this.value">
-              <div class="muted">Transaksi otomatis masuk ke daftar <b>Piutang Usaha</b> dan bisa dilunasi bertahap.</div>
-            ` : ''}
-            ${state.paymentMethod === 'Tunai (Kas Laci)' ? `
-              <label>Uang Diterima (Rp)</label>
-              <input type="number" placeholder="Uang pas: ${total}" value="${state.cashPaid}" oninput="state.cashPaid=this.value;render()">
-              <div style="display:flex;gap:5px;margin-bottom:8px">
-                <button class="btn secondary sm" onclick="state.cashPaid=${total};render()">Uang Pas</button>
-                <button class="btn secondary sm" onclick="state.cashPaid=20000;render()">20rb</button>
-                <button class="btn secondary sm" onclick="state.cashPaid=50000;render()">50rb</button>
-                <button class="btn secondary sm" onclick="state.cashPaid=100000;render()">100rb</button>
-              </div>
-              <div class="r-row"><span>Kembalian:</span><b class="${change < 0 ? 'red' : 'green'}">${rp(Math.max(0, change))}</b></div>
-            ` : ''}
-          </div>
-          <button class="btn success" style="width:100%;padding:13px;font-size:15px" onclick="processCheckout()">✅ Proses Bayar & Cetak Struk</button>
-        ` : `<p class="muted" style="text-align:center;padding:28px 0">Pilih produk di sebelah kiri atau scan barcode untuk memulai transaksi.</p>`}
-      </div>
-    </div>`;
-}
-
-function viewPembelian() {
-  const physicalProducts = state.products.filter(p => !p.isService);
-  if (!state.purSelectedCode && physicalProducts.length) {
-    state.purSelectedCode = physicalProducts[0].code;
-  }
-
-  const isSubMode = state.purMode === 'subtotal';
-  const subtotal = state.purItems.reduce((s, x) => s + Number(x.lineTotal || 0), 0);
-  const discount = Math.max(0, Number(state.purDiscount || 0));
-  const adminFee = Math.max(0, Number(state.purAdminFee || 0));
-  const shipping = Math.max(0, Number(state.purShipping || 0));
-  const grandTotal = Math.max(0, subtotal - discount + adminFee + shipping);
-  const isUtang = state.purPaySrc === '201 - Utang Usaha';
-
-  return `
-    <h1>Pencatatan Barang Masuk (Kulakan)</h1>
-    <p class="muted">Bisa input banyak produk dalam 1 nota pembelian. HPP otomatis dihitung ulang menggunakan metode Average Cost.</p>
-
-    <div class="panel">
-      <div class="mode-pills">
-        <button type="button" class="mode-pill ${!isSubMode ? 'active' : ''}" onclick="setPurchaseMode('unit')">
-          <span class="mode-dot"></span>
-          <span>Input Berdasarkan Harga Satuan</span>
-        </button>
-        <button type="button" class="mode-pill ${isSubMode ? 'active' : ''}" onclick="setPurchaseMode('subtotal')">
-          <span class="mode-dot"></span>
-          <span>Input Berdasarkan Harga Subtotal</span>
-        </button>
-      </div>
-
-      <div style="font-weight:700;margin-bottom:8px;font-size:13px">Masukkan Item Produk Yang Dibeli</div>
-      <div class="pur-entry-grid">
-        <div>
-          <label>Nama Produk</label>
-          <select id="purProd" onchange="state.purSelectedCode=this.value" style="margin-bottom:4px">
-            ${physicalProducts.map(p => `<option value="${p.code}" ${state.purSelectedCode === p.code ? 'selected' : ''}>${p.name} (Stok: ${p.stock} ${p.unit})</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <label>Total Harga Beli</label>
-          <input id="purTotalField" type="number" min="0" placeholder="25000" value="${state.purTotalInput}"
-            ${isSubMode ? 'oninput="onPurTotalChange(this.value)"' : 'readonly'} style="margin-bottom:4px">
-        </div>
-        <div>
-          <label>Quantity</label>
-          <input id="purQtyField" type="number" min="1" value="${state.purQtyInput}" oninput="onPurQtyChange(this.value)" style="margin-bottom:4px">
-        </div>
-        <div>
-          <label>Harga Satuan</label>
-          <input id="purUnitField" type="number" min="0" placeholder="5000" value="${state.purUnitInput}"
-            ${!isSubMode ? 'oninput="onPurUnitChange(this.value)"' : 'readonly'} style="margin-bottom:4px">
-        </div>
-        <div style="padding-bottom:4px">
-          <button type="button" class="btn success" onclick="addPurchaseItem()" title="Tambah ke daftar nota" style="width:100%;height:40px">＋ Tambah</button>
-        </div>
-      </div>
-
-      ${state.purItems.length ? `
-        <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">
-          <div class="section-head" style="margin-bottom:4px">
-            <b style="font-size:13px">Daftar Barang di Nota (${state.purItems.length} item)</b>
-            <button type="button" class="btn danger sm" onclick="state.purItems=[];render()">Hapus Semua</button>
-          </div>
-          ${state.purItems.map((it, idx) => `
-            <div class="row">
-              <div class="ico">📦</div>
-              <div class="grow">
-                <strong>${it.name}</strong>
-                <small>${it.qty} ${it.unit} × ${rp(it.buyPrice)}</small>
-              </div>
-              <div style="text-align:right">
-                <b>${rp(it.lineTotal)}</b><br>
-                <button type="button" class="btn danger sm" onclick="removePurchaseItem(${idx})">Hapus</button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : `<div class="panel soft" style="margin-top:12px;margin-bottom:0;text-align:center;color:var(--muted);font-size:12px">Belum ada item ditambahkan ke nota pembelian ini.</div>`}
-    </div>
-
-    <div class="panel">
-      <div class="section-head" style="margin-bottom:${state.purShowExtras ? '10px' : '0'}">
-        <div>
-          <b style="font-size:13px">Diskon, Biaya Admin & Ongkos Kirim (Opsional)</b>
-          <div class="muted">Potongan nota, biaya layanan marketplace, atau ongkir supplier</div>
-        </div>
-        <button type="button" class="btn secondary sm" onclick="state.purShowExtras=!state.purShowExtras;render()">
-          ${state.purShowExtras ? 'SEMBUNYIKAN' : 'TAMPILKAN'}
-        </button>
-      </div>
-
-      ${state.purShowExtras ? `
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:6px;border-top:1px solid var(--line)">
-          <div>
-            <label>Diskon Nota (Rp)</label>
-            <input type="number" min="0" value="${state.purDiscount || ''}" placeholder="0" oninput="state.purDiscount=this.value;render()">
-          </div>
-          <div>
-            <label>Biaya Admin (Rp)</label>
-            <input type="number" min="0" value="${state.purAdminFee || ''}" placeholder="0" oninput="state.purAdminFee=this.value;render()">
-          </div>
-          <div>
-            <label>Ongkos Kirim (Rp)</label>
-            <input type="number" min="0" value="${state.purShipping || ''}" placeholder="0" oninput="state.purShipping=this.value;render()">
-          </div>
-        </div>
-      ` : ''}
-    </div>
-
-    <div class="panel">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div>
-          <label>Nama Supplier / Toko</label>
-          <input placeholder="Contoh: Agen Sembako & ATK Blitar" value="${state.purSupplier}" oninput="state.purSupplier=this.value">
-        </div>
-        <div>
-          <label>Sumber Dana Pembayaran</label>
-          <select onchange="state.purPaySrc=this.value;render()">
-            <option value="101 - Kas Laci Toko" ${state.purPaySrc === '101 - Kas Laci Toko' ? 'selected' : ''}>101 - Kas Laci Toko (Tunai)</option>
-            <option value="102 - Bank / QRIS" ${state.purPaySrc === '102 - Bank / QRIS' ? 'selected' : ''}>102 - Bank / QRIS (Transfer)</option>
-            <option value="201 - Utang Usaha" ${isUtang ? 'selected' : ''}>201 - Utang Usaha (Tempo)</option>
-          </select>
-        </div>
-      </div>
-
-      ${isUtang ? `
-        <div style="margin-bottom:6px">
-          <label>Tanggal Jatuh Tempo Utang (Opsional)</label>
-          <input type="date" value="${state.purDueDate}" oninput="state.purDueDate=this.value">
-        </div>
-      ` : ''}
-
-      <div class="panel soft" style="padding:12px;margin-top:4px">
-        <div class="r-row"><span class="muted">Subtotal Barang:</span><b>${rp(subtotal)}</b></div>
-        ${discount > 0 ? `<div class="r-row"><span class="muted">Diskon:</span><b class="green">- ${rp(discount)}</b></div>` : ''}
-        ${adminFee > 0 ? `<div class="r-row"><span class="muted">Biaya Admin:</span><b>+ ${rp(adminFee)}</b></div>` : ''}
-        ${shipping > 0 ? `<div class="r-row"><span class="muted">Ongkos Kirim:</span><b>+ ${rp(shipping)}</b></div>` : ''}
-        <hr style="border:0;border-top:1px solid var(--line);margin:8px 0">
-        <div class="r-row" style="font-size:16px"><b>Total Transaksi</b><b class="green">${rp(grandTotal)}</b></div>
-      </div>
-
-      <button type="button" class="btn" onclick="submitPurchaseOrder()" style="width:100%;padding:12px;font-size:14px">
-        💾 Simpan Nota Kulakan & Update Stok
-      </button>
-    </div>
-
-    <h2>Riwayat Pembelian</h2>
-    <div class="panel">
-      ${state.purchases.length ? state.purchases.map(p => `
-        <div class="row">
-          <div class="ico">🧺</div>
-          <div class="grow">
-            <strong>${p.invoice} · ${p.supplier}</strong>
-            <small>${p.date} · ${p.items.map(i => i.name + ' (' + i.qty + ')').join(', ')}</small>
-            ${(p.discount || p.adminFee || p.shipping) ? `<small style="display:block;color:var(--blue)">Subtotal: ${rp(p.subtotal || p.total)}${p.discount ? ' · Diskon: -' + rp(p.discount) : ''}${p.adminFee ? ' · Admin: +' + rp(p.adminFee) : ''}${p.shipping ? ' · Ongkir: +' + rp(p.shipping) : ''}</small>` : ''}
-          </div>
-          <b>${rp(p.total)}</b>
-        </div>
-      `).join('') : '<p class="muted">Belum ada catatan pembelian.</p>'}
-    </div>`;
-}
-
-function viewPersediaan() {
-  const lowCount = state.products.filter(p => !p.isService && p.stock <= (p.minStock || 5)).length;
-  const categories = ['Semua', ...new Set(state.products.map(p => p.category || 'Umum'))];
-
-  let list = state.products.filter(p => {
-    if (state.stockFilterLow && (p.isService || p.stock > (p.minStock || 5))) return false;
-    if (state.stockCatFilter !== 'Semua' && p.category !== state.stockCatFilter) return false;
-    const q = (state.stockSearchQuery || '').toLowerCase();
-    if (q && !p.name.toLowerCase().includes(q) && !p.code.toLowerCase().includes(q)) return false;
-    return true;
-  });
-
-  // Sortir produk
-  list = [...list].sort((a, b) => {
-    if (state.stockSortBy === 'name_asc') return a.name.localeCompare(b.name);
-    if (state.stockSortBy === 'name_desc') return b.name.localeCompare(a.name);
-    if (state.stockSortBy === 'cat_asc') return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
-    if (state.stockSortBy === 'stock_asc') return (a.isService ? 999999 : a.stock) - (b.isService ? 999999 : b.stock);
-    if (state.stockSortBy === 'stock_desc') return (b.isService ? -1 : b.stock) - (a.isService ? -1 : a.stock);
-    if (state.stockSortBy === 'price_desc') return b.sellPrice - a.sellPrice;
-    return 0;
-  });
-
-  return `
-    <div class="section-head">
-      <div>
-        <h1>Manajemen Persediaan</h1>
-        <p class="muted" style="margin:2px 0 0">Menampilkan <b>${list.length}</b> dari ${state.products.length} produk & jasa</p>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn sm ${state.stockFilterLow ? 'danger' : 'secondary'}" onclick="state.stockFilterLow=!state.stockFilterLow;render()">
-          ${state.stockFilterLow ? '⚠️ Filter Menipis (' + lowCount + ') · Tampil Semua' : '⚠️ Stok Menipis (' + lowCount + ')'}
-        </button>
-        <button class="btn secondary sm" onclick="syncTwoWay(false)">🔄 Segarkan</button>
-        <button class="btn sm" onclick="openAddProductModal()">＋ Produk Baru</button>
-      </div>
-    </div>
-
-    <div class="panel" style="padding:12px">
-      <div class="filter-bar" style="margin-bottom:0">
-        <div>
-          <label>Cari Nama / Kode</label>
-          <input id="stockSearch" placeholder="Ketik nama barang atau SKU..." value="${state.stockSearchQuery}"
-            oninput="state.stockSearchQuery=this.value;render();setTimeout(()=>{const el=$('#stockSearch');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}},0)"
-            style="margin-bottom:0">
-        </div>
-        <div>
-          <label>Filter Kategori</label>
-          <select onchange="state.stockCatFilter=this.value;render()" style="margin-bottom:0">
-            ${categories.map(c => `<option value="${c}" ${state.stockCatFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <label>Urutkan (Sortir)</label>
-          <select onchange="state.stockSortBy=this.value;render()" style="margin-bottom:0">
-            <option value="name_asc" ${state.stockSortBy === 'name_asc' ? 'selected' : ''}>Nama Barang (A → Z)</option>
-            <option value="name_desc" ${state.stockSortBy === 'name_desc' ? 'selected' : ''}>Nama Barang (Z → A)</option>
-            <option value="cat_asc" ${state.stockSortBy === 'cat_asc' ? 'selected' : ''}>Kategori (A → Z)</option>
-            <option value="stock_asc" ${state.stockSortBy === 'stock_asc' ? 'selected' : ''}>Stok Paling Sedikit</option>
-            <option value="stock_desc" ${state.stockSortBy === 'stock_desc' ? 'selected' : ''}>Stok Paling Banyak</option>
-            <option value="price_desc" ${state.stockSortBy === 'price_desc' ? 'selected' : ''}>Harga Jual Tertinggi</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      ${list.length ? list.map(p => {
-        const isLow = !p.isService && p.stock <= (p.minStock || 5);
-        return `
-        <div class="row">
-          <div class="ico">${p.isService ? '🖨️' : (isLow ? '⚠️' : '📦')}</div>
-          <div class="grow">
-            <strong>${p.name} <span class="badge ${isLow ? 'low' : ''}">${p.category}</span> ${isLow ? '<span class="badge low">Stok Menipis</span>' : ''}</strong>
-            <small>Kode: ${p.code} · HPP: ${rp(p.buyPrice)} · Jual: ${rp(p.sellPrice)}</small>
-          </div>
-          <div style="text-align:right">
-            <b class="${isLow ? 'red' : ''}">${p.isService ? 'Jasa' : p.stock + ' ' + p.unit}</b><br>
-            <button class="btn secondary sm" onclick="openEditProductModal('${p.code}')">Edit</button>
-          </div>
-        </div>`;
-      }).join('') : '<p class="muted">Tidak ada produk yang cocok dengan filter saat ini.</p>'}
-    </div>`;
-}
-
-function viewUtangPiutang() {
-  const activeDebts = state.debts.filter(d => d.status !== 'Void');
-  const totalPiutang = activeDebts.filter(d => d.kind === 'Piutang').reduce((s, d) => s + Number(d.remaining || 0), 0);
-  const totalUtang = activeDebts.filter(d => d.kind === 'Utang').reduce((s, d) => s + Number(d.remaining || 0), 0);
-
-  const filtered = activeDebts.filter(d => {
-    if (state.debtTab !== 'Semua' && d.kind !== state.debtTab) return false;
-    if (state.debtStatusFilter !== 'Semua' && d.status !== state.debtStatusFilter) return false;
-    return true;
-  });
-
-  return `
-    <div class="section-head">
-      <div>
-        <h1>Buku Utang & Piutang</h1>
-        <p class="muted" style="margin:2px 0 0">Pantau tagihan pelanggan (Piutang) & kewajiban tempo ke supplier (Utang)</p>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn secondary sm" onclick="openNewDebtModal('Utang')">＋ Catat Utang</button>
-        <button class="btn sm" onclick="openNewDebtModal('Piutang')">＋ Catat Piutang</button>
-      </div>
-    </div>
-
-    <div class="metrics" style="grid-template-columns:repeat(2,1fr)">
-      <div class="metric" style="cursor:default">
-        <div class="muted">Sisa Piutang Usaha (Tagihan Pelanggan)</div>
-        <div class="value green">${rp(totalPiutang)}</div>
-      </div>
-      <div class="metric" style="cursor:default">
-        <div class="muted">Sisa Utang Usaha (Tempo Supplier)</div>
-        <div class="value red">${rp(totalUtang)}</div>
-      </div>
-    </div>
-
-    <div class="section-head">
-      <div style="display:flex;gap:6px">
-        ${['Semua', 'Piutang', 'Utang'].map(t => `
-          <button class="btn sm ${state.debtTab === t ? '' : 'secondary'}" onclick="state.debtTab='${t}';render()">${t}</button>
-        `).join('')}
-      </div>
-      <div style="display:flex;gap:6px">
-        ${['Belum Lunas', 'Lunas', 'Semua'].map(st => `
-          <button class="btn sm ${state.debtStatusFilter === st ? 'warning' : 'secondary'}" onclick="state.debtStatusFilter='${st}';render()">${st}</button>
-        `).join('')}
-      </div>
-    </div>
-
-    <div class="panel">
-      ${filtered.length ? filtered.map(d => `
-        <div class="row">
-          <div class="ico">${d.kind === 'Piutang' ? '📥' : '📤'}</div>
-          <div class="grow">
-            <strong>
-              ${d.party}
-              <span class="badge ${d.kind === 'Piutang' ? 'ok' : 'low'}">${d.kind}</span>
-              <span class="badge ${d.status === 'Lunas' ? 'ok' : 'warn'}">${d.status}</span>
-            </strong>
-            <small>Ref: ${d.ref} · ${d.date}${d.dueDate ? ' · Jatuh Tempo: ' + d.dueDate : ''}</small>
-            <small style="display:block">Total: ${rp(d.totalAmount)} · Terbayar: ${rp(d.paidAmount)} · <b>Sisa: ${rp(d.remaining)}</b></small>
-            ${d.note ? `<small class="muted">${d.note}</small>` : ''}
-          </div>
-          <div style="text-align:right">
-            <b class="${d.remaining > 0 ? (d.kind === 'Piutang' ? 'green' : 'red') : 'muted'}">${rp(d.remaining)}</b><br>
-            ${d.remaining > 0 ? `<button class="btn success sm" onclick="openPayDebtModal('${d.id}')">💵 Bayar / Lunas</button>` : ''}
-          </div>
-        </div>
-      `).join('') : '<p class="muted">Belum ada catatan utang atau piutang pada filter ini.</p>'}
-    </div>`;
-}
-
-function viewManufaktur() {
-  const physicalProducts = state.products.filter(p => !p.isService);
-  if (!state.mfgOutputCode && physicalProducts.length) {
-    state.mfgOutputCode = physicalProducts[0].code;
-  }
-  if (!state.mfgMatCode && physicalProducts.length) {
-    const alt = physicalProducts.find(p => p.code !== state.mfgOutputCode) || physicalProducts[0];
-    state.mfgMatCode = alt.code;
-  }
-
-  const matTotalCost = state.mfgMaterials.reduce((s, m) => s + Number(m.totalCost || 0), 0);
-  const extraCost = Math.max(0, Number(state.mfgExtraCost || 0));
-  const totalHpp = matTotalCost + extraCost;
-  const outQty = Math.max(1, Number(state.mfgOutputQty || 1));
-  const unitHpp = Math.round(totalHpp / outQty);
-
-  return `
-    <h1>Manufaktur / Perakitan Produk</h1>
-    <p class="muted">Ubah bahan baku berstok menjadi produk jadi (misal: paket alat tulis, parcel, atau olahan). Stok bahan baku otomatis berkurang & stok produk jadi bertambah.</p>
-
-    <div class="panel">
-      <div style="display:grid;grid-template-columns:1.5fr 0.8fr 1fr;gap:10px">
-        <div>
-          <label>Produk Jadi (Hasil Produksi)</label>
-          <select onchange="state.mfgOutputCode=this.value;render()">
-            ${physicalProducts.map(p => `<option value="${p.code}" ${state.mfgOutputCode === p.code ? 'selected' : ''}>${p.name} (Stok: ${p.stock} ${p.unit})</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <label>Qty Dihasilkan</label>
-          <input type="number" min="1" value="${state.mfgOutputQty}" oninput="state.mfgOutputQty=this.value;render()">
-        </div>
-        <div>
-          <label>Biaya Tambahan (Rp)</label>
-          <input type="number" min="0" placeholder="0" value="${state.mfgExtraCost || ''}" oninput="state.mfgExtraCost=this.value;render()">
-        </div>
-      </div>
-
-      <div style="border-top:1px solid var(--line);padding-top:10px;margin-top:4px">
-        <b style="font-size:13px;display:block;margin-bottom:6px">Bahan Baku yang Digunakan</b>
-        <div style="display:grid;grid-template-columns:1.8fr 0.8fr auto;gap:8px;align-items:end">
-          <div>
-            <label>Pilih Bahan Baku</label>
-            <select onchange="state.mfgMatCode=this.value" style="margin-bottom:4px">
-              ${physicalProducts.filter(p => p.code !== state.mfgOutputCode).map(p => `<option value="${p.code}" ${state.mfgMatCode === p.code ? 'selected' : ''}>${p.name} (Stok: ${p.stock} · HPP: ${rp(p.buyPrice)})</option>`).join('')}
-            </select>
-          </div>
-          <div>
-            <label>Qty Terpakai</label>
-            <input type="number" step="0.01" min="0.01" value="${state.mfgMatQty}" oninput="state.mfgMatQty=this.value" style="margin-bottom:4px">
-          </div>
-          <div style="padding-bottom:4px">
-            <button type="button" class="btn success" onclick="addMfgMaterial()" style="height:40px">＋ Bahan</button>
-          </div>
-        </div>
-      </div>
-
-      ${state.mfgMaterials.length ? `
-        <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:8px">
-          ${state.mfgMaterials.map((m, idx) => `
-            <div class="row">
-              <div class="ico">🧱</div>
-              <div class="grow">
-                <strong>${m.name}</strong>
-                <small>${m.qty} ${m.unit} × ${rp(m.unitCost)}</small>
-              </div>
-              <div style="text-align:right">
-                <b>${rp(m.totalCost)}</b><br>
-                <button type="button" class="btn danger sm" onclick="removeMfgMaterial(${idx})">Hapus</button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : `<div class="panel soft" style="margin-top:10px;margin-bottom:0;text-align:center;color:var(--muted);font-size:12px">Belum ada bahan baku dipilih.</div>`}
-
-      <div class="panel soft" style="padding:12px;margin-top:12px">
-        <div class="r-row"><span class="muted">Total Biaya Bahan Baku:</span><b>${rp(matTotalCost)}</b></div>
-        <div class="r-row"><span class="muted">Biaya Produksi Tambahan:</span><b>${rp(extraCost)}</b></div>
-        <div class="r-row"><span class="muted">Estimasi HPP per Satuan Hasil:</span><b>${rp(unitHpp)}</b></div>
-        <hr style="border:0;border-top:1px solid var(--line);margin:8px 0">
-        <div class="r-row" style="font-size:15px"><b>Total Nilai Produksi</b><b class="green">${rp(totalHpp)}</b></div>
-      </div>
-
-      <button type="button" class="btn" onclick="submitManufactureOrder()" style="width:100%;padding:12px;font-size:14px">
-        🏭 Proses Produksi & Update Stok
-      </button>
-    </div>
-
-    <h2>Riwayat Produksi / Manufaktur</h2>
-    <div class="panel">
-      ${state.manufactures.length ? state.manufactures.map(m => `
-        <div class="row">
-          <div class="ico">🏭</div>
-          <div class="grow">
-            <strong>${m.id} · ${m.outputName} (+${m.outputQty})</strong>
-            <small>${m.date} · HPP/unit: ${rp(m.unitCost)}</small>
-            <small style="display:block;color:var(--muted)">Bahan: ${m.materials.map(x => x.name + ' (' + x.qty + ')').join(', ')}</small>
-          </div>
-          <b>${rp(m.totalCost)}</b>
-        </div>
-      `).join('') : '<p class="muted">Belum ada riwayat produksi.</p>'}
-    </div>`;
-}
-
-function viewKeuangan() {
-  const validSales = state.sales.filter(s => s.status === 'Selesai');
-  const omzet = validSales.reduce((s, x) => s + x.total, 0);
-  const hpp = validSales.reduce((s, x) => s + x.items.reduce((a, b) => a + b.buyPrice * b.qty, 0), 0);
-  const nilaiPersediaan = state.products.filter(p => !p.isService).reduce((s, p) => s + p.stock * p.buyPrice, 0);
-
-  return `
-    <h1>Keuangan & Jurnal Otomatis</h1>
-    <div class="metrics">
-      <div class="metric" style="cursor:default"><div class="muted">Pendapatan</div><div class="value green">${rp(omzet)}</div></div>
-      <div class="metric" style="cursor:default"><div class="muted">Total HPP</div><div class="value red">${rp(hpp)}</div></div>
-      <div class="metric" style="cursor:default"><div class="muted">Laba Kotor</div><div class="value">${rp(omzet - hpp)}</div></div>
-      <div class="metric" style="cursor:default"><div class="muted">Nilai Aset Stok</div><div class="value">${rp(nilaiPersediaan)}</div></div>
-    </div>
-    <div id="journalSection">
-      <h2>Jurnal Umum (Otomatis dari Transaksi)</h2>
-      <div class="panel" style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead>
-            <tr style="background:#f1f5f9;text-align:left">
-              <th style="padding:8px">Tanggal / Ref</th>
-              <th style="padding:8px">Akun</th>
-              <th style="padding:8px;text-align:right">Debit</th>
-              <th style="padding:8px;text-align:right">Kredit</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${state.journals.length ? state.journals.slice(0, 50).map(j => `
-              <tr style="border-bottom:1px solid var(--line)">
-                <td style="padding:8px">${j.date}<br><small class="muted">${j.ref}</small></td>
-                <td style="padding:8px;padding-left:${j.credit > 0 ? '22px' : '8px'}">${j.account}<br><small class="muted">${j.desc}</small></td>
-                <td style="padding:8px;text-align:right">${j.debit ? rp(j.debit) : '-'}</td>
-                <td style="padding:8px;text-align:right">${j.credit ? rp(j.credit) : '-'}</td>
-              </tr>
-            `).join('') : '<tr><td colspan="4" style="padding:14px" class="muted">Belum ada jurnal tercatat.</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-}
-
-function viewMaster() {
-  return `
-    <h1>Master Data & Sinkronisasi Multi-Device</h1>
-
-    <div class="panel">
-      <h3>🔄 Sinkronisasi 2 Arah (HP ↔ Google Sheets ↔ Laptop)</h3>
-      <p class="muted">Data transaksi & stok otomatis disinkronkan setiap 15 detik saat online. Kamu juga bisa menekan tombol di bawah untuk menarik data produk baru dari Google Sheets.</p>
-      <label>URL Web App Google Apps Script</label>
-      <input id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec" value="${state.gasUrl}">
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" onclick="saveGasUrl()">Simpan URL</button>
-        <button class="btn success" onclick="syncTwoWay(false)">🔄 Sinkron & Tarik Data Sekarang</button>
-      </div>
-      <p class="muted" style="margin-top:8px">Sinkronisasi terakhir: <b>${state.lastSync}</b> · Antrean belum terkirim: <b>${state.syncQueue.length}</b></p>
-    </div>
-
-    <div class="panel">
-      <div class="section-head">
-        <h3 style="margin:0">🧑‍💼 Pengguna (Owner & Kasir)</h3>
-        <button class="btn sm" onclick="addUserPrompt()">＋ Tambah Akun</button>
-      </div>
-      ${state.users.map(u => `
-        <div class="row">
-          <div class="ico">👤</div>
-          <div class="grow">
-            <strong>${u.name} (${u.username})</strong>
-            <small>Peran: ${u.role} · Sandi: <code>${u.password}</code></small>
-          </div>
-          <button class="btn secondary sm" onclick="changeUserPassword('${u.username}')">✏️ Ganti Sandi</button>
-        </div>
-      `).join('')}
-    </div>
-
-    <div class="panel">
-      <h3>💾 Cadangan Data Lokal (JSON)</h3>
-      <p class="muted">Unduh file cadangan jika ingin memindahkan data antar perangkat tanpa internet.</p>
-      <div style="display:flex;gap:8px">
-        <button class="btn secondary" onclick="exportBackupJSON()">⬇️ Download Backup</button>
-        <button class="btn secondary" onclick="$('#importFile').click()">⬆️ Restore Backup</button>
-        <input id="importFile" type="file" accept=".json" style="display:none" onchange="importBackupJSON(event)">
-      </div>
-    </div>`;
-}
-
-/* =========================================================
-   13. MASTER CRUD, PASSWORD CHANGE & BACKUP HELPERS
-   ========================================================= */
-async function changeUserPassword(username) {
-  const user = state.users.find(u => u.username === username);
-  if (!user) return;
-  const nextPass = prompt('Masukkan sandi baru untuk akun "' + user.name + '" (' + user.username + '):', user.password);
-  if (nextPass === null) return;
-  const trimmed = nextPass.trim();
-  if (!trimmed) {
-    alert('Sandi tidak boleh kosong!');
-    return;
-  }
-  user.password = trimmed;
-  if (state.currentUser && state.currentUser.username === username) {
-    state.currentUser.password = trimmed;
-  }
-  const userPayload = {
-    username: user.username,
-    password: user.password,
-    name: user.name,
-    role: user.role,
-    active: 'Ya'
-  };
-  queueSync('USER', userPayload);
-  await saveAppState();
-  render();
-  alert('Sandi untuk akun ' + user.username + ' berhasil diperbarui menjadi "' + trimmed + '" dan siap disinkronkan.');
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-function openAddProductModal() {
-  const cats = [...new Set(state.products.map(p => p.category || 'Umum'))];
-  openModal(`
-    <h3>＋ Tambah Produk / Jasa Baru</h3>
-    <label>Kode Barcode / SKU</label><input id="pCode" value="BRG-${Date.now().toString().slice(-4)}">
-    <label>Nama Produk / Jasa</label><input id="pName" placeholder="Contoh: Penghapus Joyko">
-    <label>Kategori</label>
-    <input id="pCat" list="catSuggestions" value="Alat Tulis" placeholder="Pilih atau ketik kategori baru">
-    <datalist id="catSuggestions">
-      ${cats.map(c => `<option value="${c}">`).join('')}
-    </datalist>
-    <label>Satuan</label><input id="pUnit" value="Pcs">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label>Harga Beli / Modal</label><input id="pBuy" type="number" value="1000"></div>
-      <div><label>Harga Jual</label><input id="pSell" type="number" value="2000"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label>Stok Awal</label><input id="pStock" type="number" value="10"></div>
-      <div><label>Jenis Item</label><select id="pSrv"><option value="0">Barang Fisik (Pakai Stok)</option><option value="1">Jasa Fotokopi/Print</option></select></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
-      <button class="btn" style="flex:1" onclick="saveNewProduct()">Simpan Produk</button>
-    </div>
-  `);
-}
-
-async function saveNewProduct() {
-  const code = $('#pCode').value.trim();
-  const name = $('#pName').value.trim();
-  if (!code || !name) return alert('Kode dan nama wajib diisi!');
-  const prod = {
-    code, name,
-    category: $('#pCat').value.trim() || 'Umum',
-    unit: $('#pUnit').value.trim() || 'Pcs',
-    buyPrice: Number($('#pBuy').value || 0),
-    sellPrice: Number($('#pSell').value || 0),
-    stock: Number($('#pStock').value || 0),
-    minStock: 5,
-    isService: $('#pSrv').value === '1',
-    updatedAt: new Date().toISOString()
-  };
-  state.products.push(prod);
-  queueSync('PRODUCT', prod);
-  await saveAppState();
-  closeModal();
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-function openEditProductModal(code) {
-  const p = state.products.find(x => x.code === code);
-  if (!p) return;
-  const cats = [...new Set(state.products.map(x => x.category || 'Umum'))];
-  openModal(`
-    <h3>✏️ Edit ${p.name}</h3>
-    <label>Nama Produk</label><input id="eName" value="${p.name}">
-    <label>Kategori</label>
-    <input id="eCat" list="editCatSuggestions" value="${p.category}">
-    <datalist id="editCatSuggestions">
-      ${cats.map(c => `<option value="${c}">`).join('')}
-    </datalist>
-    <label>Harga Beli (HPP)</label><input id="eBuy" type="number" value="${p.buyPrice}">
-    <label>Harga Jual</label><input id="eSell" type="number" value="${p.sellPrice}">
-    ${p.isService ? '' : `<label>Penyesuaian Stok</label><input id="eStock" type="number" value="${p.stock}">`}
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
-      <button class="btn" style="flex:1" onclick="saveEditProduct('${p.code}')">Simpan</button>
-    </div>
-  `);
-}
-
-async function saveEditProduct(code) {
-  const p = state.products.find(x => x.code === code);
-  if (!p) return;
-  p.name = $('#eName').value.trim() || p.name;
-  p.category = $('#eCat').value.trim() || p.category;
-  p.buyPrice = Number($('#eBuy').value || 0);
-  p.sellPrice = Number($('#eSell').value || 0);
-  if (!p.isService && $('#eStock')) p.stock = Number($('#eStock').value || 0);
-  p.updatedAt = new Date().toISOString();
-  queueSync('PRODUCT', p);
-  await saveAppState();
-  closeModal();
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-async function saveGasUrl() {
-  state.gasUrl = $('#gasUrlInput').value.trim();
-  await saveAppState();
-  alert('URL Google Apps Script tersimpan!');
-  syncTwoWay(false);
-}
-
-async function addUserPrompt() {
-  const name = prompt('Nama lengkap pengguna:');
-  if (!name) return;
-  const username = prompt('Username untuk login:');
-  if (!username) return;
-  const password = prompt('Password:', '123') || '123';
-  const role = confirm('Klik OK untuk peran Owner, Cancel untuk Kasir (keduanya memiliki hak akses penuh yang sama):') ? 'Owner' : 'Kasir';
-  const newUser = { name, username, password, role, active: 'Ya' };
-  state.users.push(newUser);
-  queueSync('USER', newUser);
-  await saveAppState();
-  render();
-  if (state.online && state.gasUrl) syncTwoWay(true);
-}
-
-function exportBackupJSON() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'YADHIYA_POS_Backup_' + todayKey() + '.json';
-  a.click();
-}
-
-function importBackupJSON(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (ev) => {
-    try {
-      const parsed = JSON.parse(ev.target.result);
-      state = { ...state, ...parsed, online: navigator.onLine };
-      await saveAppState();
-      alert('Data berhasil dipulihkan!');
-      render();
-    } catch (err) {
-      alert('File backup tidak valid.');
-    }
-  };
-  reader.readAsText(file);
-}
-
-/* =========================================================
-   14. MAIN RENDERER & EVENTS
-   ========================================================= */
-const NAV_ITEMS = [
-  ['Dashboard', '📊', 'Beranda'],
-  ['Kasir', '🛒', 'Kasir'],
-  ['Pembelian', '🧺', 'Kulakan'],
-  ['Persediaan', '📦', 'Stok'],
-  ['UtangPiutang', '💳', 'Utang/Piutang'],
-  ['Manufaktur', '🏭', 'Manufaktur'],
-  ['Keuangan', '📒', 'Akuntansi'],
-  ['Master', '⚙️', 'Pengaturan']
-];
-
-function go(p) {
-  if (p !== 'Persediaan') state.stockFilterLow = false;
-  state.page = p;
-  render();
-}
-function openModal(html) { $('#modalBody').innerHTML = html; $('#modalBg').classList.add('open'); }
-function closeModal() { $('#modalBg').classList.remove('open'); }
-
-function render() {
-  if (!state.currentUser) return renderLogin();
-
-  let content = '';
-  if (state.page === 'Dashboard') content = viewDashboard();
-  else if (state.page === 'Kasir') content = viewKasir();
-  else if (state.page === 'Pembelian') content = viewPembelian();
-  else if (state.page === 'Persediaan') content = viewPersediaan();
-  else if (state.page === 'UtangPiutang') content = viewUtangPiutang();
-  else if (state.page === 'Manufaktur') content = viewManufaktur();
-  else if (state.page === 'Keuangan') content = viewKeuangan();
-  else if (state.page === 'Master') content = viewMaster();
-
-  $('#root').innerHTML = `
-    <div class="shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="logo">Y</div>
-          <div><b>YADHIYA POS</b><small>Offline-First Retail</small></div>
-        </div>
-        ${NAV_ITEMS.map(([id, ico, label]) => `
-          <button class="${state.page === id ? 'active' : ''}" onclick="go('${id}')">
-            <span>${ico}</span> ${label}
-          </button>
-        `).join('')}
-        <div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.12)">
-          <button onclick="handleLogout()" style="color:#fca5a5">🚪 Keluar (${state.currentUser.username})</button>
-        </div>
-      </aside>
-
-      <div class="main-area">
-        <header>
-          <div class="brand">
-            <div class="logo">Y</div>
-            <div><b>YADHIYA POS</b><small>${state.currentUser.name} (${state.currentUser.role})</small></div>
-          </div>
-          <div class="status-bar">
-            <button class="pill ${state.online ? 'online' : 'offline'}" onclick="state.online=!state.online;render()">
-              ${state.online ? '🟢 Online' : '🔴 Offline'}
-            </button>
-            <button class="pill sync" onclick="syncTwoWay(false)">
-              ${isSyncing ? '⏳ Syncing...' : '🔄 Sync (' + state.syncQueue.length + ')'}
-            </button>
-            <button class="pill user" onclick="handleLogout()">👤 ${state.currentUser.username}</button>
-          </div>
-        </header>
-        <main>${content}</main>
-      </div>
-    </div>
-
-    <nav class="bottom-nav">
-      ${NAV_ITEMS.map(([id, ico, label]) => `
-        <button class="${state.page === id ? 'active' : ''}" onclick="go('${id}')">
-          <b>${ico}</b>${label}
-        </button>
-      `).join('')}
-    </nav>
-  `;
-}
-
-window.addEventListener('online', () => {
-  state.online = true;
-  render();
-  if (state.gasUrl) syncTwoWay(true);
-});
-window.addEventListener('offline', () => { state.online = false; render(); });
-window.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && state.currentUser && state.online && state.gasUrl) {
-    syncTwoWay(true);
-  }
-});
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'F2' && state.page === 'Kasir') {
-    e.preventDefault();
-    const s = $('#posSearch');
-    if (s) s.focus();
-  }
-});
-
-setInterval(() => {
-  if (state.currentUser && state.online && state.gasUrl && !isSyncing) {
-    syncTwoWay(true);
-  }
-}, 15000);
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
-
-loadAppState().then(() => {
-  render();
-  if (state.currentUser && state.online && state.gasUrl) {
-    syncTwoWay(true);
-  }
-});
-</script>
+  </script>
 </body>
 </html>
