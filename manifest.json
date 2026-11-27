@@ -1,10 +1,18 @@
 {
-  "name": "YADHIYA POS & Manajemen Toko v1.6",
+  "name": "YADHIYA POS — Kasir & Akuntansi Offline",
   "short_name": "YADHIYA POS",
+  "description": "Aplikasi Kasir, Fotokopi, Kulakan, Manufaktur, Utang Piutang, dan Akuntansi Otomatis Offline-First dengan Sinkronisasi Google Sheets",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f1f5f9",
-  "theme_color": "#1d4ed8",
-  "description": "POS, Manufaktur BOM (Bahan + Listrik + Operasional), Stok, & Sinkronisasi v1.6",
-  "icons": []
+  "orientation": "any",
+  "background_color": "#172b4d",
+  "theme_color": "#172b4d",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%23172b4d'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='280' fill='%23ffffff'%3EY%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
