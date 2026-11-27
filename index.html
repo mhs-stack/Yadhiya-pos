@@ -1120,7 +1120,6 @@ async function submitManufactureOrder() {
   const outCode = state.mfgOutputCode || (physicalProducts[0] && physicalProducts[0].code);
   const outProd = physicalProducts.find(p => p.code === outCode);
   const outQty = Math.max(1, Number(state.mfgOutputQty || 1));
-  const extraCost = Math.max(0, Number(state.mfgExtraCost || 0));
 
   if (!outProd) {
     alert('Pilih produk hasil produksi terlebih dahulu!');
@@ -1410,7 +1409,10 @@ async function syncTwoWay(silent = false) {
             outputCode: String(m.KodeProdukJadi),
             outputName: String(m.NamaProdukJadi),
             outputQty: Number(m.QtyHasil || 0),
-            extraCost: Number(m.BiayaTambahan || 0),
+            materialCost: Number(m.BiayaBahan || 0),
+            electricityCost: Number(m.BiayaListrik || 0),
+            operationalCost: Number(m.BiayaOperasional || 0),
+            extraCost: Number(m.BiayaTambahan !== undefined ? m.BiayaTambahan : (Number(m.BiayaListrik || 0) + Number(m.BiayaOperasional || 0))),
             totalCost: Number(m.TotalHPP || 0),
             unitCost: Number(m.HPPSatuan || 0),
             cashier: String(m.Kasir || ''),
