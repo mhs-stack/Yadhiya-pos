@@ -138,11 +138,19 @@ nav.bottom-nav button.active{color:var(--blue);font-weight:800}
   .cart-box{position:sticky;top:74px}
 }
 
-/* THERMAL PRINT MODE */
+/* KWITANSI 1/3 A4 STYLING */
+.kwitansi-paper{background:#fff;color:#0f172a;border:1.5px solid #172b4d;border-radius:10px;padding:14px 18px;font-family:'Segoe UI',system-ui,sans-serif;font-size:12px;line-height:1.45}
+.kwitansi-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #172b4d;padding-bottom:8px;margin-bottom:10px}
+.kwitansi-amount-box{background:#f1f5f9;border:1.5px solid #172b4d;border-radius:8px;padding:8px 14px;font-weight:800;font-size:15px;display:inline-block}
+.kwitansi-sign{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;text-align:center;font-size:11px}
+
+/* THERMAL & 1/3 A4 PRINT MODE */
 @media print{
   body *{visibility:hidden}
   #printArea, #printArea *{visibility:visible}
   #printArea{position:fixed;left:0;top:0;width:58mm;padding:2mm;border:0}
+  #printKwitansiArea, #printKwitansiArea *{visibility:visible}
+  #printKwitansiArea{position:fixed;left:0;top:0;width:210mm;min-height:99mm;padding:8mm 12mm;border:1.5px solid #000;border-radius:0;box-sizing:border-box;background:#fff}
 }
 </style>
 </head>
@@ -204,9 +212,9 @@ const DEFAULT_USERS = [
 ];
 
 const ROLE_PAGES = {
-  Owner: ['Dashboard', 'Kasir', 'Pembelian', 'Persediaan', 'UtangPiutang', 'Manufaktur', 'Keuangan', 'Master'],
-  Kasir: ['Kasir', 'Pembelian', 'Persediaan', 'UtangPiutang', 'Manufaktur'],
-  Accounting: ['Dashboard', 'Persediaan', 'UtangPiutang', 'Manufaktur', 'Keuangan']
+  Owner: ['Dashboard', 'Kasir', 'Pembelian', 'Persediaan', 'Manufaktur', 'UtangPiutang', 'Keuangan', 'Master'],
+  Kasir: ['Kasir', 'Pembelian', 'Persediaan', 'Manufaktur', 'UtangPiutang'],
+  Accounting: ['Dashboard', 'Persediaan', 'Manufaktur', 'UtangPiutang', 'Keuangan']
 };
 
 function getUserRole() {
@@ -280,10 +288,13 @@ let state = {
   // UtangPiutang UI state
   debtTab: 'Semua', // 'Semua' | 'Utang' | 'Piutang'
   debtStatusFilter: 'Belum Lunas', // 'Semua' | 'Belum Lunas' | 'Lunas'
-  // Manufaktur UI draft
+  debtSearchQuery: '',
+  // Manufaktur UI draft & tarif listrik otomatis
+  electricityRatePerUnit: 35,
+  mfgAutoElec: true,
   mfgOutputCode: '',
   mfgOutputQty: 1,
-  mfgElectricityCost: 0,
+  mfgElectricityCost: 35,
   mfgOperationalCost: 0,
   mfgExtraCost: 0,
   mfgMatCode: '',
@@ -300,6 +311,7 @@ async function loadAppState() {
       ...saved,
       debts: saved.debts || [],
       manufactures: saved.manufactures || [],
+      electricityRatePerUnit: saved.electricityRatePerUnit !== undefined ? Number(saved.electricityRatePerUnit) : 35,
       gasUrl: saved.gasUrl || DEFAULT_GAS_URL,
       online: navigator.onLine
     };
@@ -320,6 +332,7 @@ async function saveAppState() {
     purchases: state.purchases,
     debts: state.debts,
     manufactures: state.manufactures,
+    electricityRatePerUnit: state.electricityRatePerUnit,
     journals: state.journals,
     shifts: state.shifts
   };
@@ -350,17 +363,13 @@ function renderLogin() {
       <p class="muted" style="margin-top:4px">Kasir, Fotokopi & Akuntansi Offline-First</p>
       <form onsubmit="handleLogin(event)" style="margin-top:18px">
         <label>Username</label>
-        <input id="loginUser" placeholder="Masukkan username (admin / kasir)" required autocomplete="username">
+        <input id="loginUser" placeholder="Masukkan username akun Anda" required autocomplete="username">
         <label>Password</label>
-        <input id="loginPass" type="password" placeholder="Masukkan password (default: 123)" required autocomplete="current-password">
+        <input id="loginPass" type="password" placeholder="Masukkan sandi akun Anda" required autocomplete="current-password">
         <button class="btn" style="width:100%;padding:12px;margin-top:6px" type="submit">Masuk ke Aplikasi</button>
       </form>
-      <div class="panel soft" style="margin-top:16px;margin-bottom:0;font-size:11px">
-        <b>Akun Bawaan Offline:</b><br>
-        • Owner: <code>admin</code> / Password: <code>123</code><br>
-        • Kasir: <code>kasir</code> / Password: <code>123</code><br>
-        • Accounting: <code>accounting</code> / Password: <code>123</code><br>
-        <span class="muted">Transaksi di HP dan Laptop otomatis disinkronkan dua arah saat online.</span>
+      <div class="panel soft" style="margin-top:16px;margin-bottom:0;font-size:11px;text-align:center">
+        <span class="muted">🔒 Akses terbatas sesuai peran masing-masing pengguna. Data tersinkron otomatis saat online.</span>
       </div>
     </div>
   </div>`;
@@ -1064,14 +1073,144 @@ async function submitPayDebt(id) {
 
   await saveAppState();
   closeModal();
-  alert('Pembayaran sebesar ' + rp(amt) + ' tercatat! Status: ' + d.status);
   render();
+  showDebtKwitansiModal(d.id);
   if (state.online && state.gasUrl) syncTwoWay(true);
 }
 
+function showDebtKwitansiModal(id) {
+  const d = state.debts.find(x => x.id === id);
+  if (!d) return;
+  const isPiutang = d.kind === 'Piutang';
+  const titleText = isPiutang ? 'KWITANSI PEMBAYARAN PIUTANG' : 'BUKTI PEMBAYARAN UTANG USAHA';
+  const fromLabel = isPiutang ? 'Sudah Terima Dari' : 'Dibayarkan Kepada';
+  const amountShown = d.paidAmount > 0 ? d.paidAmount : d.totalAmount;
+  const statusBadge = d.status === 'Lunas' ? 'LUNAS' : (d.paidAmount > 0 ? 'CICILAN / SEBAGIAN' : 'BELUM LUNAS (TAGIHAN)');
+
+  openModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3 style="margin:0">🧾 Kwitansi / Nota ${d.kind} (1/3 A4)</h3>
+      <span class="badge ${d.status === 'Lunas' ? 'ok' : 'warn'}">${statusBadge}</span>
+    </div>
+    <div id="printKwitansiArea" class="kwitansi-paper">
+      <div class="kwitansi-head">
+        <div>
+          <b style="font-size:15px;letter-spacing:.03em">TOKO YADHIYA</b><br>
+          <span style="font-size:11px;color:#475569">Retail, Alat Tulis Kantor &amp; Jasa Fotokopi</span>
+        </div>
+        <div style="text-align:right">
+          <b style="font-size:13px">${titleText}</b><br>
+          <span style="font-size:11px">No: <b>${d.id}</b> · Ref: ${d.ref}</span><br>
+          <span style="font-size:11px">Tanggal: ${d.date}</span>
+        </div>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px">
+        <tr>
+          <td style="width:155px;padding:3px 0;color:#475569">${fromLabel}</td>
+          <td style="padding:3px 0">: <b>${d.party}</b></td>
+        </tr>
+        <tr>
+          <td style="padding:3px 0;color:#475569">Untuk Pembayaran</td>
+          <td style="padding:3px 0">: ${d.note || (d.kind + ' transaksi ' + d.ref)}${d.dueDate ? ' (Jatuh Tempo: ' + d.dueDate + ')' : ''}</td>
+        </tr>
+        <tr>
+          <td style="padding:3px 0;color:#475569">Rincian Tagihan</td>
+          <td style="padding:3px 0">: Total Awal <b>${rp(d.totalAmount)}</b> · Terbayar <b>${rp(d.paidAmount)}</b> · Sisa <b>${rp(d.remaining)}</b></td>
+        </tr>
+        <tr>
+          <td style="padding:3px 0;color:#475569">Status Transaksi</td>
+          <td style="padding:3px 0">: <b>${statusBadge}</b></td>
+        </tr>
+      </table>
+
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px">
+        <div>
+          <div style="font-size:10px;color:#475569;margin-bottom:3px">${d.paidAmount > 0 ? 'NOMINAL YANG TELAH DIBAYARKAN:' : 'NOMINAL TAGIHAN:'}</div>
+          <div class="kwitansi-amount-box">${rp(amountShown)}</div>
+        </div>
+        <div class="kwitansi-sign" style="margin-top:0;min-width:240px">
+          <div>
+            <div>${isPiutang ? 'Pelanggan,' : 'Supplier,'}</div>
+            <div style="height:34px"></div>
+            <div>( <b>${d.party}</b> )</div>
+          </div>
+          <div>
+            <div>Admin / Kasir Toko,</div>
+            <div style="height:34px"></div>
+            <div>( <b>${state.currentUser ? state.currentUser.name : 'TOKO YADHIYA'}</b> )</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:8px;font-size:11px">💡 Ukuran cetak disetel otomatis ke <b>1/3 A4 (210mm × 99mm)</b> saat dicetak atau disimpan ke PDF.</p>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn secondary" style="flex:1" onclick="closeModal()">Tutup</button>
+      <button class="btn" style="flex:1" onclick="window.print()">🖨️ Cetak / Simpan PDF (1/3 A4)</button>
+    </div>
+  `);
+}
+
 /* =========================================================
-   10. MANUFAKTUR / PRODUKSI BARANG RAKITAN
+   10. MANUFAKTUR / PRODUKSI BARANG RAKITAN & FOTOKOPI
    ========================================================= */
+function getEffectiveMfgElecCost() {
+  const qty = Math.max(1, Number(state.mfgOutputQty || 1));
+  if (state.mfgAutoElec) {
+    return Math.round(qty * Number(state.electricityRatePerUnit || 0));
+  }
+  return Math.max(0, Number(state.mfgElectricityCost || 0));
+}
+
+function onMfgQtyChange(val) {
+  state.mfgOutputQty = Math.max(1, Number(val || 1));
+  if (state.mfgAutoElec) {
+    state.mfgElectricityCost = Math.round(state.mfgOutputQty * Number(state.electricityRatePerUnit || 0));
+  }
+  render();
+}
+
+function onMfgManualElecInput(val) {
+  state.mfgAutoElec = false;
+  state.mfgElectricityCost = Math.max(0, Number(val || 0));
+  render();
+}
+
+function openEditElecRateModal() {
+  openModal(`
+    <h3>⚡ Pengaturan & Penyesuaian Biaya Listrik</h3>
+    <p class="muted">Atur tarif listrik otomatis per satuan hasil produksi (misal per lembar fotokopi/cetak atau per unit rakitan) agar HPP otomatis terhitung akurat sesuai harga.</p>
+    <label>Tarif Listrik Otomatis per Unit / Lembar (Rp)</label>
+    <input id="inpElecRate" type="number" min="0" step="1" value="${Number(state.electricityRatePerUnit || 0)}">
+    <div class="panel soft" style="font-size:12px">
+      <b>Contoh Perhitungan:</b><br>
+      Jika tarif listrik = <b>${rp(state.electricityRatePerUnit || 35)}</b> per lembar, maka produksi <b>100 lembar</b> fotokopi otomatis menghitung biaya listrik mesin sebesar <b>${rp(100 * Number(state.electricityRatePerUnit || 35))}</b>.
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:6px">
+      <input id="chkAutoElec" type="checkbox" ${state.mfgAutoElec ? 'checked' : ''} style="width:auto;margin:0">
+      <span>Aktifkan hitung listrik otomatis saat Qty berubah</span>
+    </label>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn secondary" style="flex:1" onclick="closeModal()">Batal</button>
+      <button class="btn" style="flex:1" onclick="saveElecRateSetting()">Simpan Penyesuaian</button>
+    </div>
+  `);
+}
+
+async function saveElecRateSetting() {
+  const rate = Math.max(0, Number($('#inpElecRate').value || 0));
+  const auto = $('#chkAutoElec').checked;
+  state.electricityRatePerUnit = rate;
+  state.mfgAutoElec = auto;
+  if (auto) {
+    const qty = Math.max(1, Number(state.mfgOutputQty || 1));
+    state.mfgElectricityCost = Math.round(qty * rate);
+  }
+  await saveAppState();
+  closeModal();
+  render();
+}
+
 function addMfgMaterial() {
   const physicalProducts = state.products.filter(p => !p.isService);
   if (!physicalProducts.length) return;
@@ -1116,9 +1255,9 @@ function removeMfgMaterial(idx) {
 }
 
 async function submitManufactureOrder() {
-  const physicalProducts = state.products.filter(p => !p.isService);
-  const outCode = state.mfgOutputCode || (physicalProducts[0] && physicalProducts[0].code);
-  const outProd = physicalProducts.find(p => p.code === outCode);
+  const allProducts = state.products;
+  const outCode = state.mfgOutputCode || (allProducts[0] && allProducts[0].code);
+  const outProd = allProducts.find(p => p.code === outCode);
   const outQty = Math.max(1, Number(state.mfgOutputQty || 1));
 
   if (!outProd) {
@@ -1140,7 +1279,7 @@ async function submitManufactureOrder() {
   }
 
   const matTotalCost = state.mfgMaterials.reduce((s, m) => s + Number(m.totalCost || 0), 0);
-  const elecCost = Math.max(0, Number(state.mfgElectricityCost || 0));
+  const elecCost = getEffectiveMfgElecCost();
   const operCost = Math.max(0, Number(state.mfgOperationalCost || 0));
   const extraCost = elecCost + operCost;
   const grandCost = matTotalCost + extraCost;
@@ -1160,13 +1299,19 @@ async function submitManufactureOrder() {
     }
   });
 
-  // 2. Tambah stok produk jadi & update HPP rata-rata (Average Cost)
-  const oldVal = outProd.stock * outProd.buyPrice;
-  const nextStock = outProd.stock + outQty;
-  outProd.buyPrice = nextStock > 0 ? Math.round((oldVal + grandCost) / nextStock) : unitHpp;
-  outProd.stock = nextStock;
-  outProd.updatedAt = new Date().toISOString();
-  queueSync('STOCK_DELTA', { code: outProd.code, delta: +outQty, newBuyPrice: outProd.buyPrice });
+  // 2. Update HPP & stok produk/jasa hasil produksi
+  if (outProd.isService) {
+    outProd.buyPrice = unitHpp;
+    outProd.updatedAt = new Date().toISOString();
+    queueSync('PRODUCT', outProd);
+  } else {
+    const oldVal = outProd.stock * outProd.buyPrice;
+    const nextStock = outProd.stock + outQty;
+    outProd.buyPrice = nextStock > 0 ? Math.round((oldVal + grandCost) / nextStock) : unitHpp;
+    outProd.stock = nextStock;
+    outProd.updatedAt = new Date().toISOString();
+    queueSync('STOCK_DELTA', { code: outProd.code, delta: +outQty, newBuyPrice: outProd.buyPrice });
+  }
 
   const mfgRecord = {
     id,
@@ -1201,12 +1346,12 @@ async function submitManufactureOrder() {
 
   state.mfgMaterials = [];
   state.mfgOutputQty = 1;
-  state.mfgElectricityCost = 0;
+  state.mfgElectricityCost = state.mfgAutoElec ? Number(state.electricityRatePerUnit || 0) : 0;
   state.mfgOperationalCost = 0;
   state.mfgExtraCost = 0;
 
   await saveAppState();
-  alert('Produksi ' + id + ' selesai! Stok ' + outProd.name + ' bertambah +' + outQty + (canSeeCostDetails() ? ' (HPP baru: ' + rp(outProd.buyPrice) + ')' : '.'));
+  alert('Produksi ' + id + ' selesai! ' + (outProd.isService ? 'HPP Jasa ' + outProd.name + ' diperbarui' : 'Stok ' + outProd.name + ' bertambah +' + outQty) + (canSeeCostDetails() ? ' (HPP baru: ' + rp(outProd.buyPrice) + ')' : '.'));
   render();
   if (state.online && state.gasUrl) syncTwoWay(true);
 }
@@ -1897,10 +2042,15 @@ function viewUtangPiutang() {
   const activeDebts = state.debts.filter(d => d.status !== 'Void');
   const totalPiutang = activeDebts.filter(d => d.kind === 'Piutang').reduce((s, d) => s + Number(d.remaining || 0), 0);
   const totalUtang = activeDebts.filter(d => d.kind === 'Utang').reduce((s, d) => s + Number(d.remaining || 0), 0);
+  const dq = (state.debtSearchQuery || '').toLowerCase().trim();
 
   const filtered = activeDebts.filter(d => {
     if (state.debtTab !== 'Semua' && d.kind !== state.debtTab) return false;
     if (state.debtStatusFilter !== 'Semua' && d.status !== state.debtStatusFilter) return false;
+    if (dq) {
+      const hay = [d.party, d.ref, d.id, d.note, d.date].join(' ').toLowerCase();
+      if (!hay.includes(dq)) return false;
+    }
     return true;
   });
 
@@ -1908,7 +2058,7 @@ function viewUtangPiutang() {
     <div class="section-head">
       <div>
         <h1>Buku Utang & Piutang</h1>
-        <p class="muted" style="margin:2px 0 0">Pantau tagihan pelanggan (Piutang) & kewajiban tempo ke supplier (Utang)</p>
+        <p class="muted" style="margin:2px 0 0">Pantau tagihan pelanggan (Piutang), kewajiban ke supplier (Utang), & cetak Kwitansi 1/3 A4</p>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn secondary sm" onclick="openNewDebtModal('Utang')">＋ Catat Utang</button>
@@ -1927,16 +2077,24 @@ function viewUtangPiutang() {
       </div>
     </div>
 
-    <div class="section-head">
-      <div style="display:flex;gap:6px">
-        ${['Semua', 'Piutang', 'Utang'].map(t => `
-          <button class="btn sm ${state.debtTab === t ? '' : 'secondary'}" onclick="state.debtTab='${t}';render()">${t}</button>
-        `).join('')}
-      </div>
-      <div style="display:flex;gap:6px">
-        ${['Belum Lunas', 'Lunas', 'Semua'].map(st => `
-          <button class="btn sm ${state.debtStatusFilter === st ? 'warning' : 'secondary'}" onclick="state.debtStatusFilter='${st}';render()">${st}</button>
-        `).join('')}
+    <div class="panel" style="padding:12px">
+      <div style="display:grid;grid-template-columns:1.5fr auto auto;gap:8px;align-items:center">
+        <div>
+          <input id="debtSearchInput" placeholder="🔍 Cari nama pelanggan, supplier, no. ref, atau catatan..."
+            value="${state.debtSearchQuery}"
+            oninput="state.debtSearchQuery=this.value;render();setTimeout(()=>{const el=$('#debtSearchInput');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}},0)"
+            style="margin:0">
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${['Semua', 'Piutang', 'Utang'].map(t => `
+            <button class="btn sm ${state.debtTab === t ? '' : 'secondary'}" onclick="state.debtTab='${t}';render()">${t}</button>
+          `).join('')}
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${['Belum Lunas', 'Lunas', 'Semua'].map(st => `
+            <button class="btn sm ${state.debtStatusFilter === st ? 'warning' : 'secondary'}" onclick="state.debtStatusFilter='${st}';render()">${st}</button>
+          `).join('')}
+        </div>
       </div>
     </div>
 
@@ -1954,9 +2112,12 @@ function viewUtangPiutang() {
             <small style="display:block">Total: ${rp(d.totalAmount)} · Terbayar: ${rp(d.paidAmount)} · <b>Sisa: ${rp(d.remaining)}</b></small>
             ${d.note ? `<small class="muted">${d.note}</small>` : ''}
           </div>
-          <div style="text-align:right">
-            <b class="${d.remaining > 0 ? (d.kind === 'Piutang' ? 'green' : 'red') : 'muted'}">${rp(d.remaining)}</b><br>
-            ${d.remaining > 0 ? `<button class="btn success sm" onclick="openPayDebtModal('${d.id}')">💵 Bayar / Lunas</button>` : ''}
+          <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <b class="${d.remaining > 0 ? (d.kind === 'Piutang' ? 'green' : 'red') : 'muted'}">${rp(d.remaining)}</b>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
+              <button class="btn secondary sm" onclick="showDebtKwitansiModal('${d.id}')">🧾 Kwitansi</button>
+              ${d.remaining > 0 ? `<button class="btn success sm" onclick="openPayDebtModal('${d.id}')">💵 Bayar</button>` : ''}
+            </div>
           </div>
         </div>
       `).join('') : '<p class="muted">Belum ada catatan utang atau piutang pada filter ini.</p>'}
@@ -1964,9 +2125,11 @@ function viewUtangPiutang() {
 }
 
 function viewManufaktur() {
+  const allProducts = state.products;
   const physicalProducts = state.products.filter(p => !p.isService);
-  if (!state.mfgOutputCode && physicalProducts.length) {
-    state.mfgOutputCode = physicalProducts[0].code;
+  if (!state.mfgOutputCode && allProducts.length) {
+    const fcDefault = allProducts.find(p => p.isService) || allProducts[0];
+    state.mfgOutputCode = fcDefault.code;
   }
   if (!state.mfgMatCode && physicalProducts.length) {
     const alt = physicalProducts.find(p => p.code !== state.mfgOutputCode) || physicalProducts[0];
@@ -1975,7 +2138,7 @@ function viewManufaktur() {
 
   const showCosts = canSeeCostDetails();
   const matTotalCost = state.mfgMaterials.reduce((s, m) => s + Number(m.totalCost || 0), 0);
-  const elecCost = Math.max(0, Number(state.mfgElectricityCost || 0));
+  const elecCost = getEffectiveMfgElecCost();
   const operCost = Math.max(0, Number(state.mfgOperationalCost || 0));
   const extraCost = elecCost + operCost;
   const totalHpp = matTotalCost + extraCost;
@@ -1983,24 +2146,41 @@ function viewManufaktur() {
   const unitHpp = Math.round(totalHpp / outQty);
 
   return `
-    <h1>Manufaktur / Perakitan & Jasa</h1>
-    <p class="muted">Hitung pemakaian bahan baku (misal kertas & tinta fotokopi/cetak atau bahan rakitan) ditambah biaya listrik mesin & operasional lainnya.</p>
+    <div class="section-head">
+      <div>
+        <h1>Manufaktur / Perakitan & Biaya Jasa</h1>
+        <p class="muted" style="margin:2px 0 0">Contoh: <b>Fotokopi</b> membutuhkan bahan <b>Kertas + Tinta</b> dan <b>Biaya Listrik</b> karena menyalakan mesin.</p>
+      </div>
+      <button type="button" class="btn secondary sm" onclick="openEditElecRateModal()">⚡ Edit Tarif Listrik (${rp(state.electricityRatePerUnit)}/unit)</button>
+    </div>
+
+    <div class="panel soft" style="padding:10px 14px;border-left:4px solid var(--blue)">
+      <div style="font-size:12px">
+        <b>💡 Panduan Kalkulasi HPP Manufaktur & Jasa:</b><br>
+        1. Pilih hasil produksi/layanan (misal: <i>Fotokopi Hitam Putih A4</i> atau <i>Paket ATK</i>) dan jumlah hasil.<br>
+        2. <b>Biaya Listrik Mesin</b> terhitung otomatis (<b>${rp(state.electricityRatePerUnit)}</b> × Qty) atau bisa disesuaikan manual.<br>
+        3. Tambahkan bahan baku yang terpakai (misal: <i>Kertas HVS</i> &amp; <i>Tinta Printer</i>) — stok bahan otomatis berkurang dan HPP per lembar/unit langsung disesuaikan.
+      </div>
+    </div>
 
     <div class="panel">
-      <div style="display:grid;grid-template-columns:1.4fr 0.8fr 1fr 1fr;gap:10px">
+      <div style="display:grid;grid-template-columns:1.4fr 0.7fr 1.1fr 1fr;gap:10px">
         <div>
           <label>Produk Jadi / Layanan Hasil</label>
           <select onchange="state.mfgOutputCode=this.value;render()">
-            ${physicalProducts.map(p => `<option value="${p.code}" ${state.mfgOutputCode === p.code ? 'selected' : ''}>${p.name} (Stok: ${p.stock} ${p.unit})</option>`).join('')}
+            ${allProducts.map(p => `<option value="${p.code}" ${state.mfgOutputCode === p.code ? 'selected' : ''}>${p.name} (${p.isService ? 'Jasa · HPP: ' + rp(p.buyPrice) : 'Stok: ' + p.stock + ' ' + p.unit})</option>`).join('')}
           </select>
         </div>
         <div>
-          <label>Qty Dihasilkan</label>
-          <input type="number" min="1" value="${state.mfgOutputQty}" oninput="state.mfgOutputQty=this.value;render()">
+          <label>Qty Hasil</label>
+          <input type="number" min="1" value="${state.mfgOutputQty}" oninput="onMfgQtyChange(this.value)">
         </div>
         <div>
-          <label>Biaya Listrik Mesin (Rp)</label>
-          <input type="number" min="0" placeholder="0" value="${state.mfgElectricityCost || ''}" oninput="state.mfgElectricityCost=this.value;render()">
+          <label style="display:flex;justify-content:space-between;align-items:center">
+            <span>Biaya Listrik (Rp) ${state.mfgAutoElec ? '<span class="badge ok">Auto</span>' : '<span class="badge warn">Manual</span>'}</span>
+            <a href="javascript:void(0)" onclick="openEditElecRateModal()" style="font-size:11px;color:var(--blue);text-decoration:none">✏️ Edit</a>
+          </label>
+          <input type="number" min="0" placeholder="0" value="${elecCost}" oninput="onMfgManualElecInput(this.value)">
         </div>
         <div>
           <label>Biaya Operasional Lain (Rp)</label>
@@ -2009,12 +2189,12 @@ function viewManufaktur() {
       </div>
 
       <div style="border-top:1px solid var(--line);padding-top:10px;margin-top:4px">
-        <b style="font-size:13px;display:block;margin-bottom:6px">Bahan Baku yang Digunakan</b>
+        <b style="font-size:13px;display:block;margin-bottom:6px">Bahan Baku yang Digunakan (Kertas, Tinta, dll.)</b>
         <div style="display:grid;grid-template-columns:1.8fr 0.8fr auto;gap:8px;align-items:end">
           <div>
             <label>Pilih Bahan Baku</label>
             <select onchange="state.mfgMatCode=this.value" style="margin-bottom:4px">
-              ${physicalProducts.filter(p => p.code !== state.mfgOutputCode).map(p => `<option value="${p.code}" ${state.mfgMatCode === p.code ? 'selected' : ''}>${p.name} (Stok: ${p.stock} · HPP: ${rp(p.buyPrice)})</option>`).join('')}
+              ${physicalProducts.filter(p => p.code !== state.mfgOutputCode).map(p => `<option value="${p.code}" ${state.mfgMatCode === p.code ? 'selected' : ''}>${p.name} (Stok: ${p.stock} ${p.unit}${showCosts ? ' · HPP: ' + rp(p.buyPrice) : ''})</option>`).join('')}
             </select>
           </div>
           <div>
@@ -2034,25 +2214,28 @@ function viewManufaktur() {
               <div class="ico">🧱</div>
               <div class="grow">
                 <strong>${m.name}</strong>
-                <small>${m.qty} ${m.unit} × ${rp(m.unitCost)}</small>
+                <small>${m.qty} ${m.unit}${showCosts ? ' × ' + rp(m.unitCost) : ''}</small>
               </div>
               <div style="text-align:right">
-                <b>${rp(m.totalCost)}</b><br>
+                ${showCosts ? `<b>${rp(m.totalCost)}</b><br>` : ''}
                 <button type="button" class="btn danger sm" onclick="removeMfgMaterial(${idx})">Hapus</button>
               </div>
             </div>
           `).join('')}
         </div>
-      ` : `<div class="panel soft" style="margin-top:10px;margin-bottom:0;text-align:center;color:var(--muted);font-size:12px">Belum ada bahan baku dipilih.</div>`}
+      ` : `<div class="panel soft" style="margin-top:10px;margin-bottom:0;text-align:center;color:var(--muted);font-size:12px">Belum ada bahan baku dipilih (misal: Kertas HVS & Tinta).</div>`}
 
       <div class="panel soft" style="padding:12px;margin-top:12px">
-        <div class="r-row"><span class="muted">Biaya Listrik Mesin:</span><b>${rp(elecCost)}</b></div>
+        <div class="r-row">
+          <span class="muted">Biaya Listrik Mesin (${state.mfgAutoElec ? rp(state.electricityRatePerUnit) + ' × ' + outQty : 'Manual'}):</span>
+          <span><b>${rp(elecCost)}</b> <button type="button" class="btn secondary sm" style="padding:2px 6px;font-size:10px;margin-left:4px" onclick="openEditElecRateModal()">✏️ Sesuaikan</button></span>
+        </div>
         <div class="r-row"><span class="muted">Biaya Operasional Lain:</span><b>${rp(operCost)}</b></div>
         ${showCosts ? `
           <div class="r-row"><span class="muted">Total Biaya Bahan Baku:</span><b>${rp(matTotalCost)}</b></div>
-          <div class="r-row"><span class="muted">Estimasi HPP per Satuan Hasil:</span><b>${rp(unitHpp)}</b></div>
+          <div class="r-row"><span class="muted">Estimasi HPP per Satuan / Lembar:</span><b>${rp(unitHpp)}</b></div>
           <hr style="border:0;border-top:1px solid var(--line);margin:8px 0">
-          <div class="r-row" style="font-size:15px"><b>Total Biaya Produksi</b><b class="green">${rp(totalHpp)}</b></div>
+          <div class="r-row" style="font-size:15px"><b>Total Biaya Produksi / HPP</b><b class="green">${rp(totalHpp)}</b></div>
         ` : `
           <hr style="border:0;border-top:1px solid var(--line);margin:8px 0">
           <div class="r-row" style="font-size:15px"><b>Total Listrik &amp; Operasional</b><b class="green">${rp(extraCost)}</b></div>
@@ -2060,7 +2243,7 @@ function viewManufaktur() {
       </div>
 
       <button type="button" class="btn" onclick="submitManufactureOrder()" style="width:100%;padding:12px;font-size:14px">
-        🏭 Proses Produksi & Update Stok
+        🏭 Proses Produksi & Update HPP / Stok
       </button>
     </div>
 
@@ -2344,8 +2527,8 @@ const NAV_ITEMS = [
   ['Kasir', '🛒', 'Kasir'],
   ['Pembelian', '🧺', 'Kulakan'],
   ['Persediaan', '📦', 'Stok'],
-  ['UtangPiutang', '💳', 'Utang/Piutang'],
   ['Manufaktur', '🏭', 'Manufaktur'],
+  ['UtangPiutang', '💳', 'Utang/Piutang'],
   ['Keuangan', '📒', 'Akuntansi'],
   ['Master', '⚙️', 'Pengaturan']
 ];

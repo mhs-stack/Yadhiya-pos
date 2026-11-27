@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yadhiya-pos-v1.6-roles';
+const CACHE_NAME = 'yadhiya-pos-v1.7-priv-mfg-kwitansi';
 const ASSETS = [
   './',
   './index.html',
